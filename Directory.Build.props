@@ -1,0 +1,38 @@
+<Project>
+	<!-- Individual project file settings can override this; also, you can include a similar (dummy) file as in the Test project -->
+	<PropertyGroup>
+
+		<AssemblyVersion>1.1.3</AssemblyVersion>
+		<Version>$(AssemblyVersion)</Version>
+		<PackageReleaseNotes></PackageReleaseNotes>
+		<Copyright>2024 Bald Flavor</Copyright>
+		<Authors>Bald Flavor</Authors>
+
+		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
+
+		<BaseOutputPath>..\PraxisBin</BaseOutputPath>
+		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+		<AppendPlatformToOutputPath>false</AppendPlatformToOutputPath>
+
+		<TargetFramework>net8.0</TargetFramework>
+		<Platforms>x64</Platforms>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+		<Optimize>False</Optimize>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+		<Optimize>True</Optimize>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="ReadMe.md" Pack="true" PackagePath="." />
+	</ItemGroup>
+</Project>

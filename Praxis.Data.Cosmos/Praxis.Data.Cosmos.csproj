@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Helpers and extensions for working with Azure Cosmos Db</Description>		
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Azure.Cosmos" Version="3.44.1" />
+	</ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Praxis\Praxis.csproj" />
+	</ItemGroup>
+</Project>

@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Extensions, helpers and common code used generically in a wide variety of projects</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="EmbeddedResource\ZipCityState.dat" />
+	</ItemGroup>
+</Project>

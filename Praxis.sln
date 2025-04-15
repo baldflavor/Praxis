@@ -1,0 +1,90 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31717.71
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis", "Praxis\Praxis.csproj", "{F55CA80D-4AA4-4A6A-B64B-297FE5B648DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Data", "Praxis.Data\Praxis.Data.csproj", "{AF071690-C3FD-4B5D-A98F-F257E4021CDB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Web", "Praxis.Web\Praxis.Web.csproj", "{5D0A173F-D122-4B0B-8617-E74C89B38229}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Cache", "Praxis.Cache\Praxis.Cache.csproj", "{2B780C1E-AE2A-4A2F-B317-C52AD0DAC381}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Data.Cosmos", "Praxis.Data.Cosmos\Praxis.Data.Cosmos.csproj", "{D0117BE4-363B-4C4F-B59A-D462EBC8DB57}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BD68C485-5689-42A3-BADB-BBD3D169AB63}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.filenesting.json = .filenesting.json
+		.gitignore = .gitignore
+		.runsettings = .runsettings
+		Directory.Build.props = Directory.Build.props
+		License.md = License.md
+		praxis.js = praxis.js
+		praxisWS.js = praxisWS.js
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Knowledge", "Praxis.Knowledge\Praxis.Knowledge.csproj", "{248B0979-3FE0-4370-A7BB-407A2C46DD05}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.LiteDb", "Praxis.LiteDb\Praxis.LiteDb.csproj", "{24541B47-B362-4404-A849-810D88E8EBA2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Praxis.Test", "Praxis.Test\Praxis.Test.csproj", "{DC79A77D-BD55-4BCD-979F-74818546BF64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Praxis.Logging", "Praxis.Logging\Praxis.Logging.csproj", "{974DC538-2573-40E7-97C6-CAA51FCF34E2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Praxis.WinForm", "Praxis.WinForm\Praxis.WinForm.csproj", "{742E0C1B-D102-4F06-A218-DFCC934F3011}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F55CA80D-4AA4-4A6A-B64B-297FE5B648DA}.Debug|x64.ActiveCfg = Debug|x64
+		{F55CA80D-4AA4-4A6A-B64B-297FE5B648DA}.Debug|x64.Build.0 = Debug|x64
+		{F55CA80D-4AA4-4A6A-B64B-297FE5B648DA}.Release|x64.ActiveCfg = Release|x64
+		{F55CA80D-4AA4-4A6A-B64B-297FE5B648DA}.Release|x64.Build.0 = Release|x64
+		{AF071690-C3FD-4B5D-A98F-F257E4021CDB}.Debug|x64.ActiveCfg = Debug|x64
+		{AF071690-C3FD-4B5D-A98F-F257E4021CDB}.Debug|x64.Build.0 = Debug|x64
+		{AF071690-C3FD-4B5D-A98F-F257E4021CDB}.Release|x64.ActiveCfg = Release|x64
+		{AF071690-C3FD-4B5D-A98F-F257E4021CDB}.Release|x64.Build.0 = Release|x64
+		{5D0A173F-D122-4B0B-8617-E74C89B38229}.Debug|x64.ActiveCfg = Debug|x64
+		{5D0A173F-D122-4B0B-8617-E74C89B38229}.Debug|x64.Build.0 = Debug|x64
+		{5D0A173F-D122-4B0B-8617-E74C89B38229}.Release|x64.ActiveCfg = Release|x64
+		{5D0A173F-D122-4B0B-8617-E74C89B38229}.Release|x64.Build.0 = Release|x64
+		{2B780C1E-AE2A-4A2F-B317-C52AD0DAC381}.Debug|x64.ActiveCfg = Debug|x64
+		{2B780C1E-AE2A-4A2F-B317-C52AD0DAC381}.Debug|x64.Build.0 = Debug|x64
+		{2B780C1E-AE2A-4A2F-B317-C52AD0DAC381}.Release|x64.ActiveCfg = Release|x64
+		{2B780C1E-AE2A-4A2F-B317-C52AD0DAC381}.Release|x64.Build.0 = Release|x64
+		{D0117BE4-363B-4C4F-B59A-D462EBC8DB57}.Debug|x64.ActiveCfg = Debug|x64
+		{D0117BE4-363B-4C4F-B59A-D462EBC8DB57}.Debug|x64.Build.0 = Debug|x64
+		{D0117BE4-363B-4C4F-B59A-D462EBC8DB57}.Release|x64.ActiveCfg = Release|x64
+		{D0117BE4-363B-4C4F-B59A-D462EBC8DB57}.Release|x64.Build.0 = Release|x64
+		{248B0979-3FE0-4370-A7BB-407A2C46DD05}.Debug|x64.ActiveCfg = Debug|x64
+		{248B0979-3FE0-4370-A7BB-407A2C46DD05}.Debug|x64.Build.0 = Debug|x64
+		{248B0979-3FE0-4370-A7BB-407A2C46DD05}.Release|x64.ActiveCfg = Release|x64
+		{248B0979-3FE0-4370-A7BB-407A2C46DD05}.Release|x64.Build.0 = Release|x64
+		{24541B47-B362-4404-A849-810D88E8EBA2}.Debug|x64.ActiveCfg = Debug|x64
+		{24541B47-B362-4404-A849-810D88E8EBA2}.Debug|x64.Build.0 = Debug|x64
+		{24541B47-B362-4404-A849-810D88E8EBA2}.Release|x64.ActiveCfg = Release|x64
+		{24541B47-B362-4404-A849-810D88E8EBA2}.Release|x64.Build.0 = Release|x64
+		{DC79A77D-BD55-4BCD-979F-74818546BF64}.Debug|x64.ActiveCfg = Debug|x64
+		{DC79A77D-BD55-4BCD-979F-74818546BF64}.Debug|x64.Build.0 = Debug|x64
+		{DC79A77D-BD55-4BCD-979F-74818546BF64}.Release|x64.ActiveCfg = Release|x64
+		{DC79A77D-BD55-4BCD-979F-74818546BF64}.Release|x64.Build.0 = Release|x64
+		{974DC538-2573-40E7-97C6-CAA51FCF34E2}.Debug|x64.ActiveCfg = Debug|x64
+		{974DC538-2573-40E7-97C6-CAA51FCF34E2}.Debug|x64.Build.0 = Debug|x64
+		{974DC538-2573-40E7-97C6-CAA51FCF34E2}.Release|x64.ActiveCfg = Release|x64
+		{974DC538-2573-40E7-97C6-CAA51FCF34E2}.Release|x64.Build.0 = Release|x64
+		{742E0C1B-D102-4F06-A218-DFCC934F3011}.Debug|x64.ActiveCfg = Debug|x64
+		{742E0C1B-D102-4F06-A218-DFCC934F3011}.Debug|x64.Build.0 = Debug|x64
+		{742E0C1B-D102-4F06-A218-DFCC934F3011}.Release|x64.ActiveCfg = Release|x64
+		{742E0C1B-D102-4F06-A218-DFCC934F3011}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E2DFB76D-6753-454B-8353-AAE8BC2FAB51}
+	EndGlobalSection
+EndGlobal

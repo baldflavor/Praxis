@@ -1,0 +1,9 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<Description>Lists, words, informational bits</Description>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource Include="EmbeddedResource\words_alpha_curated.txt" />
+	</ItemGroup>
+</Project>

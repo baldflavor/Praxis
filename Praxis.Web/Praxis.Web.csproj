@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+	<PropertyGroup>
+		<Description>Extensions and helpers for that which resides typically in the 'Web' sub-namespace of Microsoft technology</Description>
+		<OutputType>Library</OutputType>
+		<IsPackable>false</IsPackable>
+	</PropertyGroup>
+</Project>
