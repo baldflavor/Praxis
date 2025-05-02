@@ -54,7 +54,6 @@ public static partial class Json {
 	/// </list>
 	/// It also includes several extra converters:
 	/// <list type="bullet">
-	/// <item><see cref="GuidJsonConverter"/></item>
 	/// <item><see cref="IPAddressJsonConverter"/></item>
 	/// <item><see cref="IPEndpointJsonConverter"/></item>
 	/// <item><see cref="JsonStringEnumConverter"/>(namingPolicy: <see cref="JsonNamingPolicy.CamelCase"/>, allowIntegerValues: <see langword="true"/>)]</item>
@@ -62,7 +61,6 @@ public static partial class Json {
 	/// </remarks>
 	private static readonly JsonSerializerOptions _praxisDefaultOptions = new() {
 		Converters = {
-			new GuidJsonConverter(),
 			new IPAddressJsonConverter(),
 			new IPEndpointJsonConverter(),
 			new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)

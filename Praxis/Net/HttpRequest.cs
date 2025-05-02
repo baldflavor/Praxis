@@ -25,6 +25,11 @@ public static class HttpRequest {
 		return await response.Content.ReadAsStringAsync(ctok).ConfigureAwait(false);
 	}
 
+	public static async Task Transmit(this HttpClient client, HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken ctok = default) {
+		using HttpResponseMessage response = await _RetrieveResponse(client, method, baseUri, relativeUri, data, headers, ctok).ConfigureAwait(false);
+		await _AssertSuccess(response, ctok).ConfigureAwait(false);
+	}
+
 
 	private static async Task _AssertSuccess(HttpResponseMessage arg, CancellationToken ctok) {
 		if (!arg.IsSuccessStatusCode) {
