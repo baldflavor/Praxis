@@ -29,7 +29,7 @@ public static class Tools {
 	/// </remarks>
 	/// <param name="connectTimeoutSeconds">Number of milliseconds to wait for preamble connection / retrieval of connection from pool and establishment</param>
 	/// <param name="decompressionMethod">Compression and decompression encoding format to be used to compress the data received in response to an System.Net.HttpWebRequest</param>
-	/// <param name="defaultRequestVersion">The HttpVersion to use when making requests; when null a default of <see cref="HttpVersion.Version20"/> is used</param>
+	/// <param name="defaultRequestVersion">The <see cref="Version"/> to use when making requests; when <see langword="null"/> a default of <see cref="HttpVersion.Version30"/> is used</param>
 	/// <param name="pooledConnectionLifetimeMinutes">How long each pooled connection should live before expiry</param>
 	/// <param name="remoteCertificateValidationCallback">Delegate used for sub processing or altering SSL validation - useful for debugging purposes or when allowing a trusted host or serial number. Be very careful with this callback to avoid security malfeasance</param>
 	/// <param name="timeoutSeconds">Seconds to wait before timing out a response from a request</param>
@@ -46,7 +46,7 @@ public static class Tools {
 
 		return new HttpClient(handler) {
 			Timeout = TimeSpan.FromSeconds(timeoutSeconds),
-			DefaultRequestVersion = defaultRequestVersion ?? HttpVersion.Version20
+			DefaultRequestVersion = defaultRequestVersion ?? HttpVersion.Version30
 		};
 	}
 
