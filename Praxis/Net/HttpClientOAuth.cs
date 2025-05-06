@@ -59,12 +59,12 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="password">Password to send for the token request</param>
 	/// <param name="tokenUri">The URI to use when requesting the token</param>
 	/// <returns>An AuthTokenResponse</returns>
-	public async Task<OAuthTokenResponse> GetOAuthTokenResponse(string username, string password, Uri tokenUri, CancellationToken ctok) {
+	public async Task<OAuthTokenResponse> GetOAuthTokenResponse(string username, string password, Uri tokenUri, CancellationToken cTok) {
 		OAuthTokenResponse? oAuthTokenResponse = await client.Retrieve<OAuthTokenResponse>(
 				HttpMethod.Post,
 				tokenUri,
 				data: GetAuthTokenRequestValues(username, password),
-				ctok: ctok)
+				cTok: cTok)
 				.ConfigureAwait(false);
 
 		oAuthTokenResponse!.AccessToken = "Bearer " + oAuthTokenResponse.AccessToken;
@@ -83,8 +83,8 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="data">Values to be either sent as part of the query string or posted to the request</param>
 	/// <param name="headers">List of headers to send with the request</param>
 	/// <returns>A type TData object</returns>
-	public async Task<T?> Retrieve<T>(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken ctok = default) where T : class {
-		return await client.Retrieve<T>(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, ctok).ConfigureAwait(false), ctok).ConfigureAwait(false);
+	public async Task<T?> Retrieve<T>(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) where T : class {
+		return await client.Retrieve<T>(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, cTok).ConfigureAwait(false), cTok).ConfigureAwait(false);
 	}
 
 	/// <summary>
@@ -97,8 +97,8 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="data">Values to be either sent as part of the query string or posted to the request</param>
 	/// <param name="headers">List of headers to send with the request</param>
 	/// <returns>A string</returns>
-	public async Task<string> Retrieve(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken ctok = default) {
-		return await client.Retrieve(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, ctok).ConfigureAwait(false), ctok).ConfigureAwait(false);
+	public async Task<string> Retrieve(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) {
+		return await client.Retrieve(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, cTok).ConfigureAwait(false), cTok).ConfigureAwait(false);
 	}
 
 
@@ -130,15 +130,15 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// </summary>
 	/// <param name="headers">Existing headers to accont for when making the new ones</param>
 	/// <returns>An awaitable task</returns>
-	private async Task<Dictionary<string, string>> _GetAuthHeaders(Dictionary<string, string>? headers, CancellationToken ctok) {
+	private async Task<Dictionary<string, string>> _GetAuthHeaders(Dictionary<string, string>? headers, CancellationToken cTok) {
 		headers ??= [];
 
 		// Uses a technique similar to a "double lock check" - and only uses the semaphore wait when a token is actually needed
 		if (DateTimeOffset.UtcNow >= this.TokenExpiresAt) {
 			try {
-				await _semaphoreslim.WaitAsync(ctok).ConfigureAwait(false);
+				await _semaphoreslim.WaitAsync(cTok).ConfigureAwait(false);
 				if (DateTimeOffset.UtcNow >= this.TokenExpiresAt) {
-					OAuthTokenResponse oAuthTokenResponse = await GetOAuthTokenResponse(username, password, tokenUri, ctok).ConfigureAwait(false);
+					OAuthTokenResponse oAuthTokenResponse = await GetOAuthTokenResponse(username, password, tokenUri, cTok).ConfigureAwait(false);
 					CalculateTokenExpiration(oAuthTokenResponse);
 					_tokenValue = oAuthTokenResponse.AccessToken;
 				}
