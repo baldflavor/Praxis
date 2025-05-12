@@ -4,4 +4,7 @@
 		<UseWindowsForms>true</UseWindowsForms>
 		<Description>Extensions and controls for working with WinForms</Description>
 	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Praxis\Praxis.csproj" />
+	</ItemGroup>
 </Project>
