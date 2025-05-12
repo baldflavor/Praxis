@@ -4,7 +4,7 @@ using System.ComponentModel;
 
 // Extension methods for invoking UI necessary operations
 
-internal static partial class Extension {
+public static partial class Extension {
 
 	/// <summary>
 	/// Invoke code when required

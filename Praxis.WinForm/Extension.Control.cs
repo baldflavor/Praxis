@@ -4,7 +4,7 @@ using System.Collections;
 
 // Extension methods for controls
 
-internal static partial class Extension {
+public static partial class Extension {
 
 	/// <summary>
 	/// Auto sizes the font of a label so that the text fits inside it's client rectangle. Will also set the <see cref="Label.TextAlign"/> to <see cref="ContentAlignment.MiddleCenter"/>

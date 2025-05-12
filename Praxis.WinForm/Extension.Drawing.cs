@@ -1,11 +1,8 @@
 ﻿namespace Praxis.WinForm;
 
-using System.Collections;
-using System.Windows.Forms;
-
 // Extension methods for drawing namespace objects
 
-internal static partial class Extension {
+public static partial class Extension {
 
 	/// <summary>
 	/// Using the provided image, creates an icon using binary header information

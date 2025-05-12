@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 // Extension methods for treeviews / nodes
 
-internal static partial class Extension {
+public static partial class Extension {
 
 	/// <summary>
 	/// Gets the recursive parent <see cref="TreeNode"/> of the node passed in by <paramref name="arg"/>. If the argument has no parent then it will be returned.
