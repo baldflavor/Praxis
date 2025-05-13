@@ -130,15 +130,20 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// On the target object, retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is a subclass of <see cref="MulticastDelegate"/>.
+	/// On the target object, walks through type/base type heirarchy and retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is a 
+	/// subclass of <see cref="MulticastDelegate"/>.
 	/// <para>For each of those fields the value will be set to <see langword="null"/></para>
 	/// </summary>
 	/// <param name="arg">Object being targeted</param>
 	public static void SetEventHandlersNull(this object arg) {
 		Type multicastDelegateType = typeof(MulticastDelegate);
+		Type? type = arg.GetType();
+		while (type != null) {
+			foreach (FieldInfo field in type.GetFields(Const.BindingFlagsAll).Where(f => f.FieldType.IsSubclassOf(multicastDelegateType)))
+				field.SetValue(arg, null);
 
-		foreach (FieldInfo field in arg.GetType().GetFields(Const.BindingFlagsAll).Where(f => f.FieldType.IsSubclassOf(multicastDelegateType)))
-			field.SetValue(arg, null);
+			type = type.BaseType;
+		}
 	}
 
 	/// <summary>

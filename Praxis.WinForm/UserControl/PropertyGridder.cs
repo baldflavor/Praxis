@@ -104,7 +104,14 @@ public partial class PropertyGridder : Form {
 	/// Fills the combo box with information regarding the controls available for the grid as well as the special <see cref="_refreshItem"/>
 	/// </summary>
 	private void _FillComboBox() {
-		controlsComboBox.SetItems(Enumerable.Repeat(_refreshItem, 1).Concat(_source.ControlsRecursive<Control>().Select(c => ComboBoxLabeledControl.From(c)).OrderBy(c => c.Name)), true);
+		controlsComboBox.SetItems(
+				Enumerable.Repeat(_refreshItem, 1)
+				.Concat([ComboBoxLabeledControl.From(_source)])
+				.Concat(
+						_source.ControlsRecursive<Control>()
+						.Select(c => ComboBoxLabeledControl.From(c))
+						.OrderBy(c => c.Name)),
+				true);
 	}
 
 	/// <summary>
