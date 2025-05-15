@@ -12,19 +12,31 @@ public static class Const {
 	/// Broken vertical bar
 	/// </summary>
 	/// <remarks>
-	/// Unic Number: U+00A6
-	///<para>HTML Code: <c>&amp;brvbar;</c> or <c>&#166;</c> </para>
+	/// C#: <c>(char)166</c>
+	/// <para>Unic Number: <c>U+00A6</c></para>
+	/// <para>Html Code: <c>&amp;brvbar;</c></para>
 	/// </remarks>
-	public const char BROKENVERTBAR = '¦';
+	public const char BROKENVERTBAR = 'Â¦';
 
 	/// <summary>
-	/// Broken vertical bar
+	/// Broken vertical bar (<see cref="BROKENVERTBAR"/> as <see cref="string"/>)
+	/// </summary>
+	public const string BROKENVERTBARSTRING = "Â¦";
+
+	/// <summary>
+	/// Bullet point
 	/// </summary>
 	/// <remarks>
-	/// Unic Number: U+00A6
-	///<para>HTML Code: <c>&amp;brvbar;</c> or <c>&#166;</c> </para>
+	/// C#: <c>(char)8226</c>
+	/// <para>Unic Number: <c>U+2022</c></para>
+	/// <para>Html Code: <c>&amp;bull;</c></para>
 	/// </remarks>
-	public const string BROKENVERTBARSTRING = "¦";
+	public const char BULLET = 'â€¢';
+
+	/// <summary>
+	/// Bullet point (<see cref="BULLET"/> as <see cref="string"/>)
+	/// </summary>
+	public const string BULLETSTRING = "â€¢";
 
 	/// <summary>
 	/// Carriage return / newline
@@ -52,32 +64,19 @@ public static class Const {
 	public const string NULL = "null";
 
 	/// <summary>
-	/// Right arrowhead unicode character
+	/// Right arrowhead
 	/// </summary>
 	/// <remarks>
-	/// Unic Number: <c>U+02C3</c>
-	///<para>HTML Code: <c>&#707;</c></para>
-	///<para>CSS Code: <c>\02C3</c></para>
-	///<para>Plane: 0 [Basic Multilingual Plane]</para>
-	///<para>Unic Block: Spacing Modifier Letters</para>
-	///<para>Unic Subblock: Miscellaneous phonetic modifiers</para>
-	///<para>Unic Version: 1.1 (1993)</para>
+	/// C#: <c>(char)9658</c>
+	/// <para>Unic Number: <c>U+25BA</c></para>
+	/// <para>Html Code: <c>&amp;#9658;</c></para>
 	/// </remarks>
-	public const char RIGHTARROWHEAD = '›';
+	public const char RIGHTARROWHEAD = 'â–º';
 
 	/// <summary>
-	/// Right arrowhead unicode character
+	/// Right arrowhead (<see cref="RIGHTARROWHEAD"/> as string)
 	/// </summary>
-	/// <remarks>
-	/// Unic Number: <c>U+02C3</c>
-	///<para>HTML Code: <c>&#707;</c></para>
-	///<para>CSS Code: <c>\02C3</c></para>
-	///<para>Plane: 0 [Basic Multilingual Plane]</para>
-	///<para>Unic Block: Spacing Modifier Letters</para>
-	///<para>Unic Subblock: Miscellaneous phonetic modifiers</para>
-	///<para>Unic Version: 1.1 (1993)</para>
-	/// </remarks>
-	public const string RIGHTARROWHEADSTRING = "›";
+	public const string RIGHTARROWHEADSTRING = "â–º";
 
 	/// <summary>
 	/// Represents the numeric equivalent of a <see langword="true"/> value.

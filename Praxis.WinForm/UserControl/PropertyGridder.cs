@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm.UserControl;
+namespace Praxis.WinForm.UserControl;
 
 using System.ComponentModel;
 using System.Reflection;
@@ -40,8 +40,7 @@ public partial class PropertyGridder : Form {
 		this.Name += $" - {source.Name}";
 		this.Location = new Point(source.Left + source.Width + 2, source.Top);
 
-		controlsComboBox.SelectionChangeCommitted += (s, _) =>
-		{
+		controlsComboBox.SelectionChangeCommitted += (s, _) => {
 			var selItem = ((ComboBox)s!).SelectedItem;
 			if (selItem != null) {
 				var cblc = (ComboBoxLabeledControl)selItem;
@@ -62,8 +61,7 @@ public partial class PropertyGridder : Form {
 
 		_FillComboBox();
 
-		viewPropDifferencesButton.Click += (_, _) =>
-		{
+		viewPropDifferencesButton.Click += (_, _) => {
 			object? selObj = mainPropertyGrid.SelectedObject;
 			if (selObj == null)
 				return;

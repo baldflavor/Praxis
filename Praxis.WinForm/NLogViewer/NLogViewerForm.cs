@@ -1,7 +1,6 @@
-﻿namespace Praxis.WinForm.NLogViewer;
+namespace Praxis.WinForm.NLogViewer;
 
 using System;
-using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Text.Json;

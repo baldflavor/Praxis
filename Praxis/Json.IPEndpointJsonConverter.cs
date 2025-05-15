@@ -1,4 +1,4 @@
-﻿namespace Praxis;
+namespace Praxis;
 
 using System;
 using System.Net;

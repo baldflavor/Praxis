@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm.NLogViewer;
+namespace Praxis.WinForm.NLogViewer;
 
 using System;
 using System.Linq;
