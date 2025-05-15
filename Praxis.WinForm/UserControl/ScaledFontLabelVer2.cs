@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm.UserControl;
+namespace Praxis.WinForm.UserControl;
 
 using System;
 using System.Drawing.Drawing2D;

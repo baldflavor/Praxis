@@ -1,4 +1,4 @@
-﻿namespace Praxis.Knowledge;
+namespace Praxis.Knowledge;
 
 using System.Collections.ObjectModel;
 using System.Reflection;
@@ -29,7 +29,7 @@ public static class Word {
 		string? line;
 		List<string> words = [];
 
-		while ((line = sr.ReadLine()) != null) 
+		while ((line = sr.ReadLine()) != null)
 			words.Add(line!);
 
 		Word.Words = new(words);

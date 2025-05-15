@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm;
+namespace Praxis.WinForm;
 
 // Placeholder used for nesting
 

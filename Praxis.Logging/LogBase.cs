@@ -1,4 +1,4 @@
-﻿namespace Praxis.Logging;
+namespace Praxis.Logging;
 
 using System.Runtime.CompilerServices;
 using NLog;

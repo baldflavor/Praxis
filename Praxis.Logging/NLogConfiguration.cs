@@ -1,4 +1,4 @@
-﻿namespace Praxis.Logging;
+namespace Praxis.Logging;
 
 using NLog;
 using NLog.Layouts;

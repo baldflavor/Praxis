@@ -1,4 +1,4 @@
-﻿namespace Praxis.LiteDb;
+namespace Praxis.LiteDb;
 
 using System.Linq.Expressions;
 using LiteDB;

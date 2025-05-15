@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm.NLogViewer;
+namespace Praxis.WinForm.NLogViewer;
 
 /// <summary>
 /// Represents a target file that is being watched and tracks position and whether it had changes

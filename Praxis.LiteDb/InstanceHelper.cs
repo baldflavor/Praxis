@@ -1,4 +1,4 @@
-﻿namespace AdViewPlayer.Api.Helper;
+namespace AdViewPlayer.Api.Helper;
 
 using System.Globalization;
 using LiteDB;

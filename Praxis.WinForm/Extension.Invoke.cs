@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm;
+namespace Praxis.WinForm;
 
 using System.ComponentModel;
 
