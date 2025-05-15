@@ -1,4 +1,4 @@
-﻿namespace Praxis.ComponentModel.DataAnnotation;
+namespace Praxis.ComponentModel.DataAnnotation;
 
 using System.ComponentModel.DataAnnotations;
 

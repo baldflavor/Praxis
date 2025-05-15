@@ -55,7 +55,7 @@ public sealed class Recipients {
 				sb.AppendLine(prefix);
 				sb.AppendLine(string.Join(",", list));
 			}
-		};
+		}
 	}
 
 

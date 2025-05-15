@@ -1,4 +1,4 @@
-﻿namespace Praxis;
+namespace Praxis;
 
 using System.Collections.Concurrent;
 

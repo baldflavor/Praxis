@@ -1,7 +1,6 @@
 namespace Praxis.IO;
 
 using System.Numerics;
-using System.Reflection;
 
 /// <summary>
 /// Tool methods for working with file/io related tasks
