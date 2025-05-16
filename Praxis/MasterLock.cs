@@ -120,4 +120,20 @@ public sealed class MasterLock {
 
 		return _lockDictSlim[key];
 	}
+
+	/// <summary>
+	/// Simple object that can be used both to "lock" upon and also to hold a key that can be used for
+	/// semaphore or related operations 
+	/// </summary>
+	public class LockNKey(string? key = null) {
+		/// <summary>
+		/// Holds a string reference to a value that represents the key for this lock
+		/// </summary>
+		private readonly string _key = key ?? Crypto.Token.GuidAlpha();
+
+		/// <summary>
+		/// Gets the key associate with this instance
+		/// </summary>
+		public string Key => _key;
+	}
 }
