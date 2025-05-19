@@ -29,10 +29,10 @@ internal static partial class Extension {
 			BorderStyle = BorderStyle.None,
 			CausesValidation = false,
 			Cursor = cursor ?? Cursors.Default,
-			Location = new Point(1, 1),
+			Location = new Point(0, 0),
 			Margin = new Padding(0),
 			Padding = new Padding(6),
-			Size = new Size(owner.ClientSize.Width - 2, owner.ClientSize.Height - 2),
+			Size = new Size(owner.ClientSize.Width, owner.ClientSize.Height),
 			TabIndex = int.MaxValue,
 			TabStop = false,
 			Visible = false
