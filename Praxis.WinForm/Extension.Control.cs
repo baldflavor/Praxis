@@ -4,10 +4,13 @@ using System.Collections;
 
 // Extension methods for controls
 
-public static partial class Extension {
+internal static partial class Extension {
 	/// <summary>
 	/// Adds a panel sized to the client size of its owner and an inner label that displays a text message
 	/// </summary>
+	/// <remarks>
+	/// Performs layout on <paramref name="owner"/> after controls are added
+	/// </remarks>
 	/// <param name="owner"><see cref="Control"/> to add the panel to and for setting size and location</param>
 	/// <param name="text">Set on the inner label as a message to a user</param>
 	/// <param name="autoSizeFontMax">If not <see langword="null"/> then the font used for <paramref name="text"/> will be autosized with this as the font's maximum size</param>
@@ -16,19 +19,20 @@ public static partial class Extension {
 	/// <param name="innerLabelConfig">Optional delegate used for further configuration of the inner text label. Set sizing and spacing with care.</param>
 	/// <param name="innerLabel">Set to the inner text label. Useful when setting the <see cref="Label.Text"/> property to a different message</param>
 	/// <returns>The outer border <see cref="Panel"/></returns>
+	/// <exception cref="ArgumentOutOfRangeException">Thrown if <paramref name="autoSizeFontMax"/> is less than <c>1</c></exception>
 	public static Panel AddBlockingPanel(this Control owner, string text, out Label innerLabel, float? autoSizeFontMax = 100, Cursor? cursor = null, Action<Panel>? borderPanelConfig = null, Action<Label>? innerLabelConfig = null) {
 		ArgumentOutOfRangeException.ThrowIfLessThan(autoSizeFontMax ?? 100, 1);
 
 		var borderPanel = new Panel {
 			Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom,
-			BackColor = Color.Black,
+			BackColor = Color.SaddleBrown,
 			BorderStyle = BorderStyle.None,
 			CausesValidation = false,
 			Cursor = cursor ?? Cursors.Default,
-			Location = new Point(2, 2),
+			Location = new Point(1, 1),
 			Margin = new Padding(0),
-			Padding = new Padding(4),
-			Size = new Size(owner.ClientSize.Width - 4, owner.ClientSize.Height - 4),
+			Padding = new Padding(6),
+			Size = new Size(owner.ClientSize.Width - 2, owner.ClientSize.Height - 2),
 			TabIndex = int.MaxValue,
 			TabStop = false,
 			Visible = false
@@ -43,21 +47,22 @@ public static partial class Extension {
 			Cursor = borderPanel.Cursor,
 			Dock = DockStyle.Fill,
 			ForeColor = Color.Black,
+			TabIndex = borderPanel.TabIndex,
 			Text = text,
-			TabIndex = borderPanel.TabIndex
 		}.SetNoMarginPadding();
 
 		innerLabelConfig?.Invoke(innerLabel);
 
 		borderPanel.Controls.Add(innerLabel);
 		owner.Controls.Add(borderPanel);
-		owner.PerformLayout();
 
 		if (autoSizeFontMax != null)
 			innerLabel.AutoSizeFont(startingFontSize: autoSizeFontMax.Value);
 
 		borderPanel.Visible = true;
 		borderPanel.BringToFront();
+
+		owner.PerformLayout();
 
 		return borderPanel;
 	}
@@ -109,39 +114,22 @@ public static partial class Extension {
 	public static IEnumerable<T> ControlsRecursive<T>(this Control arg) where T : Control {
 		foreach (var matching in arg.Controls.OfType<T>()) {
 			yield return matching;
-			if (matching.HasChildren) {
-				foreach (var child in ControlsRecursive<T>(matching))
-					yield return child;
-			}
+
+			foreach (var child in ControlsRecursive<T>(matching))
+				yield return child;
 		}
 	}
 
 	/// <summary>
-	/// Disposes all child controls in the <see cref="Control.Controls"/> collection of the passed argument and clears control collection
+	/// Disposes all child controls
 	/// </summary>
 	/// <remarks>
-	/// Disposing a control removes it from the control collection it belongs to as well as all of its children, so you cannot enumerate through a .Controls
-	/// collection and dispose of it in that fashion
+	/// Dispose on a control disposes all child controls of that control and also removes them from their parent
 	/// </remarks>
-	/// <param name="arg">Control of which to dispose all children</param>
+	/// <param name="arg"><see cref="Control"/> to operate on</param>
 	public static void DisposeChildren(this Control arg) {
-		for (int i = arg.Controls.Count - 1; i >= 0; i--) {
-			using var control = arg.Controls[i];
-			arg.Controls.Remove(control);
-		}
-	}
-
-	/// <summary>
-	/// Disposes a control and removes it from a parent control collection where present
-	/// </summary>
-	/// <param name="control">The control to target</param>
-	/// <param name="disposeChildren">Indicates whether or not to dispose of child controls of <paramref name="control"/></param>
-	public static void DisposeRemoveFromParent(this Control control, bool disposeChildren = true) {
-		using var c = control;
-		control.Parent?.Controls.Remove(control);
-
-		if (disposeChildren)
-			control.DisposeChildren();
+		while (arg.Controls.Count > 0)
+			arg.Controls[0].Dispose();
 	}
 
 	/// <summary>
@@ -279,7 +267,19 @@ public static partial class Extension {
 	/// <returns>A value indicating whether the value was set or not</returns>
 	public static bool TrySetSelectedItem<T>(this ListBox control, Func<T, bool> evaluator) => _TrySetSelectedItem(control, evaluator);
 
+	/// <summary>
+	/// Peforms an action on all controls that are recursive children of <paramref name="control"/>
+	/// </summary>
+	/// <param name="control"><paramref name="control"/></param>
+	/// <param name="action">Delegate to perform on each recursively found child</param>
+	/// <returns><paramref name="control"/></returns>
+	public static Control WithChildren(this Control control, Action<Control> action) {
+		action(control);
+		foreach (Control child in control.Controls)
+			_ = child.WithChildren(action);
 
+		return control;
+	}
 
 	/// <summary>
 	/// Sets the passed list of enumerable items to the items collection of the control and optionally selects the first item automatically
