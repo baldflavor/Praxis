@@ -21,6 +21,7 @@ public static partial class Extension {
 
 		var borderPanel = new Panel {
 			Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom,
+			BackColor = Color.Black,
 			BorderStyle = BorderStyle.None,
 			CausesValidation = false,
 			Cursor = cursor ?? Cursors.Default,
