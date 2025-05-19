@@ -5,9 +5,65 @@ using System.Collections;
 // Extension methods for controls
 
 public static partial class Extension {
+	/// <summary>
+	/// Adds a panel sized to the client size of its owner and an inner label that displays a text message
+	/// </summary>
+	/// <param name="owner"><see cref="Control"/> to add the panel to and for setting size and location</param>
+	/// <param name="text">Set on the inner label as a message to a user</param>
+	/// <param name="autoSizeFontMax">If not <see langword="null"/> then the font used for <paramref name="text"/> will be autosized with this as the font's maximum size</param>
+	/// <param name="cursor">Cursor to set on the blocking panel and inner label. When <see langword="null"/>, <see cref="Cursors.Default"/> is used</param>
+	/// <param name="borderPanelConfig">Optional delegate used for further configuration of the blocking (border) panel. Set sizing and spacing with care.</param>
+	/// <param name="innerLabelConfig">Optional delegate used for further configuration of the inner text label. Set sizing and spacing with care.</param>
+	/// <param name="innerLabel">Set to the inner text label. Useful when setting the <see cref="Label.Text"/> property to a different message</param>
+	/// <returns>The outer border <see cref="Panel"/></returns>
+	public static Panel AddBlockingPanel(this Control owner, string text, out Label innerLabel, float? autoSizeFontMax = 100, Cursor? cursor = null, Action<Panel>? borderPanelConfig = null, Action<Label>? innerLabelConfig = null) {
+		ArgumentOutOfRangeException.ThrowIfLessThan(autoSizeFontMax ?? 100, 1);
+
+		var borderPanel = new Panel {
+			Anchor = AnchorStyles.Left | AnchorStyles.Top | AnchorStyles.Right | AnchorStyles.Bottom,
+			BorderStyle = BorderStyle.None,
+			CausesValidation = false,
+			Cursor = cursor ?? Cursors.Default,
+			Location = new Point(2, 2),
+			Margin = new Padding(0),
+			Padding = new Padding(4),
+			Size = new Size(owner.ClientSize.Width - 4, owner.ClientSize.Height - 4),
+			TabIndex = int.MaxValue,
+			TabStop = false,
+			Visible = false
+		};
+
+		borderPanelConfig?.Invoke(borderPanel);
+
+		innerLabel = new Label {
+			BackColor = Color.Bisque,
+			BorderStyle = borderPanel.BorderStyle,
+			CausesValidation = borderPanel.CausesValidation,
+			Cursor = borderPanel.Cursor,
+			Dock = DockStyle.Fill,
+			ForeColor = Color.Black,
+			Text = text,
+			TabIndex = borderPanel.TabIndex
+		}.SetNoMarginPadding();
+
+		innerLabelConfig?.Invoke(innerLabel);
+
+		borderPanel.Controls.Add(innerLabel);
+		owner.Controls.Add(borderPanel);
+		owner.PerformLayout();
+
+		if (autoSizeFontMax != null)
+			innerLabel.AutoSizeFont(startingFontSize: autoSizeFontMax.Value);
+
+		borderPanel.Visible = true;
+		borderPanel.BringToFront();
+
+		return borderPanel;
+	}
 
 	/// <summary>
-	/// Auto sizes the font of a label so that the text fits inside it's client rectangle. Will also set the <see cref="Label.TextAlign"/> to <see cref="ContentAlignment.MiddleCenter"/>
+	/// Auto sizes the font of a innerLabel so that the text fits inside it's client rectangle.
+	/// Will also set the <see cref="Label.TextAlign"/> to <see cref="ContentAlignment.MiddleLeft"/>
 	/// </summary>
 	/// <remarks>
 	/// Drawing is suspended while autosizing the font
@@ -69,8 +125,22 @@ public static partial class Extension {
 	/// <param name="arg">Control of which to dispose all children</param>
 	public static void DisposeChildren(this Control arg) {
 		for (int i = arg.Controls.Count - 1; i >= 0; i--) {
-			arg.Controls[i].Dispose();
+			using var control = arg.Controls[i];
+			arg.Controls.Remove(control);
 		}
+	}
+
+	/// <summary>
+	/// Disposes a control and removes it from a parent control collection where present
+	/// </summary>
+	/// <param name="control">The control to target</param>
+	/// <param name="disposeChildren">Indicates whether or not to dispose of child controls of <paramref name="control"/></param>
+	public static void DisposeRemoveFromParent(this Control control, bool disposeChildren = true) {
+		using var c = control;
+		control.Parent?.Controls.Remove(control);
+
+		if (disposeChildren)
+			control.DisposeChildren();
 	}
 
 	/// <summary>
@@ -103,12 +173,11 @@ public static partial class Extension {
 	/// <param name="arg">Target combo box to alter</param>
 	/// <returns><paramref name="arg"/></returns>
 	public static ComboBox MakeYesNo(this ComboBox arg) {
-		arg.SetItems(
-						[
-										Tuple.Create((bool?)null, ""),
-																Tuple.Create((bool?)true, "Yes"),
-																Tuple.Create((bool?)false, "No")],
-						true);
+		arg.SetItems([
+				Tuple.Create((bool?)null, ""),
+						Tuple.Create((bool?)true, "Yes"),
+						Tuple.Create((bool?)false, "No")],
+				true);
 		arg.ValueMember = "Item1";
 		arg.DisplayMember = "Item2";
 		arg.Refresh();
