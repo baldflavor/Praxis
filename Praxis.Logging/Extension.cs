@@ -1,8 +1,7 @@
-namespace AdviewNexus.Logging;
+namespace Praxis.Logging;
 
 using System.Runtime.CompilerServices;
 using NLog;
-using Praxis.Logging;
 
 /// <summary>
 /// Extensions for NLog / Logger operations
