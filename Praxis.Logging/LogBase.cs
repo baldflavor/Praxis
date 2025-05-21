@@ -6,27 +6,19 @@ using NLog;
 /// <summary>
 /// Class used for working with various logging facilities
 /// </summary>
-public class LogBase {
-
+/// <remarks>
+/// Initializes a new instance of the <see cref="Logging" /> class
+/// </remarks>
+/// <param name="attachProperties">Each of these are added to the root <see cref="_logger"/> and will thus be added to every entry that
+/// is added through subsequent log entries. This can cause logs to be larger than necessary in size.</param>
+public class LogBase(Type type) {
 	/// <summary>
 	/// Holds a reference to an <see cref="Logger"/> used for writing log entries
 	/// </summary>
 	/// <remarks>
 	/// This instance should be used for internal logging operations as it may already have properties set
 	/// </remarks>
-	private readonly Logger _logger;
-
-
-	/// <summary>
-	/// Initializes a new instance of the <see cref="Logging" /> class
-	/// </summary>
-	/// <param name="attachProperties">Each of these are added to the root <see cref="_logger"/> and will thus be added to every entry that
-	/// is added through subsequent log entries. This can cause logs to be larger than necessary in size.</param>
-	public LogBase() {
-		_logger = LogManager.GetLogger(GetType().FullName);
-	}
-
-
+	private readonly Logger _logger = LogManager.GetLogger(type.FullName);
 
 	/// <summary>
 	/// Used for capturing an exception and writing it out to appropriate storage. Calls <see cref="OnLoggedError(Exception)"/> post entry.
