@@ -1,5 +1,6 @@
 namespace Praxis.Logging;
 
+using System.Reflection;
 using NLog;
 using NLog.Layouts;
 using NLog.Targets;
@@ -22,8 +23,40 @@ public static class NLogConfiguration {
 	/// <summary>
 	/// Static constructor, sets global and base level properties for working with NLog
 	/// </summary>
+	/// <remarks>
+	/// Also adds object transformation for common framework types that typically either cannot be serialized or produce
+	/// recursive / overly long serialized information. (i.e. <see cref="Assembly"/>, <see cref="Type"/>, <see cref="FileSystemInfo"/>
+	/// </remarks>
 	static NLogConfiguration() {
 		NLog.Time.TimeSource.Current = new NLog.Time.FastUtcTimeSource(); // Fast time source with UTC stamp updated every 15ms
+
+		LogManager.Setup().SetupSerialization((s) =>
+		{
+			s.RegisterObjectTransformation<Assembly>(e =>
+			{
+				AssemblyName assemblyName = e.GetName();
+				return new { assemblyName.FullName, assemblyName.Version };
+			});
+
+			s.RegisterObjectTransformation<FileSystemInfo>(e =>
+			{
+				FileInfo? fi = e as FileInfo;
+				return new {
+					e.CreationTimeUtc,
+					e.Exists,
+					e.FullName,
+					IsReadOnly = fi?.IsReadOnly ?? false,
+					e.LastWriteTimeUtc,
+					Length = fi?.Length ?? int.MinValue,
+				};
+			});
+
+			s.RegisterObjectTransformation<Type>(e => new
+			{
+				AssemblyFullName = e.Assembly.FullName,
+				TypeFullName = e.FullName
+			});
+		});
 	}
 
 

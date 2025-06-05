@@ -34,8 +34,8 @@ public class LogBase(Type type) {
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Error(exception);
+						.WithProperty(Constant.CALLER, callerMemberName)
+						.Error(exception);
 
 		OnLoggedError(exception);
 	}
@@ -57,8 +57,8 @@ public class LogBase(Type type) {
 		ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Info(message);
+						.WithProperty(Constant.CALLER, callerMemberName)
+						.Info(message);
 
 		OnLoggedInfo(message);
 	}
@@ -83,8 +83,8 @@ public class LogBase(Type type) {
 			throw new ArgumentException("Must have either an exception or message to log");
 
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Warn(exception, message);
+						.WithProperty(Constant.CALLER, callerMemberName)
+						.Warn(exception, message);
 
 		OnLoggedWarn(exception, message);
 	}
@@ -93,7 +93,7 @@ public class LogBase(Type type) {
 	/// Used for adding properties to a <see cref="Logger"/> before performing a log operation
 	/// </summary>
 	/// <remarks>
-	/// Base level code performs the following:
+	/// Base level code performs the following and should be called when overriden unless specifically not needed:
 	/// <list type="number">
 	///	<item>If <paramref name="data"/> is <see langword="null"/>, <c>returns</c></item>
 	///	<item>If <paramref name="data"/> is <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/>

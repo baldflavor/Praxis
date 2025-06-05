@@ -11,17 +11,16 @@ using System.Reflection;
 /// </remarks>
 /// <param name="executingAssembly">The assembly that is currently executing code</param>
 /// <param name="extended">Extended properties to include in the initialization log</param>
-public class InitializeInfo(AssemblyName executingAssembly, Dictionary<string, object>? extended = null) {
-
+public class InitializeInfo(Assembly executingAssembly, Dictionary<string, object>? extended = null) {
 	/// <summary>
 	/// Gets the name and version of the entry assembly for the current application domain
 	/// </summary>
-	public NameVersion? AssemblyEntry { get; } = NameVersion.From(Assembly.GetEntryAssembly()?.GetName());
+	public Assembly? AssemblyEntry { get; } = Assembly.GetEntryAssembly();
 
 	/// <summary>
 	/// Gets the name and version of an executing assembly
 	/// </summary>
-	public NameVersion AssemblyExecuting { get; } = NameVersion.From(executingAssembly);
+	public Assembly AssemblyExecuting { get; } = executingAssembly;
 
 	/// <summary>
 	/// Gets extended properties pertinent to initialization info
