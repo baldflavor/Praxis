@@ -4,7 +4,7 @@ using System.Collections;
 
 // Extension methods for controls
 
-internal static partial class Extension {
+public static partial class Extension {
 	/// <summary>
 	/// Adds a panel sized to the client size of its owner and an inner label that displays a text message
 	/// </summary>
