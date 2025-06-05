@@ -28,7 +28,10 @@ public class LogBaseDI<T> {
 	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
-		AddProperties(data, _logger.WithProperty(Constant.CALLER, callerMemberName)).Error(exception);
+		AddProperties(data, _logger)
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Error(exception);
+
 		OnLoggedError(exception);
 	}
 
@@ -45,7 +48,11 @@ public class LogBaseDI<T> {
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedInfo(string)"/></exception>
 	public void Info(string message, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		ArgumentException.ThrowIfNullOrWhiteSpace(message);
-		AddProperties(data, _logger.WithProperty(Constant.CALLER, callerMemberName)).Info(message);
+
+		AddProperties(data, _logger)
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Info(message);
+
 		OnLoggedInfo(message);
 	}
 
@@ -65,7 +72,10 @@ public class LogBaseDI<T> {
 		if (exception == default && string.IsNullOrWhiteSpace(message))
 			throw new ArgumentException("Must have either an exception or message to log");
 
-		AddProperties(data, _logger.WithProperty(Constant.CALLER, callerMemberName)).Warn(exception, message);
+		AddProperties(data, _logger)
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Warn(exception, message);
+
 		OnLoggedWarn(exception, message);
 	}
 
@@ -74,13 +84,23 @@ public class LogBaseDI<T> {
 	/// <summary>
 	/// Used for adding properties to a <see cref="Logger"/> before performing a log operation
 	/// </summary>
-	/// <remarks>Base level code adds <paramref name="data"/> to a property named <see cref="DATA"/> if it is not <see langword="null"/></remarks>
-	/// <param name="data">Data to be added as a property to the logger</param>
+	/// <remarks>
+	/// Base level code performs the following:
+	/// <list type="number">
+	///	<item>If <paramref name="data"/> is <see langword="null"/>, <c>returns</c></item>
+	///	<item>If <paramref name="data"/> is <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/>
+	///	of <see cref="string"/>, <see cref="object"/>, adds each to the <paramref name="logger"/>, then <c>returns</c></item>
+	///	<item>Adds <paramref name="data"/> to a property named <see cref="Constant.DATA"/></item>
+	/// </list>
+	/// </remarks>
+	/// <param name="data">Data used for <paramref name="logger"/> properties</param>
 	/// <param name="logger">The logger that is being used for logging purposes</param>
 	/// <returns><see cref="Logger"/></returns>
 	protected virtual Logger AddProperties(object? data, Logger logger) {
 		if (data == null)
 			return logger;
+		else if (data is IEnumerable<KeyValuePair<string, object>> dDict)
+			return logger.WithProperties(dDict);
 		else
 			return logger.WithProperty(Constant.DATA, data);
 	}
