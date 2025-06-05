@@ -6,10 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 /// <summary>
-/// Provides static methods for working with KeyValuePair[string, string] objects
+/// Provides static methods for working with KeyValuePair instances
 /// </summary>
 public static class Kvp {
-
 	/// <summary>
 	/// Type definition for IEnumerable
 	/// </summary>
@@ -28,6 +27,13 @@ public static class Kvp {
 	public static KeyValuePair<string, string>[] Array(params KeyValuePair<string, string>[] arg) => arg;
 
 	/// <summary>
+	/// Simply allows one to use a shortened method of making an array of KeyValuePairs through the params function rather than having to create a new array in calling / client code
+	/// </summary>
+	/// <param name="arg">Params array of arg key value pairs to simply return</param>
+	/// <returns>An array of KeyValuePair objects</returns>
+	public static KeyValuePair<K, V>[] Array<K, V>(params KeyValuePair<K, V>[] arg) => arg;
+
+	/// <summary>
 	/// Creates a key value pair that's suitable as a basic authorization header to be sent along with a request
 	/// </summary>
 	/// <param name="user">The "user" portion of the basic auth header</param>
@@ -44,12 +50,14 @@ public static class Kvp {
 	/// <returns>An array of KeyValuePair with the propertyname and value.ToString() respectively</returns>
 	public static KeyValuePair<string, string?>[] FromObject(object arg, string? nameFormat = null) {
 		return
-			arg
-				.GetType()
-				.GetRuntimeProperties()
-				.Where(pi => pi.CanRead && (pi.PropertyType == _stringType || !_iEnumerableType.IsAssignableFrom(pi.PropertyType)))
-				.Select(pi => KeyValuePair.Create(string.IsNullOrWhiteSpace(nameFormat) ? pi.Name : string.Format(nameFormat, pi.Name), pi.GetValue(arg)?.ToString()))
-				.ToArray();
+				[.. arg
+								.GetType()
+								.GetRuntimeProperties()
+								.Where(pi => pi.CanRead && (pi.PropertyType == _stringType || !_iEnumerableType.IsAssignableFrom(pi.PropertyType)))
+								.Select(pi => KeyValuePair.Create(
+										string.IsNullOrWhiteSpace(nameFormat) ?
+										pi.Name :
+										string.Format(nameFormat, pi.Name), pi.GetValue(arg)?.ToString()))];
 	}
 
 
@@ -66,8 +74,8 @@ public static class Kvp {
 		using var content = new FormUrlEncodedContent(arg);
 
 		return
-			new StringBuilder("?")
-			.Append(await content.ReadAsStringAsync().ConfigureAwait(false))
-			.ToString();
+				new StringBuilder("?")
+				.Append(await content.ReadAsStringAsync().ConfigureAwait(false))
+				.ToString();
 	}
 }

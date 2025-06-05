@@ -29,8 +29,8 @@ public class LogBaseDI<T> {
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		AddProperties(data, _logger)
-			.WithProperty(Constant.CALLER, callerMemberName)
-			.Error(exception);
+				.WithProperty(Constant.CALLER, callerMemberName)
+				.Error(exception);
 
 		OnLoggedError(exception);
 	}
@@ -50,8 +50,8 @@ public class LogBaseDI<T> {
 		ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
 		AddProperties(data, _logger)
-			.WithProperty(Constant.CALLER, callerMemberName)
-			.Info(message);
+				.WithProperty(Constant.CALLER, callerMemberName)
+				.Info(message);
 
 		OnLoggedInfo(message);
 	}
@@ -73,8 +73,8 @@ public class LogBaseDI<T> {
 			throw new ArgumentException("Must have either an exception or message to log");
 
 		AddProperties(data, _logger)
-			.WithProperty(Constant.CALLER, callerMemberName)
-			.Warn(exception, message);
+				.WithProperty(Constant.CALLER, callerMemberName)
+				.Warn(exception, message);
 
 		OnLoggedWarn(exception, message);
 	}
