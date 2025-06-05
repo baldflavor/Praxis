@@ -4,21 +4,18 @@ using System.Runtime.CompilerServices;
 using NLog;
 
 /// <summary>
-/// Class used for working with various logging facilities
+/// Class used as a base for working with logging operations as part of dependency injected scenarios
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="Logging" /> class
-/// </remarks>
-/// <param name="attachProperties">Each of these are added to the root <see cref="_logger"/> and will thus be added to every entry that
-/// is added through subsequent log entries. This can cause logs to be larger than necessary in size.</param>
-public class LogBase(Type type) {
+public class LogBaseDI<T> {
+
 	/// <summary>
 	/// Holds a reference to an <see cref="Logger"/> used for writing log entries
 	/// </summary>
 	/// <remarks>
 	/// This instance should be used for internal logging operations as it may already have properties set
 	/// </remarks>
-	private readonly Logger _logger = LogManager.GetLogger(type.FullName);
+	private readonly Logger _logger = LogManager.GetLogger(typeof(T).FullName);
+
 
 	/// <summary>
 	/// Used for capturing an exception and writing it out to appropriate storage. Calls <see cref="OnLoggedError(Exception)"/> post entry.
@@ -27,15 +24,13 @@ public class LogBase(Type type) {
 	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
 	/// </remarks>
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
-	/// <param name="data">Supplemental data properties to log.
-	/// <para>Pass an <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/>, <see cref="object"/> to set multiple named properties</para>
-	/// <para>Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</para></param>
+	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
 	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Error(exception);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Error(exception);
 
 		OnLoggedError(exception);
 	}
@@ -47,9 +42,7 @@ public class LogBase(Type type) {
 	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
 	/// </remarks>
 	/// <param name="message">Message to be logged</param>
-	/// <param name="data">Supplemental data properties to log.
-	/// <para>Pass an <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/>, <see cref="object"/> to set multiple named properties</para>
-	/// <para>Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</para></param>
+	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
 	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
 	/// <exception cref="ArgumentException">Thrown if <paramref name="message"/> does not have a cogent value</exception>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedInfo(string)"/></exception>
@@ -57,12 +50,11 @@ public class LogBase(Type type) {
 		ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Info(message);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Info(message);
 
 		OnLoggedInfo(message);
 	}
-
 
 	/// <summary>
 	/// Used for capturing a warning and writing it out to appropriate storage. Calls <see cref="OnLoggedWarn(Exception?, string?)"/> post entry.
@@ -72,9 +64,7 @@ public class LogBase(Type type) {
 	/// </remarks>
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
 	/// <param name="message">Alternative messaging to log alongside <paramref name="exception"/></param>
-	/// <param name="data">Supplemental data properties to log.
-	/// <para>Pass an <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/>, <see cref="object"/> to set multiple named properties</para>
-	/// <para>Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</para></param>
+	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
 	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
 	/// <exception cref="ArgumentException">Thrown if both <paramref name="exception"/> and <paramref name="message"/> are null</exception>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedWarn(Exception?, string?)"/></exception>
@@ -83,11 +73,13 @@ public class LogBase(Type type) {
 			throw new ArgumentException("Must have either an exception or message to log");
 
 		AddProperties(data, _logger)
-				.WithProperty(Constant.CALLER, callerMemberName)
-				.Warn(exception, message);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Warn(exception, message);
 
 		OnLoggedWarn(exception, message);
 	}
+
+
 
 	/// <summary>
 	/// Used for adding properties to a <see cref="Logger"/> before performing a log operation
@@ -112,8 +104,6 @@ public class LogBase(Type type) {
 		else
 			return logger.WithProperty(Constant.DATA, data);
 	}
-
-
 
 	/// <summary>
 	/// Code that runs after all other operations in <see cref="Error(Exception, object?, string?)"/>

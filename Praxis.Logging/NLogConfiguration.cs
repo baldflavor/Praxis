@@ -31,26 +31,24 @@ public static class NLogConfiguration {
 	/// Configures NLog for Json formatted file output
 	/// </summary>
 	/// <param name="directoryName">The directory where NLog should write logs</param>
-	/// <param name="includeLoggerName">Indicates whether to include the logger "name" as part of the layout</param>
 	/// <param name="maxArchiveFiles">Maximum number of archive files to be kept before they are deleted. Files are archived according to <see cref="FileArchivePeriod.Day"/></param>
 	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
 	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
-	public static void ConfigureForJsonFileOutput(string directoryName, bool includeLoggerName, int maxArchiveFiles = 183, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		_SetLogManagerConfiguration(_GetFileTarget(directoryName, _GetJsonLayout(includeLoggerName, recursionLimit, tzi ?? TimeZoneInfo.Local), maxArchiveFiles));
+	public static void ConfigureForJsonFileOutput(string directoryName, int maxArchiveFiles = 183, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
+		_SetLogManagerConfiguration(_GetFileTarget(directoryName, _GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local), maxArchiveFiles));
 	}
 
 	/// <summary>
 	/// Configures NLog for Json formatted file and memory output
 	/// </summary>
 	/// <param name="directoryName">The directory where NLog should write logs</param>
-	/// <param name="includeLoggerName">Indicates whether to include the logger "name" as part of the layout</param>
 	/// <param name="maxArchiveFiles">Maximum number of archive files to be kept before they are deleted. Files are archived according to <see cref="FileArchivePeriod.Day"/></param>
 	/// <param name="maxLogCount">Maximum number of logs to keep in memory</param>
 	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
 	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
 	/// <returns><see cref="MemoryTarget"/></returns>
-	public static MemoryTarget ConfigureForJsonFileOutputAndMemoryTarget(string directoryName, bool includeLoggerName, int maxArchiveFiles = 183, int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		var layout = _GetJsonLayout(includeLoggerName, recursionLimit, tzi ?? TimeZoneInfo.Local);
+	public static MemoryTarget ConfigureForJsonFileOutputAndMemoryTarget(string directoryName, int maxArchiveFiles = 183, int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
+		var layout = _GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local);
 		var memoryTarget = _GetMemoryTarget(layout, maxLogCount);
 		_SetLogManagerConfiguration(memoryTarget, _GetFileTarget(directoryName, layout, maxArchiveFiles));
 		return memoryTarget;
@@ -59,13 +57,12 @@ public static class NLogConfiguration {
 	/// <summary>
 	/// Configures NLog for Json formatted memory output
 	/// </summary>
-	/// <param name="includeLoggerName">Indicates whether to include the logger "name" as part of the layout</param>
 	/// <param name="maxLogCount">Maximum number of logs to keep in memory</param>
 	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
 	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
 	/// <returns><see cref="MemoryTarget"/></returns>
-	public static MemoryTarget ConfigureForJsonMemoryTarget(bool includeLoggerName, int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		var target = _GetMemoryTarget(_GetJsonLayout(includeLoggerName, recursionLimit, tzi ?? TimeZoneInfo.Local), maxLogCount);
+	public static MemoryTarget ConfigureForJsonMemoryTarget(int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
+		var target = _GetMemoryTarget(_GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local), maxLogCount);
 		_SetLogManagerConfiguration(target);
 		return target;
 	}
@@ -95,11 +92,10 @@ public static class NLogConfiguration {
 	/// <summary>
 	/// Gets a layout configured for json formatting
 	/// </summary>
-	/// <param name="includeLoggerName">Indicates whether to include the logger "name" as part of the layout</param>
 	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
 	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary.</param>
 	/// <returns><see cref="JsonLayout"/></returns>
-	private static JsonLayout _GetJsonLayout(bool includeLoggerName, int recursionLimit, TimeZoneInfo tzi) {
+	private static JsonLayout _GetJsonLayout(int recursionLimit, TimeZoneInfo tzi) {
 		var jsLayout = new JsonLayout {
 			ExcludeEmptyProperties = true,
 			MaxRecursionLimit = recursionLimit,
@@ -111,23 +107,21 @@ public static class NLogConfiguration {
 		jsLayout.Attributes.Add(new JsonAttribute("Level", Layout.FromString("${level:format=FirstCharacter}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Utc", Layout.FromString("${longdate}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Tzi", tzi.Id));
-
-		if (includeLoggerName)
-			jsLayout.Attributes.Add(new JsonAttribute("Logger", Layout.FromString("${logger}")));
-
+		jsLayout.Attributes.Add(new JsonAttribute("Logger", Layout.FromString("${logger}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Message", Layout.FromString("${message}")));
+
 		jsLayout.Attributes.Add(
-			new JsonAttribute(
-				"Properties",
-				new JsonLayout {
-					ExcludeEmptyProperties = true,
-					IncludeEventProperties = true,
-					MaxRecursionLimit = recursionLimit,
-					RenderEmptyObject = false,
-					SuppressSpaces = true
-				}) {
-				Encode = false
-			});
+				new JsonAttribute(
+						"Properties",
+						new JsonLayout {
+							ExcludeEmptyProperties = true,
+							IncludeEventProperties = true,
+							MaxRecursionLimit = recursionLimit,
+							RenderEmptyObject = false,
+							SuppressSpaces = true
+						}) {
+					Encode = false
+				});
 		jsLayout.Attributes.Add(new JsonAttribute("Exceptions", Layout.FromString("${exception:format=@}")) { Encode = false });
 
 		return jsLayout;
