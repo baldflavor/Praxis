@@ -15,11 +15,10 @@ using Praxis.LiteDb;
 public class LiteDb {
 	// Static reference to a mapper used during connection to a LiteDatabase
 	private static BsonMapper _bMapper =
-		Option.GetBsonMapperNoTrimWhitespaceEnumAsInteger()
 		// Comment / uncomment to see the effect this has on dates
-		.UseCustomDateTimeDateTimeOffsetMapping()
-		;
-
+		FactoryOption.RegisterCustomDateTimeDateTimeOffsetMapping(
+			new BsonMapper { EnumAsInteger = true, TrimWhitespace = false }
+		);
 
 	[TestMethod]
 	public void SerializeDeserializeDates() {
@@ -58,7 +57,7 @@ public class LiteDb {
 
 			lr.Database.Checkpoint();
 
-			DateTime filter = 
+			DateTime filter =
 				DateTime.MinValue
 				//entities[1].CreatedOn
 				;
@@ -83,7 +82,7 @@ public class LiteDb {
 		};
 
 		if (!File.Exists(fileFullName))
-			conString.Collation = Option.InvariantIgnoreCaseCollation;
+			conString.Collation = FactoryOption.InvariantIgnoreCaseCollation;
 
 		LiteRepository lr = new(conString, _bMapper);
 
