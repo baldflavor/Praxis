@@ -64,11 +64,11 @@ public static class Extension {
 	}
 
 	/// <summary>
-	/// Initiates a rebuild on the database by the way of a repository using <see cref="Option.DefaultRebuildOptions"/>
+	/// Initiates a rebuild on the database by the way of a repository using <see cref="FactoryOption.DefaultRebuildOptions"/>
 	/// </summary>
 	/// <remarks>Will cause a backup file to be created</remarks>
 	/// <param name="lr"><see cref="ILiteRepository"/> to use for database instance access</param>
-	public static void RebuildWDefaults(this ILiteRepository lr) => lr.Database.Rebuild(Option.DefaultRebuildOptions);
+	public static void RebuildWDefaults(this ILiteRepository lr) => lr.Database.Rebuild(FactoryOption.DefaultRebuildOptions);
 
 	/// <summary>
 	/// Uploads a file
