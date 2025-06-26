@@ -281,7 +281,47 @@ public static partial class Extension {
 		return $"{mask}{arg[maskCount..]}";
 	}
 
+	/// <summary>
+	/// Removes all occurances of a <c>char</c> from a source <c>string</c>
+	/// </summary>
+	/// <param name="source"><c>string</c> used as the source for which to perform replacement</param>
+	/// <param name="toRemove">Target <c>char</c> to remove from <paramref name="source"/></param>
+	/// <returns><c>string</c></returns>
+	public static string RemoveChar(this string source, char toRemove) {
+		return source.Length <= _MAXSTACKSIZE ? _StackAlloc() : _Heap();
 
+		/* ----------------------------------------------------------------------------------------------------------
+		 * Performs replacement using stack allocation */
+		string _StackAlloc() {
+			Span<char> buffer = stackalloc char[source.Length];
+			int count = 0;
+
+			foreach (char c in source) {
+				if (c != toRemove)
+					buffer[count++] = c;
+			}
+
+			return new string(buffer.Slice(0, count));
+		}
+
+		/* ----------------------------------------------------------------------------------------------------------
+		 * Performs replacement using the heap / string.Create */
+		string _Heap() {
+			int newLength = 0;
+			foreach (char c in source) {
+				if (c != toRemove)
+					newLength++;
+			}
+
+			return string.Create(newLength, source, (span, source) => {
+				int i = 0;
+				foreach (char c in source) {
+					if (c != toRemove)
+						span[i++] = c;
+				}
+			});
+		}
+	}
 
 	/// <summary>
 	/// Removes all occurances of matching <c>char</c>s from a source <c>string</c>
@@ -326,54 +366,6 @@ public static partial class Extension {
 			});
 		}
 	}
-
-	/// <summary>
-	/// Removes all occurances of a <c>char</c> from a source <c>string</c>
-	/// </summary>
-	/// <param name="source"><c>string</c> used as the source for which to perform replacement</param>
-	/// <param name="toRemove">Target <c>char</c> to remove from <paramref name="source"/></param>
-	/// <returns><c>string</c></returns>
-	public static string RemoveChar(this string source, char toRemove) {
-		return source.Length <= _MAXSTACKSIZE ? _StackAlloc() : _Heap();
-
-		/* ----------------------------------------------------------------------------------------------------------
-		 * Performs replacement using stack allocation */
-		string _StackAlloc() {
-			Span<char> buffer = stackalloc char[source.Length];
-			int count = 0;
-
-			foreach (char c in source) {
-				if (c != toRemove)
-					buffer[count++] = c;
-			}
-
-			return new string(buffer.Slice(0, count));
-		}
-
-		/* ----------------------------------------------------------------------------------------------------------
-		 * Performs replacement using the heap / string.Create */
-		string _Heap() {
-			int newLength = 0;
-			foreach (char c in source) {
-				if (c != toRemove)
-					newLength++;
-			}
-
-			return string.Create(newLength, source, (span, source) => {
-				int i = 0;
-				foreach (char c in source) {
-					if (c != toRemove)
-						span[i++] = c;
-				}
-			});
-		}
-	}
-
-
-
-
-
-
 
 	/// <summary>
 	/// Returns whether one string starts with another using <see cref="StringComparison.OrdinalIgnoreCase"/>
