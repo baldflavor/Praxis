@@ -25,7 +25,7 @@ public class LogBaseDI<T> {
 	/// </remarks>
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
 	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
-	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
+	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services (but can be passed when necessary).</param>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		AddProperties(data, _logger)
@@ -43,7 +43,7 @@ public class LogBaseDI<T> {
 	/// </remarks>
 	/// <param name="message">Message to be logged</param>
 	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
-	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
+	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services (but can be passed when necessary).</param>
 	/// <exception cref="ArgumentException">Thrown if <paramref name="message"/> does not have a cogent value</exception>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedInfo(string)"/></exception>
 	public void Info(string message, object? data = null, [CallerMemberName] string callerMemberName = "") {
@@ -65,7 +65,7 @@ public class LogBaseDI<T> {
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
 	/// <param name="message">Alternative messaging to log alongside <paramref name="exception"/></param>
 	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
-	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services</param>
+	/// <param name="callerMemberName">Captures the name of the method where this method was called. Filled in by the caller defaultly using compiler services (but can be passed when necessary).</param>
 	/// <exception cref="ArgumentException">Thrown if both <paramref name="exception"/> and <paramref name="message"/> are null</exception>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedWarn(Exception?, string?)"/></exception>
 	public void Warn(Exception? exception = null, string? message = null, object? data = null, [CallerMemberName] string callerMemberName = "") {
