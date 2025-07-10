@@ -66,7 +66,7 @@ public partial class PropertyGridder : Form {
 			if (selObj == null)
 				return;
 
-			StringBuilder sb = new StringBuilder(DIVLINE);
+			var sb = new StringBuilder(DIVLINE);
 			sb.AppendLine();
 			sb.AppendLine(((Control)selObj).Name);
 			sb.AppendLine(DIVLINE);
@@ -75,7 +75,7 @@ public partial class PropertyGridder : Form {
 					_GetProps(selObj)
 					.Where(p => _ogProperties[p.Key] != p.Value)
 					.OrderBy(p => p.Key)
-					.Select(p => $"{p.Key}›{p.Value}");
+					.Select(p => $"{p.Key}{Const.RIGHTARROWHEAD}{p.Value}");
 
 			foreach (var chp in changedProps)
 				sb.AppendLine(chp);
@@ -105,10 +105,8 @@ public partial class PropertyGridder : Form {
 		controlsComboBox.SetItems(
 				Enumerable.Repeat(_refreshItem, 1)
 				.Concat([ComboBoxLabeledControl.From(_source)])
-				.Concat(
-						_source.ControlsRecursive<Control>()
-						.Select(c => ComboBoxLabeledControl.From(c))
-						.OrderBy(c => c.Name)),
+				.Concat(_source.ControlsRecursive<Control>().Select(c => ComboBoxLabeledControl.From(c)))
+				.OrderBy(c => c.Name),
 				true);
 	}
 
@@ -119,9 +117,30 @@ public partial class PropertyGridder : Form {
 	/// <param name="Control">The control in question</param>
 	private record class ComboBoxLabeledControl(string Name, Control Control) {
 		public static ComboBoxLabeledControl From(Control control) {
-			return new ComboBoxLabeledControl(
-					string.IsNullOrWhiteSpace(control.Name) ? control.GetType().Name : control.Name,
-					control);
+			StringBuilder sb = new();
+			_ParentNameRecursive(control, sb);
+			_AppendName(control, sb);
+
+			return new ComboBoxLabeledControl(sb.ToString(), control);
+
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Appends the name of the control or it's type to a StringBuilder */
+			static void _AppendName(Control arg, StringBuilder sb) {
+				if (string.IsNullOrWhiteSpace(arg.Name))
+					sb.Append(arg.GetType().Name);
+				else
+					sb.Append(arg.Name);
+			}
+
+			/* ----------------------------------------------------------------------------------------------------------
+			 * Retrieves the recursive parent of the control and adds the name of each to a StringBuilder */
+			static void _ParentNameRecursive(Control arg, StringBuilder sb) {
+				if (arg.Parent is not null) {
+					_ParentNameRecursive(arg.Parent, sb);
+					_AppendName(arg.Parent, sb);
+					sb.Append('.');
+				}
+			}
 		}
 	}
 }

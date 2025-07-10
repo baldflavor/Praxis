@@ -6,32 +6,45 @@ namespace Praxis;
 public static partial class Extension {
 
 	/// <summary>
-	/// Formatting string for fixed digits using 12 hour format with AM/PM designation, does not include seconds
+	/// Formatting string for fixed digits using 12 hour format with AM/PM designation, does not include seconds.
 	/// </summary>
 	private const string _FIXEDDIGIT12HOURNOSECONDSFORMAT = "yyyy/MM/dd hh:mm tt";
 
+	/// <summary>
+	/// Formatting string for fixed digits using 12 hour format with AM/PM designation, includes seconds.
+	/// </summary>
+	private const string _FIXEDDIGIT12HOURSECONDSFORMAT = "yyyy/MM/dd hh:mm:ss tt";
+
 
 	/// <summary>
-	/// Gets a string representation using the format in <see cref="_FIXEDDIGIT12HOURNOSECONDSFORMAT"/>
+	/// Gets a string representation using a constant, custom format.
 	/// </summary>
 	/// <remarks>
+	/// Utilizes:
+	/// <para><see cref="_FIXEDDIGIT12HOURSECONDSFORMAT"/>, <see cref="_FIXEDDIGIT12HOURNOSECONDSFORMAT"/></para>
 	/// Example:
-	/// <c>2025/04/03 08:01 AM</c>
+	/// <para><c>2025/04/03 08:01 AM</c></para>
+	/// <para><c>2025/04/03 08:01:58 AM</c></para>
 	/// </remarks>
-	/// <param name="arg"><see cref="DateTime"/></param>
-	/// <returns><see cref="string"/></returns>
-	public static string ToFixedDigit12HourNoSeconds(this DateTime arg) => arg.ToString(_FIXEDDIGIT12HOURNOSECONDSFORMAT);
+	/// <param name="arg">Value to format</param>
+	/// <param name="includeSeconds">Indicates whether or not to include seconds in the result string.</param>
+	/// <returns><c>string</c></returns>
+	public static string ToFixedDigit12Hour(this DateTime arg, bool includeSeconds) => arg.ToString(includeSeconds ? _FIXEDDIGIT12HOURSECONDSFORMAT : _FIXEDDIGIT12HOURNOSECONDSFORMAT);
 
 	/// <summary>
-	/// Gets a string representation using the format in <see cref="_FIXEDDIGIT12HOURNOSECONDSFORMAT"/>
+	/// Gets a string representation using a constant, custom format.
 	/// </summary>
 	/// <remarks>
+	/// Utilizes:
+	/// <para><see cref="_FIXEDDIGIT12HOURSECONDSFORMAT"/>, <see cref="_FIXEDDIGIT12HOURNOSECONDSFORMAT"/></para>
 	/// Example:
-	/// <c>2025/04/03 08:01 AM</c>
+	/// <para><c>2025/04/03 08:01 AM</c></para>
+	/// <para><c>2025/04/03 08:01:58 AM</c></para>
 	/// </remarks>
-	/// <param name="arg"><see cref="DateTime"/></param>
-	/// <returns><see cref="string"/></returns>
-	public static string ToFixedDigit12HourNoSeconds(this DateTimeOffset arg) => arg.ToString(_FIXEDDIGIT12HOURNOSECONDSFORMAT);
+	/// <param name="arg">Value to format</param>
+	/// <param name="includeSeconds">Indicates whether or not to include seconds in the result string.</param>
+	/// <returns><c>string</c></returns>
+	public static string ToFixedDigit12Hour(this DateTimeOffset arg, bool includeSeconds) => arg.ToString(includeSeconds ? _FIXEDDIGIT12HOURSECONDSFORMAT : _FIXEDDIGIT12HOURNOSECONDSFORMAT);
 
 	/// <summary>
 	/// Gets the round-trip (ISO 8601) compliant string representation of <paramref name="arg"/>
