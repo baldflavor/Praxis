@@ -9,7 +9,7 @@ public static partial class Extension {
 	/// Adds a panel sized to the client size of its owner and an inner label that displays a text message
 	/// </summary>
 	/// <remarks>
-	/// Performs layout on <paramref name="owner"/> after controls are added
+	/// Invokes <c>Refresh()</c> on <paramref name="owner"/> after controls are added
 	/// </remarks>
 	/// <param name="owner"><see cref="Control"/> to add the panel to and for setting size and location</param>
 	/// <param name="text">Set on the inner label as a message to a user</param>
@@ -62,7 +62,7 @@ public static partial class Extension {
 		borderPanel.Visible = true;
 		borderPanel.BringToFront();
 
-		owner.PerformLayout();
+		owner.Refresh();
 
 		return borderPanel;
 	}
@@ -93,10 +93,10 @@ public static partial class Extension {
 		string text = label.Text;
 
 		while (true) {
-			using Font tempFont = new Font(fontFam, startingFontSize);
+			using var tempFont = new Font(fontFam, startingFontSize);
 
 			Size textSize = TextRenderer.MeasureText(text, tempFont, clientSize, TextFormatFlags.WordBreak);
-			if ((textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height) || startingFontSize == 1f) {
+			if (textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height || startingFontSize == 1f) {
 				label.Font = tempFont;
 				return label;
 			}
@@ -140,7 +140,7 @@ public static partial class Extension {
 	/// <param name="action">An Action to be performed when the handler fires</param>
 	public static void HandleEnterAction(this Control control, Action action) {
 		void kd(object? s, KeyEventArgs e) {
-			bool suppress = (e.KeyCode is Keys.Enter or Keys.Return);
+			bool suppress = e.KeyCode is Keys.Enter or Keys.Return;
 			e.SuppressKeyPress = suppress;
 			if (suppress)
 				action();
@@ -242,7 +242,7 @@ public static partial class Extension {
 			arg.Owner = otherForm;
 
 		arg.StartPosition = FormStartPosition.Manual;
-		arg.Location = new Point(otherForm.Left + (arg.Width / 4), otherForm.Top + (arg.Height / 4));
+		arg.Location = new Point(otherForm.Left + arg.Width / 4, otherForm.Top + arg.Height / 4);
 
 		return arg;
 	}
