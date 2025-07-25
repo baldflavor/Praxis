@@ -2,7 +2,7 @@
 	<!-- Individual project file settings can override this; also, you can include a similar (dummy) file as in the Test project -->
 	<PropertyGroup>
 
-		<AssemblyVersion>1.4.4</AssemblyVersion>
+		<AssemblyVersion>1.4.5</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<Copyright>2024 Bald Flavor</Copyright>
