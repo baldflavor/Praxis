@@ -74,16 +74,18 @@ public static class NLogConfiguration {
 	/// <param name="layout">The layout to be used for formatting log entries</param>
 	/// <param name="archiveAboveSize">Size in bytes above which log files will be automatically archived.</param>
 	/// <param name="maxArchiveDays">Maximum age of archive files in days to be kept.</param>
+	/// <param name="maxArchiveFiles">Maximum number of archive files to retain. <c>-1</c> denotes that this feature is disabled.</param>
 	/// <param name="name">Name of the target.</param>
 	/// <returns><see cref="AtomicFileTarget"/></returns>
-	public static AtomicFileTarget GetTargetAtomicFile(string fileFullName, Layout layout, long archiveAboveSize = 30000000, int maxArchiveDays = 188, string name = "") {
+	public static AtomicFileTarget GetTargetAtomicFile(string fileFullName, Layout layout, long archiveAboveSize = 10000000, int maxArchiveDays = 188, int maxArchiveFiles = -1, string name = "") {
 		return new AtomicFileTarget {
 			ArchiveAboveSize = archiveAboveSize,
 			ArchiveSuffixFormat = "_{0:000}",
 			FileName = fileFullName.Replace('\\', '/'),
 			Layout = layout,
 			Name = name,
-			MaxArchiveDays = maxArchiveDays
+			MaxArchiveDays = maxArchiveDays,
+			MaxArchiveFiles = maxArchiveFiles
 		};
 	}
 
