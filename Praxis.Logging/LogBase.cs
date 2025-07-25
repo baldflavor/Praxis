@@ -18,7 +18,7 @@ public class LogBase(Type type) {
 	/// <remarks>
 	/// This instance should be used for internal logging operations as it may already have properties set
 	/// </remarks>
-	private readonly Logger _logger = LogManager.GetLogger(type.FullName);
+	private readonly Logger _logger = LogManager.GetLogger(type.FullName ?? throw new Exception("The type specified in the class constructor has a FullName that is null and thus cannot be used to obtain a log instance."));
 
 	/// <summary>
 	/// Used for capturing an exception and writing it out to appropriate storage. Calls <see cref="OnLoggedError(Exception)"/> post entry.
@@ -34,8 +34,8 @@ public class LogBase(Type type) {
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedError(Exception)"/></exception>
 	public void Error(Exception exception, object? data = null, [CallerMemberName] string callerMemberName = "") {
 		AddProperties(data, _logger)
-						.WithProperty(Constant.CALLER, callerMemberName)
-						.Error(exception);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Error(exception);
 
 		OnLoggedError(exception);
 	}
@@ -57,8 +57,8 @@ public class LogBase(Type type) {
 		ArgumentException.ThrowIfNullOrWhiteSpace(message);
 
 		AddProperties(data, _logger)
-						.WithProperty(Constant.CALLER, callerMemberName)
-						.Info(message);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Info(message);
 
 		OnLoggedInfo(message);
 	}
@@ -79,12 +79,12 @@ public class LogBase(Type type) {
 	/// <exception cref="ArgumentException">Thrown if both <paramref name="exception"/> and <paramref name="message"/> are null</exception>
 	/// <exception cref="Exception">Thrown if the logging operation could not be completed, or if one is thrown by code in <see cref="OnLoggedWarn(Exception?, string?)"/></exception>
 	public void Warn(Exception? exception = null, string? message = null, object? data = null, [CallerMemberName] string callerMemberName = "") {
-		if (exception == default && string.IsNullOrWhiteSpace(message))
+		if (exception is null && string.IsNullOrWhiteSpace(message))
 			throw new ArgumentException("Must have either an exception or message to log");
 
 		AddProperties(data, _logger)
-						.WithProperty(Constant.CALLER, callerMemberName)
-						.Warn(exception, message);
+			.WithProperty(Constant.CALLER, callerMemberName)
+			.Warn(exception, message!);
 
 		OnLoggedWarn(exception, message);
 	}
@@ -107,7 +107,7 @@ public class LogBase(Type type) {
 	protected virtual Logger AddProperties(object? data, Logger logger) {
 		if (data == null)
 			return logger;
-		else if (data is IEnumerable<KeyValuePair<string, object>> dDict)
+		else if (data is IEnumerable<KeyValuePair<string, object?>> dDict)
 			return logger.WithProperties(dDict);
 		else
 			return logger.WithProperty(Constant.DATA, data);

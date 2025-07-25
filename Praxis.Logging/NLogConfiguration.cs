@@ -2,8 +2,10 @@ namespace Praxis.Logging;
 
 using System.Reflection;
 using NLog;
+using NLog.Config;
 using NLog.Layouts;
 using NLog.Targets;
+using NLog.Targets.Wrappers;
 
 /// <summary>
 /// Class used for configuring NLog for layouts and outputs.
@@ -30,16 +32,13 @@ public static class NLogConfiguration {
 	static NLogConfiguration() {
 		NLog.Time.TimeSource.Current = new NLog.Time.FastUtcTimeSource(); // Fast time source with UTC stamp updated every 15ms
 
-		LogManager.Setup().SetupSerialization((s) =>
-		{
-			s.RegisterObjectTransformation<Assembly>(e =>
-			{
+		LogManager.Setup().SetupSerialization((s) => {
+			s.RegisterObjectTransformation<Assembly>(e => {
 				AssemblyName assemblyName = e.GetName();
 				return new { assemblyName.FullName, assemblyName.Version };
 			});
 
-			s.RegisterObjectTransformation<FileSystemInfo>(e =>
-			{
+			s.RegisterObjectTransformation<FileSystemInfo>(e => {
 				FileInfo? fi = e as FileInfo;
 				return new {
 					e.CreationTimeUtc,
@@ -51,74 +50,40 @@ public static class NLogConfiguration {
 				};
 			});
 
-			s.RegisterObjectTransformation<Type>(e => new
-			{
+			s.RegisterObjectTransformation<Type>(e => new {
 				AssemblyFullName = e.Assembly.FullName,
 				TypeFullName = e.FullName
 			});
 		});
 	}
 
-
 	/// <summary>
-	/// Configures NLog for Json formatted file output
+	/// Gets an (atomic) file target configured for writing out log files to disk.
 	/// </summary>
-	/// <param name="directoryName">The directory where NLog should write logs</param>
-	/// <param name="maxArchiveFiles">Maximum number of archive files to be kept before they are deleted. Files are archived according to <see cref="FileArchivePeriod.Day"/></param>
-	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
-	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
-	public static void ConfigureForJsonFileOutput(string directoryName, int maxArchiveFiles = 183, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		_SetLogManagerConfiguration(_GetFileTarget(directoryName, _GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local), maxArchiveFiles));
-	}
-
-	/// <summary>
-	/// Configures NLog for Json formatted file and memory output
-	/// </summary>
-	/// <param name="directoryName">The directory where NLog should write logs</param>
-	/// <param name="maxArchiveFiles">Maximum number of archive files to be kept before they are deleted. Files are archived according to <see cref="FileArchivePeriod.Day"/></param>
-	/// <param name="maxLogCount">Maximum number of logs to keep in memory</param>
-	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
-	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
-	/// <returns><see cref="MemoryTarget"/></returns>
-	public static MemoryTarget ConfigureForJsonFileOutputAndMemoryTarget(string directoryName, int maxArchiveFiles = 183, int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		var layout = _GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local);
-		var memoryTarget = _GetMemoryTarget(layout, maxLogCount);
-		_SetLogManagerConfiguration(memoryTarget, _GetFileTarget(directoryName, layout, maxArchiveFiles));
-		return memoryTarget;
-	}
-
-	/// <summary>
-	/// Configures NLog for Json formatted memory output
-	/// </summary>
-	/// <param name="maxLogCount">Maximum number of logs to keep in memory</param>
-	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
-	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <see langword="null"/> then <see cref="TimeZoneInfo.Local"/> will be used</param>
-	/// <returns><see cref="MemoryTarget"/></returns>
-	public static MemoryTarget ConfigureForJsonMemoryTarget(int maxLogCount = 10_000, int recursionLimit = 5, TimeZoneInfo? tzi = null) {
-		var target = _GetMemoryTarget(_GetJsonLayout(recursionLimit, tzi ?? TimeZoneInfo.Local), maxLogCount);
-		_SetLogManagerConfiguration(target);
-		return target;
-	}
-
-	/// <summary>
-	/// Gets a file target configured for writing out log files to disk
-	/// </summary>
-	/// <param name="directoryName">The directory where NLog should write logs</param>
+	/// <remarks>
+	/// <para><b>ARCHIVE NOTE:</b></para>
+	/// Log file names should be "static" and placed in the <b>SAME</b> directory: dynamic replacement tokens in file names will cause issues with archiving. Additionally, log files
+	/// are now created / archived where the highest (suffixed) file is the <i>NEWEST</i>.
+	/// <para>Reference for additional options:</para>
+	/// <para><see href="https://github.com/NLog/NLog/wiki/File-target"/></para>
+	/// You may wish to wrap this in an <see cref="AsyncTargetWrapper"/> for higher performance:
+	/// <para><see href="https://github.com/NLog/NLog/wiki/AsyncWrapper-target"/></para>
+	/// <para>(Most of the default properties are good to go, just pay attention to <see cref="AsyncTargetWrapperOverflowAction"/>.)</para>
+	/// </remarks>
+	/// <param name="fileFullName">The absolute file name where NLog should write logs</param>
 	/// <param name="layout">The layout to be used for formatting log entries</param>
-	/// <param name="maxArchiveFiles">Maximum number of archive files to be kept before they are deleted. Files are archived according to <see cref="FileArchivePeriod.Day"/></param>
-	/// <returns><see cref="FileTarget"/></returns>
-	private static FileTarget _GetFileTarget(string directoryName, Layout layout, int maxArchiveFiles) {
-		string nlogForwardSlashPath = directoryName.Replace('\\', '/');
-		nlogForwardSlashPath = nlogForwardSlashPath[..(nlogForwardSlashPath.EndsWith('/') ? nlogForwardSlashPath.Length - 1 : nlogForwardSlashPath.Length)];
-
-		return new FileTarget("jsonFileTarget") {
-			ArchiveEvery = FileArchivePeriod.Day,
-			ArchiveFileName = $"{nlogForwardSlashPath}/archive/${{shortdate}}_{{###}}.zip",
-			EnableArchiveFileCompression = true,
-			FileName = $"{nlogForwardSlashPath}/${{shortdate}}.json",
-			FileNameKind = FilePathKind.Absolute,
-			MaxArchiveFiles = maxArchiveFiles,
-			Layout = layout
+	/// <param name="archiveAboveSize">Size in bytes above which log files will be automatically archived.</param>
+	/// <param name="maxArchiveDays">Maximum age of archive files in days to be kept.</param>
+	/// <param name="name">Name of the target.</param>
+	/// <returns><see cref="AtomicFileTarget"/></returns>
+	public static AtomicFileTarget GetTargetAtomicFile(string fileFullName, Layout layout, long archiveAboveSize = 30000000, int maxArchiveDays = 188, string name = "") {
+		return new AtomicFileTarget {
+			ArchiveAboveSize = archiveAboveSize,
+			ArchiveSuffixFormat = "_{0:000}",
+			FileName = fileFullName.Replace('\\', '/'),
+			Layout = layout,
+			Name = name,
+			MaxArchiveDays = maxArchiveDays
 		};
 	}
 
@@ -126,20 +91,19 @@ public static class NLogConfiguration {
 	/// Gets a layout configured for json formatting
 	/// </summary>
 	/// <param name="recursionLimit">Maximum number of properties to use for recursion when writing out objects as Json</param>
-	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary.</param>
+	/// <param name="tzi"><see cref="TimeZoneInfo"/> used for log entries for converting the time stamp to local time when necessary. If <c>null</c> then <see cref="TimeZoneInfo.Local"/> will be used.</param>
 	/// <returns><see cref="JsonLayout"/></returns>
-	private static JsonLayout _GetJsonLayout(int recursionLimit, TimeZoneInfo tzi) {
+	public static JsonLayout GetLayoutJson(int recursionLimit = 5, TimeZoneInfo? tzi = null) {
 		var jsLayout = new JsonLayout {
 			ExcludeEmptyProperties = true,
 			MaxRecursionLimit = recursionLimit,
-			RenderEmptyObject = false,
-			SuppressSpaces = true
+			RenderEmptyObject = false
 		};
 
 		jsLayout.Attributes.Add(new JsonAttribute("ID", Layout.FromString($"{DateTime.UtcNow.ToOADate()}_${{sequenceid}}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Level", Layout.FromString("${level:format=FirstCharacter}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Utc", Layout.FromString("${longdate}")));
-		jsLayout.Attributes.Add(new JsonAttribute("Tzi", tzi.Id));
+		jsLayout.Attributes.Add(new JsonAttribute("Tzi", (tzi ?? TimeZoneInfo.Local).Id));
 		jsLayout.Attributes.Add(new JsonAttribute("Logger", Layout.FromString("${logger}")));
 		jsLayout.Attributes.Add(new JsonAttribute("Message", Layout.FromString("${message}")));
 
@@ -161,24 +125,17 @@ public static class NLogConfiguration {
 	}
 
 	/// <summary>
-	/// Gets a memory target configured for storing logs in memory
+	/// Sets the value of <see cref="LogManager.Configuration"/> to a new configuration, configured for <see cref="LogLevel.Debug"/> to <see cref="LogLevel.Fatal"/>
+	/// logging with the passed targets.
 	/// </summary>
-	/// <param name="layout">The layout to be used for formatting log entries</param>
-	/// <param name="maxLogCount">Maximum number of logs to keep in memory</param>
-	/// <returns><see cref="MemoryTarget"/></returns>
-	private static MemoryTarget _GetMemoryTarget(Layout layout, int maxLogCount) {
-		return new MemoryTarget("jsonMemoryTarget") {
-			Layout = layout,
-			MaxLogsCount = maxLogCount
-		};
-	}
+	/// <param name="configPostSet">Delegate that can be used to perform any other operation on the <see cref="LoggingConfiguration"/> after it has been set to <c>LogManager.Configuration</c>.</param>
+	/// <param name="targets">Targets to add to the configuration.</param>
+	/// <exception cref="ArgumentException"></exception>
+	public static void SetLogManagerConfiguration(params Target[] targets) {
+		if (targets is null || targets.Length < 1)
+			throw new ArgumentException("Must have at least one target supplied");
 
-	/// <summary>
-	/// Sets the <see cref="LogManager.Configuration"/> to a new configuration with the passed targets added with rules for log levels
-	/// </summary>
-	/// <param name="targets">Targets to add to a new configuration to be set</param>
-	private static void _SetLogManagerConfiguration(params Target[] targets) {
-		var config = new NLog.Config.LoggingConfiguration();
+		var config = new LoggingConfiguration();
 
 		foreach (var target in targets)
 			config.AddRule(LogLevel.Debug, LogLevel.Fatal, target);
