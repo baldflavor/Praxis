@@ -70,7 +70,7 @@ public static class NLogConfiguration {
 	/// <para><see href="https://github.com/NLog/NLog/wiki/AsyncWrapper-target"/></para>
 	/// <para>(Most of the default properties are good to go, just pay attention to <see cref="AsyncTargetWrapperOverflowAction"/>.)</para>
 	/// </remarks>
-	/// <param name="fileFullName">The absolute file name where NLog should write logs</param>
+	/// <param name="fileFullName">The absolute file name where NLog should write logs. This same file name / location serves also to be the location of archived logs, with a suffix where the highest numbered file is the newest/most current.</param>
 	/// <param name="layout">The layout to be used for formatting log entries</param>
 	/// <param name="archiveAboveSize">Size in bytes above which log files will be automatically archived.</param>
 	/// <param name="maxArchiveDays">Maximum age of archive files in days to be kept.</param>
