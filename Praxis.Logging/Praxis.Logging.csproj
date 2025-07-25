@@ -2,8 +2,7 @@
 	<PropertyGroup>
 		<Description>Used to facilitate common logging setup and output</Description>
 	</PropertyGroup>
-
 	<ItemGroup>
-		<PackageReference Include="NLog" Version="5.4.0" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.2" />
 	</ItemGroup>
 </Project>

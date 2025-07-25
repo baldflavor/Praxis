@@ -13,7 +13,7 @@ public static partial class Extension {
 	/// <param name="action">The action to perform</param>
 	public static void BeginInvokeIfRequired(this ISynchronizeInvoke isi, MethodInvoker action) {
 		if (isi.InvokeRequired) {
-			isi.BeginInvoke(action, [isi]);
+			isi.BeginInvoke(action, null);
 		}
 		else {
 			action();
