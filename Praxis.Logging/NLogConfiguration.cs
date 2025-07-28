@@ -77,7 +77,7 @@ public static class NLogConfiguration {
 	/// <param name="maxArchiveFiles">Maximum number of archive files to retain. <c>-1</c> denotes that this feature is disabled.</param>
 	/// <param name="name">Name of the target.</param>
 	/// <returns><see cref="AtomicFileTarget"/></returns>
-	public static AtomicFileTarget GetTargetAtomicFile(string fileFullName, Layout layout, long archiveAboveSize = 10000000, int maxArchiveDays = 188, int maxArchiveFiles = -1, string name = "") {
+	public static AtomicFileTarget GetTargetAtomicFile(string fileFullName, Layout layout, long archiveAboveSize = 5000000, int maxArchiveDays = 188, int maxArchiveFiles = -1, string name = "") {
 		return new AtomicFileTarget {
 			ArchiveAboveSize = archiveAboveSize,
 			ArchiveSuffixFormat = "_{0:000}",
