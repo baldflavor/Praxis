@@ -54,7 +54,7 @@ public partial class NLogViewerForm : Form {
 	private static readonly string[] _skipNames = [_ID, _LEVEL, _TZI];
 
 	/// <summary>
-	/// Creates an instance of the <see cref="NLogViewerForm"/> class
+	/// Creates an instance of the <see cref="MainForm"/> class
 	/// </summary>
 	/// <param name="directory">The directory to watch</param>
 	/// <param name="maxNodeCount">Maximum number of nodes to display in the tree before removing them from the bottom of the list</param>
@@ -121,6 +121,9 @@ public partial class NLogViewerForm : Form {
 				if (firstRun == true) {
 					_expandNewCheckBox.Checked = true;
 					firstRun = false;
+					TreeNode[] orderedNodes = [.. _allEntriesTreeView.Nodes.Cast<TreeNode>().OrderByDescending(t => t.Text)];
+					_allEntriesTreeView.Nodes.Clear();
+					_allEntriesTreeView.Nodes.AddRange(orderedNodes);
 				}
 				else {
 					if (_allEntriesTreeView.SelectedNode == null)
@@ -166,7 +169,7 @@ public partial class NLogViewerForm : Form {
 	/// <summary>
 	/// Creates a string with padding between the name and value
 	/// </summary>
-	/// <param name="name">Name</param>
+	/// <param name="name">FullName</param>
 	/// <param name="value">value</param>
 	/// <returns><see cref="string"/></returns>
 	private static string _PaddedString(string name, string value) => $"{$"{name}: ",-25}{value.Trim()}";
@@ -290,7 +293,7 @@ public partial class NLogViewerForm : Form {
 	/// <param name="sender"></param>
 	/// <param name="e"></param>
 	private void _CopyToClipboard(object? sender, MouseEventArgs e) {
-		TreeView treeView = (TreeView)(sender ?? throw new Exception("Handler must supply the sending treeview"));
+		var treeView = (TreeView)(sender ?? throw new Exception("Handler must supply the sending treeview"));
 
 		TreeNode? topParentClickNode;
 		if (e.Button != MouseButtons.Right || (topParentClickNode = treeView.GetNodeAt(e.Location)?.GetTopParent()) == null)
@@ -308,7 +311,7 @@ public partial class NLogViewerForm : Form {
 	/// Code to handle an exception
 	/// </summary>
 	/// <param name="ex">Exception that was thrown</param>
-	private void _HandleException(Exception ex) => Invoke(() => MessageBox.Show(ex.GetDetail(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error));
+	private void _HandleException(Exception ex) => BeginInvoke(() => MessageBox.Show(ex.GetDetail(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error));
 
 	/// <summary>
 	/// Sets a status to be displayed and shown to the user
