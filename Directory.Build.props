@@ -2,7 +2,7 @@
 	<!-- Individual project file settings can override this; also, you can include a similar (dummy) file as in the Test project -->
 	<PropertyGroup>
 
-		<AssemblyVersion>1.4.6</AssemblyVersion>
+		<AssemblyVersion>$([System.DateTime]::Now.ToString("yy.Mdd.Hmm"))</AssemblyVersion>
 		<Version>$(AssemblyVersion)</Version>
 		<PackageReleaseNotes></PackageReleaseNotes>
 		<Copyright>2024 Bald Flavor</Copyright>
@@ -11,16 +11,13 @@
 		<PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
 		<PackageReadmeFile>ReadMe.md</PackageReadmeFile>
 
-		<BaseOutputPath>..\PraxisBin</BaseOutputPath>
-		<UseCommonOutputDirectory>true</UseCommonOutputDirectory>
-		<AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
-		<AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-		<AppendPlatformToOutputPath>false</AppendPlatformToOutputPath>
-
 		<TargetFramework>net8.0</TargetFramework>
+		<PlatformTarget>x64</PlatformTarget>
 		<Platforms>x64</Platforms>
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
+
+		<UseArtifactsOutput>true</UseArtifactsOutput>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 	</PropertyGroup>
 

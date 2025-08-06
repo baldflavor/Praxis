@@ -1,0 +1,45 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+  </Configurations>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".filenesting.json" />
+    <File Path=".gitignore" />
+    <File Path=".runsettings" />
+    <File Path="Directory.Build.props" />
+    <File Path="License.md" />
+    <File Path="praxis.js" />
+    <File Path="praxisWS.js" />
+  </Folder>
+  <Project Path="Praxis.Cache/Praxis.Cache.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Data.Cosmos/Praxis.Data.Cosmos.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Data/Praxis.Data.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Knowledge/Praxis.Knowledge.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.LiteDb/Praxis.LiteDb.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Logging/Praxis.Logging.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Test/Praxis.Test.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.Web/Praxis.Web.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis.WinForm/Praxis.WinForm.csproj">
+    <Platform Project="x64" />
+  </Project>
+  <Project Path="Praxis/Praxis.csproj">
+    <Platform Project="x64" />
+  </Project>
+</Solution>
