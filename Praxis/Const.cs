@@ -49,6 +49,18 @@ public static class Const {
 	public const int FALSEINT = 0;
 
 	/// <summary>
+	/// Typographical spacing figure equal to the size of a digit for numbers (with slight fluctiation depending on font).
+	/// </summary>
+	/// <remarks>
+	/// <para>A figure space or numeric space is a typographic unit equal to the size of a single numerical digit. Its size can fluctuate somewhat depending on which font is being used.
+	/// This is the preferred space to use in numbers. It has the same width as a digit and keeps the number together for the purpose of line breaking.</para>
+	/// C#: <c>(char)8199</c>
+	/// <para>Unic Number: <c>U+2077</c></para>
+	/// <para>Html Code: <c>&amp;numsp;</c></para>
+	/// </remarks>
+	public const char FIGURESPACE = '\u2007';
+
+	/// <summary>
 	/// Number of milliseconds in one minute
 	/// </summary>
 	public const int MILLISECONDSONEMINUTE = 60_000;

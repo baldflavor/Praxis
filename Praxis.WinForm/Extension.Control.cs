@@ -176,20 +176,26 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Offsets a control relative to another control with optional extra spacing
+	/// Offsets a control relative to another control utilizing margin values.
 	/// </summary>
-	/// <typeparam name="T">Type of control</typeparam>
-	/// <param name="target">Target control to offset</param>
-	/// <param name="relativeTo">The control to offset <paramref name="target"/> to</param>
-	/// <param name="isHorizontal">Indicated whether to offset horizontally or vertically</param>
-	/// <param name="pixels">Number of pixels to add to the offset (i.e. extra spacing)</param>
+	/// <remarks>
+	/// Horizontal and vertical margins are added together for a total spacing depending on direction.
+	/// </remarks>
+	/// <typeparam name="T">Type of control.</typeparam>
+	/// <param name="target">Target control to offset.</param>
+	/// <param name="relativeTo">The control to offset <paramref name="target"/> to.</param>
+	/// <param name="direction">The direction to offset <paramref name="target"/> in relation to <paramref name="relativeTo"/>.</param>
+	/// <param name="clampRelativeEdge">Whether to set the <c>X</c> or <c>Y</c> value to the relative control's value of the opposite plane axis specified in <paramref name="direction"/>.</param>
 	/// <returns><paramref name="target"/></returns>
-	public static T OffsetRelative<T>(this T target, Control relativeTo, bool isHorizontal, int pixels = 0) where T : Control {
-		if (isHorizontal)
-			target.Location = new Point(relativeTo.Location.X + relativeTo.Width + pixels, relativeTo.Location.Y);
-		else
-			target.Location = new Point(relativeTo.Location.X, relativeTo.Location.Y + relativeTo.Height + pixels);
+	public static T OffsetFromMargin<T>(this T target, Control relativeTo, FlowDirection direction, bool clampRelativeEdge = true) where T : Control {
+		target.Location = direction switch {
+			FlowDirection.TopDown => new Point(clampRelativeEdge ? relativeTo.Location.X : target.Location.X, relativeTo.Location.Y + relativeTo.Height + relativeTo.Margin.Bottom + target.Margin.Top),
+			FlowDirection.BottomUp => new Point(clampRelativeEdge ? relativeTo.Location.X : target.Location.X, relativeTo.Location.Y - relativeTo.Margin.Top - target.Height - target.Margin.Bottom),
 
+			FlowDirection.LeftToRight => new Point(relativeTo.Location.X + relativeTo.Width + relativeTo.Margin.Right + target.Margin.Left, clampRelativeEdge ? relativeTo.Location.Y : target.Location.Y),
+			FlowDirection.RightToLeft => new Point(relativeTo.Location.X - relativeTo.Margin.Left - target.Width - target.Margin.Right, clampRelativeEdge ? relativeTo.Location.Y : target.Location.Y),
+			_ => throw new Exception("Unknown flow direction"),
+		};
 		return target;
 	}
 
@@ -225,8 +231,8 @@ public static partial class Extension {
 	/// <param name="arg">Control to alter</param>
 	/// <returns><paramref name="arg"/></returns>
 	public static T SetNoMarginPadding<T>(this T arg) where T : Control {
-		arg.Margin = new Padding(0);
-		arg.Padding = new Padding(0);
+		arg.Margin = Padding.Empty;
+		arg.Padding = Padding.Empty;
 		return arg;
 	}
 
