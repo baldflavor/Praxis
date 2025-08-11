@@ -78,13 +78,10 @@ public static partial class Extension {
 	/// <param name="source">The source object to clone from.</param>
 	/// <returns>An object of type TData with set values that match from source.</returns>
 	/// <exception cref="ArgumentException">Source is null.</exception>
-	public static T CloneToType<T>(this object source) {
-		Type sourceType = source.GetType();
-		Type destinationType = typeof(T);
-
+	public static T CloneToType<T>(this object source) where T : notnull {
 		T destination = Activator.CreateInstance<T>();
 
-		_PushPropertiesTo(source, sourceType, destination, destinationType);
+		source.PushPropertiesTo(destination);
 
 		return destination;
 	}
@@ -120,20 +117,45 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Pushes matching property values by name and type from the source object to the destination object.
+	/// Pushes matching property values from a source object and type to a destination object and type. Properties are matched in a case insensitive fashion.
 	/// </summary>
 	/// <b>BE AWARE</b> that this may set <c>null</c> values to properties on the destination (such as the case of <c>string</c>) which are not
 	/// marked as <i>nullable</i> [<c>?</c>].
 	/// </remarks>
 	/// <param name="source">Source object to draw from.</param>
+	/// <param name="sourceType">Source type taken from source.</param>
 	/// <param name="destination">Destination object to push to.</param>
+	/// <param name="destinationType">Destination type taken from destination.</param>
 	/// <param name="skipProperties">Array of property names to skip when pushing values from one object to the other.</param>
 	/// <exception cref="ArgumentException">Source is null or destination is null.</exception>
 	public static void PushPropertiesTo<T, K>(this T source, K destination, params string[] skipProperties) where T : notnull where K : notnull {
-		Type sourceType = source.GetType();
-		Type destinationType = destination.GetType();
+		var sourceType = source.GetType();
+		var destinationType = destination.GetType();
 
-		_PushPropertiesTo(source, sourceType, destination, destinationType, skipProperties);
+		// Binding flags do not work on these calls other than the access modifiers
+		IEnumerable<PropertyInfo> sourceProperties = sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead);
+		IEnumerable<PropertyInfo> destinationProperties = destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite);
+
+		if (skipProperties.Length > 0)
+			destinationProperties = destinationProperties.Where(d => !skipProperties.Contains(d.Name));
+
+		foreach (PropertyInfo? destPi in destinationProperties) {
+			bool destPiTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
+
+			PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
+			if (sourcePi == null)
+				continue;
+
+			bool sourcePiTypeIsNullable = _IsNullableType(sourcePi, out Type sourcePiType);
+
+			if (sourcePiType != destPiType)
+				continue;
+
+			if (sourcePiTypeIsNullable && !destPiTypeIsNullable)
+				destPi.SetValue(destination, sourcePi.GetValue(source) ?? Activator.CreateInstance(sourcePiType));
+			else
+				destPi.SetValue(destination, sourcePi.GetValue(source));
+		}
 	}
 
 	/// <summary>
@@ -370,45 +392,6 @@ public static partial class Extension {
 			actualType = argPiType;
 
 		return argPiTypeIsNullable;
-	}
-
-	/// <summary>
-	/// Pushes matching property values from a source object and type to a destination object and type. Properties are matched in a case insensitive fashion.
-	/// </summary>
-	/// <b>BE AWARE</b> that this may set <c>null</c> values to properties on the destination (such as the case of <c>string</c>) which are not
-	/// marked as <i>nullable</i> [<c>?</c>].
-	/// </remarks>
-	/// <param name="source">Source object to draw from.</param>
-	/// <param name="sourceType">Source type taken from source.</param>
-	/// <param name="destination">Destination object to push to.</param>
-	/// <param name="destinationType">Destination type taken from destination.</param>
-	/// <param name="skipProperties">Array of property names to skip when pushing values from one object to the other.</param>
-	/// <exception cref="ArgumentException">Source is null or destination is null.</exception>
-	private static void _PushPropertiesTo<T, K>(this T source, Type sourceType, K destination, Type destinationType, params string[] skipProperties) {
-		// Binding flags do not work on these calls other than the access modifiers
-		IEnumerable<PropertyInfo> sourceProperties = sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead);
-		IEnumerable<PropertyInfo> destinationProperties = destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite);
-
-		if (skipProperties.Length > 0)
-			destinationProperties = destinationProperties.Where(d => !skipProperties.Contains(d.Name));
-
-		foreach (PropertyInfo? destPi in destinationProperties) {
-			bool destPiTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
-
-			PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
-			if (sourcePi == null)
-				continue;
-
-			bool sourcePiTypeIsNullable = _IsNullableType(sourcePi, out Type sourcePiType);
-
-			if (sourcePiType != destPiType)
-				continue;
-
-			if (sourcePiTypeIsNullable && !destPiTypeIsNullable)
-				destPi.SetValue(destination, sourcePi.GetValue(source) ?? Activator.CreateInstance(sourcePiType));
-			else
-				destPi.SetValue(destination, sourcePi.GetValue(source));
-		}
 	}
 
 	/// <summary>
