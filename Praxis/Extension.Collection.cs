@@ -24,31 +24,6 @@ public static partial class Extension {
 	public static string ToStringsFormat { get; set; } = "{0}" + Const.RIGHTARROWHEAD + "{1}";
 
 	/// <summary>
-	/// Determines whether two lists are equal by comparing reference equality, then count, then value comparison
-	/// </summary>
-	/// <typeparam name="T">Type of elements contained in each list</typeparam>
-	/// <param name="first">First list</param>
-	/// <param name="second">Second list</param>
-	/// <returns><see langword="true"/> if the lists are equal, otherwise false</returns>
-	public static bool IsEqualTo<T>(this IReadOnlyList<T>? first, IReadOnlyList<T>? second) {
-		if (ReferenceEquals(first, second))
-			return true;
-
-		if (first == null || second == null)
-			return false;
-
-		if (first.Count != second.Count)
-			return false;
-
-		for (int i = 0; i < first.Count; i++) {
-			if (!EqualityComparer<T>.Default.Equals(first[i], second[i]))
-				return false;
-		}
-
-		return true;
-	}
-
-	/// <summary>
 	/// Returns a value that indicates if the passed <paramref name="arg"/> has any elements.
 	/// <para>If the passed argument is null then false is returned</para>
 	/// <para>If the passed argument has a <see cref="ICollection.Count"/> greater than <c>zero</c> true is returned</para>
