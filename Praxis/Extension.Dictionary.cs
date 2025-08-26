@@ -59,7 +59,7 @@ public static partial class Extension {
 	/// <returns>A <typeparamref name="V"/> value</returns>
 	public static async Task<V> GetOrAdd<K, V>(this IDictionary<K, V> arg, K key, Func<Task<V>> generator, string? semSlimKey = default) {
 		SemaphoreSlim? semSlim;
-		if (semSlimKey == null)
+		if (semSlimKey is null)
 			semSlim = null;
 		else
 			semSlim = MasterLock.Instance.Slim(semSlimKey);

@@ -70,7 +70,7 @@ public interface ITabularDisplay {
 			 where dattr?.IsExcluded != true
 			 orderby dattr?.GetOrder() ?? ++idx, name
 			 select
-			 val == null ? null :
+			 val is null ? null :
 			 dtf != null ? ((IFormattable)val).ToString(dateFormat, null) :
 			 fnf != null ? ((IFormattable)val).ToString(floatingNumberFormat, null) :
 			 gf != null ? ((IFormattable)val).ToString(guidFormat, null) :
@@ -112,12 +112,11 @@ public interface ITabularDisplay {
 	public string[] Headers() {
 		int idx = _INITIALIDX;
 		return
-			(from p in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanRead)
+			[.. (from p in GetType().GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(p => p.CanRead)
 			 let dattr = p.GetCustomAttribute<TabularDisplayAttribute>()
 			 let name = dattr?.Label ?? p.Name
 			 where dattr?.IsExcluded != true
 			 orderby dattr?.GetOrder() ?? ++idx, name
-			 select name)
-			.ToArray();
+			 select name)];
 	}
 }

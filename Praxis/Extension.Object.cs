@@ -54,7 +54,7 @@ public static partial class Extension {
 		Type type = arg.GetType();
 
 		T? attrib;
-		if (memberName == null) {
+		if (memberName is null) {
 			if (type.IsEnum)
 				return arg.Attribute<T>(arg.ToString(), inherited);
 			else
@@ -143,7 +143,7 @@ public static partial class Extension {
 			bool destPiTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
 
 			PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
-			if (sourcePi == null)
+			if (sourcePi is null)
 				continue;
 
 			bool sourcePiTypeIsNullable = _IsNullableType(sourcePi, out Type sourcePiType);
@@ -219,7 +219,7 @@ public static partial class Extension {
 	public static bool TryValidate(this object arg, out List<ValidationResult> validationResults, string? propertyName = null) {
 		validationResults = [];
 
-		if (propertyName == null) {
+		if (propertyName is null) {
 			return Validator.TryValidateObject(arg, new ValidationContext(arg), validationResults, true);
 		}
 		else {
@@ -347,7 +347,7 @@ public static partial class Extension {
 		format ??= ToStringRichFormat;
 		delimiter ??= ToStringRichDelimiter;
 
-		if (arg == null)
+		if (arg is null)
 			return Const.NULL;
 
 		Type t = arg.GetType();
@@ -412,7 +412,7 @@ public static partial class Extension {
 		format ??= ToStringPropertiesFormat;
 		delimiter ??= ToStringPropertiesDelimiter;
 
-		if (arg == null)
+		if (arg is null)
 			return Const.NULL;
 
 		if (depth++ > MaxFullPropertyDepth)

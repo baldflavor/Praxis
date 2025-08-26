@@ -25,7 +25,7 @@ public static partial class Extension {
 		}
 		else if (vKind == JsonValueKind.Object) {
 			foreach (KeyValuePair<string, JsonNode?> jObj in node.AsObject()) {
-				if (jObj.Value == null)
+				if (jObj.Value is null)
 					continue;
 
 				if (jObj.Key == name)

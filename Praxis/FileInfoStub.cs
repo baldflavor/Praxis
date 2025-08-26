@@ -23,7 +23,7 @@ public record class FileInfoStub(DateTime CreationTime, DateTime CreationTimeUtc
 	/// <returns><see cref="FileInfoStub"/></returns>
 	[return: NotNullIfNotNull(nameof(fi))]
 	public static FileInfoStub? From(FileInfo? fi) {
-		if (fi == null)
+		if (fi is null)
 			return default;
 
 		long? length;

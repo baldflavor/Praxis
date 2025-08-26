@@ -49,7 +49,7 @@ public static partial class Extension {
 		List<KeyValuePair<string, string?>> toReturn = [];
 
 		foreach (string? key in arg.AllKeys) {
-			if (key == null)
+			if (key is null)
 				continue;
 
 			toReturn.Add(KeyValuePair.Create(key, arg[key]));
@@ -103,7 +103,7 @@ public static partial class Extension {
 
 		int depth = 0;
 
-		if (arg == null)
+		if (arg is null)
 			return [Const.NULL];
 
 		List<string> toReturn = [];
