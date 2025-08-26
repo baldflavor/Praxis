@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
 	<RunConfiguration>    
-			<ResultsDirectory>.\TestResult</ResultsDirectory>
-			<TargetPlatform>x64</TargetPlatform>    
+			<ResultsDirectory>.\artifacts\TestResult</ResultsDirectory>
+			<TargetPlatform>x64</TargetPlatform>   
+			<TargetFrameworkVersion>net8.0</TargetFrameworkVersion>
 	</RunConfiguration>
 </RunSettings>

@@ -68,7 +68,7 @@ public static class Kvp {
 	/// <param name="arg">Target parameters to use. If null or empty, the method returns a null result</param>
 	/// <returns>A query string; null if no parameters</returns>
 	public static async Task<string?> ToUriQueryString(IEnumerable<KeyValuePair<string, string?>> arg) {
-		if (arg == null || !arg.Any())
+		if (arg is null || !arg.Any())
 			return null;
 
 		using var content = new FormUrlEncodedContent(arg);

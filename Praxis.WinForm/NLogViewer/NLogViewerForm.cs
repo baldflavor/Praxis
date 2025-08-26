@@ -34,6 +34,11 @@ public partial class NLogViewerForm : Form {
 	private const string _LEVEL = "Level";
 
 	/// <summary>
+	/// Constant string for the message property
+	/// </summary>
+	private const string _MESSAGE = "Message";
+
+	/// <summary>
 	/// Constant string for the UTC property
 	/// </summary>
 	private const string _UTC = "Utc";
@@ -119,7 +124,6 @@ public partial class NLogViewerForm : Form {
 			BeginInvoke(_ActualWork);
 			void _ActualWork() {
 				if (firstRun == true) {
-					_expandNewCheckBox.Checked = true;
 					firstRun = false;
 					TreeNode[] orderedNodes = [.. _allEntriesTreeView.Nodes.Cast<TreeNode>().OrderByDescending(t => t.Text)];
 					_allEntriesTreeView.Nodes.Clear();
@@ -183,7 +187,7 @@ public partial class NLogViewerForm : Form {
 	private static TreeNode _TreeNodeFromJson(string json, bool expanded = false) {
 		var jObj = JsonNode.Parse(json)!.AsObject();
 
-		TreeNode newNode = new(_UTCToLocal(jObj)) {
+		TreeNode newNode = new($"{_UTCToLocal(jObj)}    {jObj.FindNodeValues(_MESSAGE).FirstOrDefault()?.ToString().SubstringLeft(140)}") {
 			BackColor = jObj[_LEVEL]!.ToString() switch {
 				_INFORMATION => Color.Empty,
 				_WARNING => Color.Yellow,
@@ -239,7 +243,7 @@ public partial class NLogViewerForm : Form {
 			var dt =
 				TimeZoneInfo.ConvertTimeFromUtc(utcValue, tzi);
 
-			return dt.ToString("s");
+			return dt.ToString("yyyy-MM-ddTHH:mm:ss.fff");
 		}
 	}
 

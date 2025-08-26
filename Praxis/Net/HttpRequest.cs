@@ -36,7 +36,7 @@ public static class HttpRequest {
 			Exception? contentReadException = null;
 			string? content;
 			try {
-				content = arg.Content == null ? null : await arg.Content.ReadAsStringAsync(cTok).ConfigureAwait(false);
+				content = arg.Content is null ? null : await arg.Content.ReadAsStringAsync(cTok).ConfigureAwait(false);
 			}
 			catch (Exception ex) {
 				contentReadException = ex;
@@ -88,7 +88,7 @@ public static class HttpRequest {
 				}
 				else {
 					return
-						daie == null ?
+						daie is null ?
 							new StringContent(JsonSerializer.Serialize(data, Json.Options), Encoding.UTF8, "application/json") :
 							new FormUrlEncodedContent(daie);
 				}

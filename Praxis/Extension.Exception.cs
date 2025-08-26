@@ -4,6 +4,7 @@ using System.Collections;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 /// <summary>
@@ -11,30 +12,33 @@ using System.Text;
 /// </summary>
 public static partial class Extension {
 	/// <summary>
-	/// Adds an entry into this exception's .Data dictionary, utilizing caller information for the key
+	/// Adds an entry into this exception's .Data dictionary, utilizing caller information for the key.
 	/// </summary>
 	/// <remarks>
-	/// <para>Key utilized is: [Excluding everything before the last <c>\</c> in <paramref name="callerFilePath"/> (if present) and before it's last (potential) <c>.</c>]<c>_</c>[<paramref name="callerMemberName"/>]</para>
+	/// <para>Key utilized is: [Excluding everything before the last <c>\</c> in <paramref name="callerFilePath"/> (if present) and before it's last (potential) <c>.</c>]<c>_</c>[<paramref name="callerMemberName"/>]<c>_</c>[<paramref name="callerArgumentExpression"/>].</para>
 	/// <para>If there is an existing entry under this key, then the key will have appended: <c>_</c>[the <b>count of the existing keys <c>+1</c></b>]</para>
 	/// Do <b>NOT</b> pass <paramref name="value"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to be empty. Cast to an object <c>(object)someDynamicInstance</c> if using dynamics.
-	/// <para>As general practice - multiple catch / .AddData blocks in the same method can make debugging more difficult. If doing so, make sure the value added is easily traceable. Wrap primitive values in an anonymous object with some other numeric key as one sort of idea.</para>
+	/// <para>As general practice - multiple catch (or .AddData) blocks in the same method can make debugging more difficult. If doing so, make sure the value added is easily traceable.</para>
 	/// </remarks>
-	/// <param name="ex">The exception to use for data dictionary addition</param>
-	/// <param name="value">The value to set - be wary about overly complicated / non-serializable objects. Use <see cref="ToStringProperties{T}(T, string?, string?, string[])"/> if necessary</param>
-	/// <param name="callerMemberName">Method caller - used for dictionary key. Filled in by the caller defaultly using compiler services</param>
-	/// <param name="callerFilePath">File path of the caller - used for dictionary key. Filled in by the caller defaultly using compiler services</param>
+	/// <param name="ex">Source exception for data dictionary addition.</param>
+	/// <param name="value">The value to set. Be cautious about using literal (i.e. <c>3+4</c>, <c>"Simon"</c>) expressions and <b>prefer variables</b>. Also <b>be wary</b> about overly complicated / non-serializable objects. Use <see cref="ToStringProperties{T}(T, string?, string?, string[])"/> if necessary.</param>
+	/// <param name="callerArgumentExpression">Argument expression used for key name. Be cautious about using literal (i.e. <c>3+4</c>, <c>"Simon"</c>) expressions and prefer variables.</param>
+	/// <param name="callerMemberName">Method caller - used for dictionary key. Filled in by the caller defaultly using compiler services. Pass/override with caution.</param>
+	/// <param name="callerFilePath">File path of the caller - used for dictionary key. Filled in by the caller defaultly using compiler services. Pass/override with caution.</param>
 	/// <returns><paramref name="ex"/></returns>
-	/// <exception cref="Exception">Thrown if the dictionary has reached a maximum size or if an invalid operation is attempted while putting the various key-values into the dictionary</exception>
-	public static Exception AddData(this Exception ex, object? value, [System.Runtime.CompilerServices.CallerMemberName] string callerMemberName = "", [System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "") {
-		string fp = callerFilePath[(callerFilePath.LastIndexOf('\\') + 1)..];
+	/// <exception cref="Exception">Thrown if the dictionary has reached a maximum size or if an invalid operation is attempted while putting the various key-values into the dictionary.</exception>
+	public static Exception AddData(this Exception ex, object? value, [CallerArgumentExpression(nameof(value))] string callerArgumentExpression = "", [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "") {
+		var cfpSpan = callerFilePath.AsSpan();
+		cfpSpan = cfpSpan[(cfpSpan.LastIndexOf('\\') + 1)..];
 
-		if (fp.Contains('.'))
-			fp = fp[..fp.LastIndexOf('.')];
+		int cfpLioSlash = cfpSpan.LastIndexOf('.');
+		if (cfpLioSlash != -1)
+			cfpSpan = cfpSpan[..cfpLioSlash];
 
-		string dataKey = $"{fp}_{callerMemberName}";
+		string dataKey = $"{cfpSpan}_{callerMemberName}_{callerArgumentExpression}";
 
 		lock (ex.Data.SyncRoot) {
-			int existingKeyCount = ex.Data.Keys.Cast<string>().Where(k => k.StartsWith(dataKey, StringComparison.OrdinalIgnoreCase)).Count();
+			int existingKeyCount = ex.Data.Keys.Cast<string>().Where(k => k.StartsWithOIC(dataKey)).Count();
 
 			if (existingKeyCount > 0)
 				dataKey = $"{dataKey}_{existingKeyCount + 1}";
@@ -72,9 +76,8 @@ public static partial class Extension {
 		sb.AppendFormat(format, "StackTrace", ex.StackTrace);
 
 		/* For: System.Data.Entity.Validation.DbEntityValidationException
- * The code below uses reflection to pull out relevant validation errors on a model that are thrown by Entity Framework without
- * needing references System.Data.
- */
+		 * The code below uses reflection to pull out relevant validation errors on a model that are thrown by Entity Framework without
+		 * needing references System.Data. */
 		PropertyInfo? pi = ex.GetType().GetProperty("EntityValidationErrors");
 		if (pi != null) {
 			sb.Append(delimiter);
@@ -84,8 +87,7 @@ public static partial class Extension {
 			object? entityValidationErrors = pi.GetValue(ex, null);
 			PropertyInfo? eveTypePi = null;
 			foreach (object? entityValidationResult in (IEnumerable)entityValidationErrors!) {
-				if (eveTypePi == null)
-					eveTypePi = entityValidationResult.GetType().GetProperty("ValidationErrors");
+				eveTypePi ??= entityValidationResult.GetType().GetProperty("ValidationErrors");
 
 				foreach (object? validationError in (IEnumerable)eveTypePi!.GetValue(entityValidationResult)!) {
 					sb.Append('[');
@@ -157,7 +159,7 @@ public static partial class Extension {
 	/// <returns>A <see cref="Dictionary{TKey, TValue}"/> if <paramref name="ex"/> is not null</returns>
 	[return: NotNullIfNotNull(nameof(ex))]
 	public static Dictionary<string, object?>? ToDictionary(this Exception? ex) {
-		if (ex == null)
+		if (ex is null)
 			return null;
 
 		return
@@ -167,7 +169,7 @@ public static partial class Extension {
 				.ToDictionary(
 						e => e.pi.Name,
 						v =>
-								v.val == null ? null :
+								v.val is null ? null :
 								v.pi.PropertyType == typeof(Exception) ? ((Exception)v.val).ToDictionary() :
 								v.pi.PropertyType == typeof(MethodBase) ? v.val.ToString() :
 								v.pi.PropertyType == typeof(Type) ? v.val.ToString() :
