@@ -2,6 +2,7 @@ namespace Praxis;
 
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -16,6 +17,7 @@ public static partial class Extension {
 	/// </summary>
 	/// <remarks>
 	/// <para>Key utilized is: [Excluding everything before the last <c>\</c> in <paramref name="callerFilePath"/> (if present) and before it's last (potential) <c>.</c>]<c>_</c>[<paramref name="callerMemberName"/>]<c>_</c>[<paramref name="callerArgumentExpression"/>].</para>
+	/// <para>As such <b>BE AWARE</b> that a long expression (such as an anonymous object) will end up in a long string name. In this case, <i>pass in <paramref name="callerArgumentExpression"/> with a value to use as the key.</i></para>
 	/// <para>If there is an existing entry under this key, then the key will have appended: <c>_</c>[the <b>count of the existing keys <c>+1</c></b>]</para>
 	/// Do <b>NOT</b> pass <paramref name="value"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to be empty. Cast to an object <c>(object)someDynamicInstance</c> if using dynamics.
 	/// <para>As general practice - multiple catch (or .AddData) blocks in the same method can make debugging more difficult. If doing so, make sure the value added is easily traceable.</para>
@@ -28,6 +30,7 @@ public static partial class Extension {
 	/// <returns><paramref name="ex"/></returns>
 	/// <exception cref="Exception">Thrown if the dictionary has reached a maximum size or if an invalid operation is attempted while putting the various key-values into the dictionary.</exception>
 	public static Exception AddData(this Exception ex, object? value, [CallerArgumentExpression(nameof(value))] string callerArgumentExpression = "", [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "") {
+		Stopwatch sw = Stopwatch.StartNew();
 		var cfpSpan = callerFilePath.AsSpan();
 		cfpSpan = cfpSpan[(cfpSpan.LastIndexOf('\\') + 1)..];
 
@@ -35,23 +38,46 @@ public static partial class Extension {
 		if (cfpLioSlash != -1)
 			cfpSpan = cfpSpan[..cfpLioSlash];
 
-		string dataKey = $"{cfpSpan}_{callerMemberName}_{callerArgumentExpression}";
+		string dataKey = $"{cfpSpan}_{callerMemberName}";
 
 		lock (ex.Data.SyncRoot) {
-			int existingKeyCount = ex.Data.Keys.Cast<string>().Where(k => k.StartsWithOIC(dataKey)).Count();
-
-			if (existingKeyCount > 0)
-				dataKey = $"{dataKey}_{existingKeyCount + 1}";
-
 			try {
-				ex.Data[dataKey] = value;
+				Dictionary<string, object?>? dkDict = ex.Data[dataKey] as Dictionary<string, object?>;
+				if (dkDict is null) {
+					dkDict = [];
+					ex.Data[dataKey] = dkDict;
+				}
+
+				string subKey = _SanitizeCallerArgumentExpression(callerArgumentExpression);
+				int existingKeyCount = dkDict.Keys.Where(k => k.StartsWithOIC(subKey)).Count();
+
+				if (existingKeyCount > 0)
+					subKey = $"{subKey}_{existingKeyCount + 1}";
+
+				dkDict[subKey] = value;
 			}
 			catch (ArgumentException ae) {
 				ex.Data[dataKey] = $"COULD NOT ADD DATA / ARGUMENT EXCEPTION -> {ae.Message}";
 			}
 		}
 
+		sw.Stop();
+		var elTM = sw.Elapsed.TotalMilliseconds;
 		return ex;
+
+		/* ----------------------------------------------------------------------------------------------------------
+		 * Sanitizes the passed argument to only contain characters that should be used as keys in
+		 * the internal datadictionary */
+		static string _SanitizeCallerArgumentExpression(string arg) {
+			if (arg.Any(c => char.IsControl(c) || !char.IsAsciiLetterOrDigit(c)))
+				return arg.KeepChars(_SanitizeKeepChars);
+			else
+				return arg;
+
+			static bool _SanitizeKeepChars(char c) {
+				return char.IsAsciiLetterOrDigit(c) || c == '_';
+			}
+		}
 	}
 
 	/// <summary>

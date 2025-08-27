@@ -20,6 +20,7 @@
     <ProjectReference Include="..\Praxis.Data\Praxis.Data.csproj" />
     <ProjectReference Include="..\Praxis.Knowledge\Praxis.Knowledge.csproj" />
     <ProjectReference Include="..\Praxis.LiteDb\Praxis.LiteDb.csproj" />
+    <ProjectReference Include="..\Praxis.Logging\Praxis.Logging.csproj" />
     <ProjectReference Include="..\Praxis.Web\Praxis.Web.csproj" />
   </ItemGroup>
 

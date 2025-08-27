@@ -1,119 +1,87 @@
 namespace Praxis.Test;
 
 using System.Collections;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Praxis.Knowledge;
+using Praxis.Logging;
 
 [TestClass]
 public class ExceptionExtension {
 
 	[TestMethod]
-	public void AddData_Object_ByNewInline() {
-		int testNum = Random.Shared.Next();
-		string testString = Word.Random();
+	public void AddData_Various() {
+		var mTarget = new NLog.Targets.MemoryTarget { Layout = NLogConfiguration.GetLayoutJson(), MaxLogsCount = 40_000 };
+		NLogConfiguration.SetLogManagerConfiguration(mTarget);
+		//NLog.LogManager.GetLogger(typeof(ExceptionExtension).FullName!).Initialized(new InitializeInfo(Assembly.GetExecutingAssembly()));
+		var log = new LogBase(GetType());
 
+		int num = Random.Shared.Next();
 		try {
-			throw new Exception("Thrown for testing");
+			_ThrowA(num);
 		}
 		catch (Exception ex) {
-			bool found = false;
-			ex.AddData(new { testNum = -3, testString = "NADA" }).AddData(new { testNum, testString });
-
-			foreach (DictionaryEntry de in ex.Data) {
-				if (de.Value == null)
-					continue;
-
-				dynamic dVal = de.Value;
-				if (dVal.testNum == testNum && dVal.testString == testString) {
-					found = true;
-					break;
-				}
+			var data = ex.Data;
+			foreach (DictionaryEntry de in data) {
+				var key = de.Key;
+				var value = de.Value;
 			}
 
-			Assert.IsTrue(found);
+			log.Error(ex);
+		}
+
+		foreach (string logEntry in mTarget.Logs) {
+			var jNode = System.Text.Json.Nodes.JsonNode.Parse(logEntry);
+			Assert.IsNotNull(jNode);
 		}
 	}
 
-	[TestMethod]
-	public void AddData_Object_ByVariable() {
-		var edObj = new { testNum = Random.Shared.Next(), testString = Word.Random() };
 
+
+	private static void _ThrowA(int num) {
 		try {
-			throw new Exception("Thrown for testing");
+			_ThrowB(num, DateTimeOffset.UtcNow);
 		}
 		catch (Exception ex) {
-			bool found = false;
-			ex.AddData(edObj);
-
-			foreach (DictionaryEntry de in ex.Data) {
-				if (de.Value == edObj) {
-					found = true;
-					break;
-				}
-			}
-
-			Assert.IsTrue(found);
+			ex.AddData(num);
+			throw;
 		}
 	}
 
-	[TestMethod]
-	public void AddData_Primitive_ByVariable() {
-		int testNum = Random.Shared.Next();
-
+	private static void _ThrowB(int num, DateTimeOffset tStamp) {
 		try {
-			throw new Exception("Thrown for testing");
+			_ThrowC(num, tStamp, Word.Random());
 		}
 		catch (Exception ex) {
-			bool found = false;
-			ex.AddData(testNum).AddData(false);
-
-			foreach (DictionaryEntry de in ex.Data) {
-				if (de.Value?.Equals(testNum) == true) {
-					found = true;
-					break;
-				}
-			}
-
-			Assert.IsTrue(found);
-		}
-
-		try {
-			throw new Exception("Thrown for testing");
-		}
-		catch (Exception ex) {
-			bool found = false;
-			ex.AddData(testNum);
-
-			foreach (DictionaryEntry de in ex.Data) {
-				if (de.Value?.Equals(testNum) == true) {
-					found = true;
-					break;
-				}
-			}
-
-			Assert.IsTrue(found);
+			ex
+				.AddData(num)
+				.AddData(tStamp)
+				.AddData(num)
+				.AddData(new {
+					Food = "Walnuts",
+					IsCrunchy = true,
+					DoubleMilliseconds = DateTime.Now.TimeOfDay.TotalMilliseconds
+				},
+				"OverriddenName");
+			throw;
 		}
 	}
 
-	[TestMethod]
-	public void AddData_Primitive_Inline() {
-		int testNum = 1234567;
-
+	private static void _ThrowC(int num, DateTimeOffset tStamp, string word) {
 		try {
-			throw new Exception("Thrown for testing");
+			throw new Exception("Thrown for exception add data testing");
 		}
 		catch (Exception ex) {
-			bool found = false;
-			ex.AddData(333).AddData(1234567);
-
-			foreach (DictionaryEntry de in ex.Data) {
-				if (de.Value?.Equals(testNum) == true) {
-					found = true;
-					break;
-				}
-			}
-
-			Assert.IsTrue(found);
+			ex
+				.AddData(num)
+				.AddData(tStamp)
+				.AddData(word)
+				.AddData(new {
+					Word_Of_The_Day = Word.Random(),
+					IsAnonymous = true,
+					DoubleMilliseconds = DateTime.Now.TimeOfDay.TotalMilliseconds
+				});
+			throw;
 		}
 	}
 }
