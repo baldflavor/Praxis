@@ -162,7 +162,7 @@ public static class Const<T> where T : class {
 	/// <summary>
 	/// Gets names, descriptions and values for a constants class filtered to those where the type of value matches <typeparamref name="K"/>
 	/// </summary>
-	/// <remarks>Uses the <see cref="DisplayAttribute"/> to look for an optional name and description. If <see cref="DisplayAttribute.Name"/> is not present
+	/// <remarks>Uses the <see cref="DisplayAttribute"/> to look for an optional name and description. If <see cref="DisplayAttribute.Name"/> is not present.</remarks>
 	/// <typeparam name="K">Type to use for filtering values</typeparam>
 	/// <returns>Tuple with name, description and value</returns>
 	public static IEnumerable<(string name, string? description, K value)> NameDescriptionValues<K>() {

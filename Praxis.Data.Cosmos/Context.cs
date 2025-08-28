@@ -31,7 +31,7 @@ public sealed class Context {
 
 
 	/// <summary>
-	/// Gets the <see cref="CosmosClient"/> that was created during <see cref="Initialize(string, string, string)"/>
+	/// Gets the <see cref="CosmosClient"/> that was created during <see cref="Initialize(string, string, string, CosmosPropertyNamingPolicy)"/>
 	/// <para>*ONLY* use the client directly if any of the rest of the context methods are not sufficient</para>
 	/// </summary>
 	public CosmosClient Client { get => _client; }
@@ -52,6 +52,7 @@ public sealed class Context {
 	/// <param name="endpoint">Account endpoint to use for data access</param>
 	/// <param name="auth">Auth key to use for data access</param>
 	/// <param name="databaseId">Database Id to use for data access</param>
+	/// <param name="namingPolicy">Naming policy to use.</param>
 	/// <returns>A <see cref="Context"/> ready for use</returns>
 	public static Context Initialize(string endpoint, string auth, string databaseId, CosmosPropertyNamingPolicy namingPolicy = CosmosPropertyNamingPolicy.CamelCase) {
 		return new Context(
@@ -83,7 +84,7 @@ public sealed class Context {
 	/// </summary>
 	/// <typeparam name="T">Type of model to delete</typeparam>
 	/// <param name="id">Unique Id of the model to delete</param>
-	/// <param name="partitionKey">The partition key to use for locating the corresponding <paramref name="id"/></param>
+	/// <param name="pkey">The partition key to use for locating the corresponding <paramref name="id"/></param>
 	/// <returns>An ItemResponse *WITHOUT* the created .Resource property set (i.e. headers only)</returns>
 	public async Task<ItemResponse<T>> Delete<T>(string id, PartitionKey pkey) where T : BaseModel {
 		return await GetContainerByType<T>().DeleteItemAsync<T>(id, pkey).ConfigureAwait(false);
@@ -95,7 +96,7 @@ public sealed class Context {
 	/// </summary>
 	/// <typeparam name="T">Type of data model to return</typeparam>
 	/// <param name="id">Unique identifier to retrieve data by</param>
-	/// <param name="partitionKey">Partition key to use for search -- if null, then the id is used as the partition key</param>
+	/// <param name="pkey">Partition key to use for search -- if null, then the id is used as the partition key</param>
 	/// <returns>A <typeparamref name="T"/> object</returns>
 	public async Task<T> Get<T>(string id, PartitionKey pkey) where T : BaseModel => (await GetContainerByType<T>().ReadItemAsync<T>(id, pkey).ConfigureAwait(false)).Resource;
 

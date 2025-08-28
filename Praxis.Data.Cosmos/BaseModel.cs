@@ -65,7 +65,7 @@ public abstract partial class BaseModel {
 	public required string Id { get; set; }
 
 	/// <summary>
-	/// Backed by <see cref="Extension.ToStringProperties(object, List{string}, string, string)"/> with the delimiter specified as <see cref="DELIMITER"/>
+	/// Backed by <see cref="Praxis.Extension.ToStringProperties{T}(T, string?, string?, string[])"/> with the delimiter specified as <see cref="DELIMITER"/>
 	/// </summary>
 	/// <param name="arg">Object to represent as a string</param>
 	/// <param name="skipProperties">Properties to skip as part of string graph</param>

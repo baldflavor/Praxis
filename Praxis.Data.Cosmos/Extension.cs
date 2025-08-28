@@ -18,14 +18,38 @@ public static class Extension {
 		return arg;
 	}
 
-
+	/// <summary>
+	/// Creates a partition key from the passed value.
+	/// </summary>
+	/// <param name="arg">Value to use for a partition key.</param>
+	/// <returns><see cref="PartitionKey"/></returns>
 	public static PartitionKey ToPartitionKey(this string arg) => new(arg);
 
+	/// <summary>
+	/// Creates a partition key from the passed value.
+	/// </summary>
+	/// <param name="arg">Value to use for a partition key.</param>
+	/// <returns><see cref="PartitionKey"/></returns>
 	public static PartitionKey ToPartitionKey(this bool arg) => new(arg);
 
+	/// <summary>
+	/// Creates a partition key from the passed value.
+	/// </summary>
+	/// <param name="arg">Value to use for a partition key.</param>
+	/// <returns><see cref="PartitionKey"/></returns>
 	public static PartitionKey ToPartitionKey(this double arg) => new(arg);
 
+	/// <summary>
+	/// Creates a partition key from the passed value.
+	/// </summary>
+	/// <param name="arg">Value to use for a partition key.</param>
+	/// <returns><see cref="PartitionKey"/></returns>
 	public static PartitionKey ToPartitionKey(this int arg) => new(arg);
 
+	/// <summary>
+	/// Creates a partition key from the passed value.
+	/// </summary>
+	/// <param name="arg">Value to use for a partition key.</param>
+	/// <returns><see cref="PartitionKey"/></returns>
 	public static PartitionKey ToPartitionKey(this long arg) => new(arg);
 }

@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 /// <para>Exceptions that bubble up from that method will cause the <i>internal polling loop</i> to <b>short circuit and stop</b>. This will also cause the <c>CancellationToken</c>
 /// passed to <see cref="Tick(CancellationToken)"/> to <b>request cancellation</b>.</para>
 /// <para>Those exceptions will also <i><b>not</b></i> bubble outside of the containing method, so an implementer is responsible for logging / handling exceptional circumstances</para>
-/// <para>When the <see cref="Stop"/> or <see cref="Dispose"/> methods are called, they internally call <see cref="CancellationTokenSource.Cancel()"/>
+/// <para>When the <see cref="Stop"/> or <see cref="Dispose()"/> methods are called, they internally call <see cref="CancellationTokenSource.Cancel()"/>
 /// on the token used for controlling the lifetime of the polling loop. This does not guarantee an immediate cessation of all operations as the
 /// cancel signal may need to propagate through various subscribers, or at all if the token is not passed to other asynchronous operations those operations</para>
 /// <para>In this sense, be cognizant and aware of tasks/timing/exceptions when implementing this class</para>
@@ -33,7 +33,7 @@ public abstract class PeriodicTimerContainer : IDisposable {
 	protected bool _isDisposed;
 
 	/// <summary>
-	/// The timing period to use for each tick/loop on <see cref="_pTimer"/>
+	/// The timing period to use for each tick/loop.
 	/// </summary>
 	private readonly TimeSpan _tickFrequency;
 
@@ -44,7 +44,7 @@ public abstract class PeriodicTimerContainer : IDisposable {
 	private readonly TimeSpan? _tickOnStartSpecialDelay;
 
 	/// <summary>
-	/// Cancellation token source used for signalling cancellation to <see cref="_pTimerTask"/>
+	/// Cancellation token source used for signalling cancellation of periodic timer / polling.
 	/// </summary>
 	private CancellationTokenSource? _cts;
 

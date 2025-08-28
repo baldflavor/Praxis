@@ -8,8 +8,26 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
+/// <summary>
+/// Static class used for extensions on <see cref="HttpClient"/>.
+/// </summary>
 public static class HttpRequest {
 
+	/// <summary>
+	/// Sends a request to a remote endpoint and returns an object deserialized from the response.
+	/// </summary>
+	/// <remarks>
+	/// Response from the server is expected to be <b><c>Json</c></b>.
+	/// </remarks>
+	/// <typeparam name="T">Type to use when deserializing the response from the remote endpoint.</typeparam>
+	/// <param name="client">Client used for web request.</param>
+	/// <param name="method">Verb/method used during communication.</param>
+	/// <param name="baseUri">Base or root address of remote destination.</param>
+	/// <param name="relativeUri">Relative portion of remote destination combined with <paramref name="baseUri"/>.</param>
+	/// <param name="data">Object sent as either query string parameters or json depending on <paramref name="method"/>.</param>
+	/// <param name="headers">Headers to send along with request.</param>
+	/// <param name="cTok">Token used for cancellation of asynchronous processes.</param>
+	/// <returns><c>Task</c> of <typeparamref name="T"/>.</returns>
 	public static async Task<T?> Retrieve<T>(this HttpClient client, HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) where T : class {
 		using HttpResponseMessage response = await _RetrieveResponse(client, method, baseUri, relativeUri, data, headers, cTok).ConfigureAwait(false);
 		await _AssertSuccess(response, cTok).ConfigureAwait(false);
@@ -18,6 +36,17 @@ public static class HttpRequest {
 		return await JsonSerializer.DeserializeAsync<T>(stream, Json.Options, cTok).ConfigureAwait(false);
 	}
 
+	/// <summary>
+	/// Sends a request to a remote endpoint and returns the response as a <c>string</c>.
+	/// </summary>
+	/// <param name="client">Client used for web request.</param>
+	/// <param name="method">Verb/method used during communication.</param>
+	/// <param name="baseUri">Base or root address of remote destination.</param>
+	/// <param name="relativeUri">Relative portion of remote destination combined with <paramref name="baseUri"/>.</param>
+	/// <param name="data">Object sent as either query string parameters or json depending on <paramref name="method"/>.</param>
+	/// <param name="headers">Headers to send along with request.</param>
+	/// <param name="cTok">Used for cancellation of asynchronous operation.</param>
+	/// <returns><c>Task</c> of <c>string</c>.</returns>
 	public static async Task<string> Retrieve(this HttpClient client, HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) {
 		using HttpResponseMessage response = await _RetrieveResponse(client, method, baseUri, relativeUri, data, headers, cTok).ConfigureAwait(false);
 		await _AssertSuccess(response, cTok).ConfigureAwait(false);
@@ -25,12 +54,35 @@ public static class HttpRequest {
 		return await response.Content.ReadAsStringAsync(cTok).ConfigureAwait(false);
 	}
 
+	/// <summary>
+	/// Sends a request to a remote enpoint.
+	/// </summary>
+	/// <remarks>
+	/// Does not read the response other than to check that it is a successful status code.
+	/// </remarks>
+	/// <param name="client">Client used for web request.</param>
+	/// <param name="method">Verb/method used during communication.</param>
+	/// <param name="baseUri">Base or root address of remote destination.</param>
+	/// <param name="relativeUri">Relative portion of remote destination combined with <paramref name="baseUri"/>.</param>
+	/// <param name="data">Object sent as either query string parameters or json depending on <paramref name="method"/>.</param>
+	/// <param name="headers">Headers to send along with request.</param>
+	/// <param name="cTok">Used for cancellation of asynchronous operation.</param>
+	/// <returns><c>Task</c></returns>
 	public static async Task Transmit(this HttpClient client, HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) {
 		using HttpResponseMessage response = await _RetrieveResponse(client, method, baseUri, relativeUri, data, headers, cTok).ConfigureAwait(false);
 		await _AssertSuccess(response, cTok).ConfigureAwait(false);
 	}
 
 
+	/// <summary>
+	/// Asserts that a response message is in the range of successful status codes.
+	/// </summary>
+	/// <remarks>
+	/// If the status code is not a success, an attempt is made to read the response content as a string and place it in the resulting exception.
+	/// </remarks>
+	/// <param name="arg">Value to assert against.</param>
+	/// <param name="cTok">Used for cancelling asynchronous operation.</param>
+	/// <returns><c>Task</c></returns>
 	private static async Task _AssertSuccess(HttpResponseMessage arg, CancellationToken cTok) {
 		if (!arg.IsSuccessStatusCode) {
 			Exception? contentReadException = null;
@@ -53,6 +105,20 @@ public static class HttpRequest {
 		}
 	}
 
+	/// <summary>
+	/// Retrieves a response message from a remote endpoint.
+	/// </summary>
+	/// <remarks>
+	/// Determines transmission of data, whether as a query string arguments or Json, depending on <paramref name="method"/>.
+	/// </remarks>
+	/// <param name="client">Client used for web request.</param>
+	/// <param name="method">Verb/method used during communication.</param>
+	/// <param name="baseUri">Base or root address of remote destination.</param>
+	/// <param name="relativeUri">Relative portion of remote destination combined with <paramref name="baseUri"/>.</param>
+	/// <param name="data">Object sent as either query string parameters or json depending on <paramref name="method"/>.</param>
+	/// <param name="headers">Headers to send along with request.</param>
+	/// <param name="cTok">Used for cancellation of asynchronous operation.</param>
+	/// <returns><c>Task</c></returns>
 	private static async Task<HttpResponseMessage> _RetrieveResponse(HttpClient client, HttpMethod method, Uri baseUri, string? relativeUri, object? data, Dictionary<string, string>? headers, CancellationToken cTok) {
 		if (method == HttpMethod.Head || method == HttpMethod.Options)
 			throw new ArgumentException(method + " is not supported", nameof(method));
@@ -84,7 +150,7 @@ public static class HttpRequest {
 				var daie = data as IEnumerable<KeyValuePair<string, string?>>;
 
 				if (method == HttpMethod.Get) {
-					relativeUri = new StringBuilder(relativeUri).Append(await Kvp.ToUriQueryString(daie ?? Kvp.FromObject(data)).ConfigureAwait(false)).ToString();
+					relativeUri = $"{relativeUri}{(relativeUri?.EndsWith('?') == true ? null : '?')}{await Kvp.ToUriQueryString(daie ?? Kvp.FromObject(data)).ConfigureAwait(false)}";
 				}
 				else {
 					return

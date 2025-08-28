@@ -18,6 +18,7 @@
 		<Nullable>enable</Nullable>
 
 		<UseArtifactsOutput>true</UseArtifactsOutput>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
 		<ProduceReferenceAssembly>False</ProduceReferenceAssembly>
 	</PropertyGroup>
 

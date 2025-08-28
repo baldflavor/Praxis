@@ -74,7 +74,7 @@ public static partial class Json {
 	};
 
 	/// <summary>
-	/// Holds a reference to <see cref="JsonSerializerOptions"/> which is accessed mainly through <see cref="Options"/> and may be overriden through <see cref="SetOptions"/>
+	/// Holds a reference to <see cref="JsonSerializerOptions"/> which is accessed through <see cref="Options"/> and may be overriden through <see cref="SetOptionsImmutable"/>.
 	/// </summary>
 	/// <remarks>Initially set to <see cref="_praxisDefaultOptions"/></remarks>
 	private static JsonSerializerOptions _options = _praxisDefaultOptions;

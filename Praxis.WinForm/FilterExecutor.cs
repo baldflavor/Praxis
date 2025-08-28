@@ -22,8 +22,8 @@ internal abstract class FilterExecutor<T>(T data, Action<T> dataFilteredDelegate
 	/// Method that should perform filtering on the contained data and return whatever the subset is that satisfies said filter.
 	/// </summary>
 	/// <param name="cTok"><c>Token</c> that should be used to detect cancellation.</param>
-	/// <returns>The result of <see cref="_filter"/> vs <see cref="data"/>.</returns>
-	/// <exception cref="OperationCanceledException">This can and <c>should</c> be thrown if cancellation is detected.</exception>
+	/// <returns>The result of <see cref="_filter"/> run against <c>data</c>.</returns>
+	/// <exception cref="OperationCanceledException">This can and <b>should</b> be thrown if cancellation is detected.</exception>
 	protected abstract T ReturnFilteredData(CancellationToken cTok);
 
 	/// <summary>

@@ -94,9 +94,16 @@ public class Hash {
 		return provider.ComputeHash(arg);
 	}
 
-
-	public static string Rfc2898(string arg, int saltSize = 50, int iterations = 300, int keySize = 60) {
-		using Rfc2898DeriveBytes cAlg = new(arg, saltSize, iterations, HashAlgorithmName.SHA512);
+	/// <summary>
+	/// Gets an Rfc2898 hash using passed arguments.
+	/// </summary>
+	/// <param name="value">Value to hash.</param>
+	/// <param name="saltSize">Size of salt.</param>
+	/// <param name="iterations">Number of iterations.</param>
+	/// <param name="keySize">Size of key.</param>
+	/// <returns><c>string</c></returns>
+	public static string Rfc2898(string value, int saltSize = 50, int iterations = 300, int keySize = 60) {
+		using Rfc2898DeriveBytes cAlg = new(value, saltSize, iterations, HashAlgorithmName.SHA512);
 
 		string key = Convert.ToBase64String(cAlg.GetBytes(keySize));
 		string salt = Convert.ToBase64String(cAlg.Salt);
@@ -104,7 +111,14 @@ public class Hash {
 		return $"{salt}¦{iterations}¦{key}";
 	}
 
-	public static bool Rfc2898IsEqual(string arg, string hash, int keySize = 60) {
+	/// <summary>
+	/// Gets whether two hashes are equal for Rfc2898.
+	/// </summary>
+	/// <param name="value">Value to check against the passed <paramref name="hash"/>.</param>
+	/// <param name="hash">Hash to check against <paramref name="value"/>.</param>
+	/// <param name="keySize">Size of the key.</param>
+	/// <returns><c>true</c> if equal, otherwise <c>false</c>.</returns>
+	public static bool Rfc2898IsEqual(string value, string hash, int keySize = 60) {
 		string[] hashSections = hash.Split('¦', 3);
 		if (hashSections.Length != 3)
 			return false;
@@ -112,7 +126,7 @@ public class Hash {
 		int iterations = int.Parse(hashSections[1]);
 		byte[] salt = Convert.FromBase64String(hashSections[0]);
 
-		using Rfc2898DeriveBytes cAlg = new(arg, salt, iterations, HashAlgorithmName.SHA512);
+		using Rfc2898DeriveBytes cAlg = new(value, salt, iterations, HashAlgorithmName.SHA512);
 
 		return cAlg.GetBytes(keySize).SequenceEqual(Convert.FromBase64String(hashSections[2]));
 	}

@@ -59,7 +59,7 @@ public partial class NLogViewerForm : Form {
 	private static readonly string[] _skipNames = [_ID, _LEVEL, _TZI];
 
 	/// <summary>
-	/// Creates an instance of the <see cref="MainForm"/> class
+	/// Creates an instance of the <see cref="NLogViewerForm"/> class.
 	/// </summary>
 	/// <param name="directory">The directory to watch</param>
 	/// <param name="maxNodeCount">Maximum number of nodes to display in the tree before removing them from the bottom of the list</param>
@@ -179,11 +179,11 @@ public partial class NLogViewerForm : Form {
 	private static string _PaddedString(string name, string value) => $"{$"{name}: ",-25}{value.Trim()}";
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="LogEntryTreeNode" /> class
+	/// Initializes a new instance of the <see cref="TreeNode" /> class from a source Json string.
 	/// </summary>
-	/// <param name="json">A Json string to use for source of node data</param>
-	/// <param name="expanded">Indicates whether the node should be fully expanded</param>
-	/// <exception cref="Exception">May be thrown if the class cannot be created</exception>
+	/// <param name="json">Source Json string.</param>
+	/// <param name="expanded">Indicates whether the node should be fully expanded.</param>
+	/// <exception cref="Exception"></exception>
 	private static TreeNode _TreeNodeFromJson(string json, bool expanded = false) {
 		var jObj = JsonNode.Parse(json)!.AsObject();
 

@@ -62,20 +62,16 @@ public static class Kvp {
 
 
 	/// <summary>
-	/// Uses key value pairs to create an encoded query string
-	/// <para>includes a preceding ?</para>
+	/// Uses key value pairs to create an encoded query string.
+	/// <para><b>Does not</b> include a preceding '<c>?</c>'.</para>
 	/// </summary>
-	/// <param name="arg">Target parameters to use. If null or empty, the method returns a null result</param>
-	/// <returns>A query string; null if no parameters</returns>
+	/// <param name="arg">Source values to use for generation.</param>
+	/// <returns>Nullable <c>string</c>. (<c>null</c> if no elements are present in <paramref name="arg"/>)</returns>
 	public static async Task<string?> ToUriQueryString(IEnumerable<KeyValuePair<string, string?>> arg) {
-		if (arg is null || !arg.Any())
+		if (!arg.Any())
 			return null;
 
 		using var content = new FormUrlEncodedContent(arg);
-
-		return
-				new StringBuilder("?")
-				.Append(await content.ReadAsStringAsync().ConfigureAwait(false))
-				.ToString();
+		return $"?{await content.ReadAsStringAsync().ConfigureAwait(false)}";
 	}
 }

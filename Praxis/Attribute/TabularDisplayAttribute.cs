@@ -1,7 +1,7 @@
 namespace Praxis.Attribute;
 
 /// <summary>
-/// Attribute that can direct extra output control when using the <see cref="ITabularDisplay"/> generation methods
+/// Attribute that can direct extra output control when using the <see cref="Interface.ITabularDisplay"/> generation methods
 /// </summary>
 [AttributeUsage(AttributeTargets.Property, AllowMultiple = false, Inherited = true)]
 public sealed class TabularDisplayAttribute : System.Attribute {

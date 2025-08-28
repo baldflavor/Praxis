@@ -6,6 +6,9 @@ using System.ComponentModel.DataAnnotations;
 /// Provides generic validation results
 /// </summary>
 public static class CustomValidation {
+	/// <summary>
+	/// Constant string for when a member name is unknown.
+	/// </summary>
 	public const string MEMBERUNKNOWN = "MemberUnknown";
 
 	/// <summary>

@@ -21,7 +21,7 @@ public class LogBaseDI<T> {
 	/// Used for capturing an exception and writing it out to appropriate storage. Calls <see cref="OnLoggedError(Exception)"/> post entry.
 	/// </summary>
 	/// <remarks>
-	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
+	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> to not be captured. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
 	/// </remarks>
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
 	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
@@ -39,7 +39,7 @@ public class LogBaseDI<T> {
 	/// Logs an informational message. Calls <see cref="OnLoggedInfo(string)"/> post entry.
 	/// </summary>
 	/// <remarks>
-	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
+	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> to not be captured. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
 	/// </remarks>
 	/// <param name="message">Message to be logged</param>
 	/// <param name="data">Supplemental data properties to log. Do <b>NOT</b> pass as a dynamic object as it will cause <paramref name="callerMemberName"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.</param>
@@ -60,7 +60,7 @@ public class LogBaseDI<T> {
 	/// Used for capturing a warning and writing it out to appropriate storage. Calls <see cref="OnLoggedWarn(Exception?, string?)"/> post entry.
 	/// </summary>
 	/// <remarks>
-	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> and <paramref name="callerFilePath"/> to not function. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
+	/// Do <b>NOT</b> pass <paramref name="data"/> as a dynamic object as it will cause <paramref name="callerMemberName"/> to not be captured. Cast to an object <c>(object)dynamicInstance</c> if using dynamics.
 	/// </remarks>
 	/// <param name="exception">The <see cref="Exception"/> to be logged</param>
 	/// <param name="message">Alternative messaging to log alongside <paramref name="exception"/></param>

@@ -25,9 +25,9 @@ public partial class PropertyGridder : Form {
 	private Dictionary<string, string> _ogProperties = [];
 
 	/// <summary>
-	/// Initializes a new instance of the <see cref="SandboxForm" /> class
+	/// Initializes a new instance of the <see cref="PropertyGridder" /> class
 	/// </summary>
-	/// <param name="manager">Manager used for Api dependency</param>
+	/// <param name="source">Source form used during instantiation and for control references.</param>
 	public PropertyGridder(Form source) {
 		const string DIVLINE = "########################################";
 

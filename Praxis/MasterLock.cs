@@ -54,6 +54,7 @@ public sealed class MasterLock {
 	/// </summary>
 	/// <param name="key">The key to use while locking</param>
 	/// <param name="action">The action to perform</param>
+	/// <param name="masterLock">Masterlock instance to use. When <c>null</c> uses <see cref="MasterLock.Instance"/>.</param>
 	public static void LockWhile(string key, Action action, MasterLock? masterLock = null) {
 		lock ((masterLock ?? MasterLock.Instance)[key]) {
 			action();
@@ -65,6 +66,7 @@ public sealed class MasterLock {
 	/// </summary>
 	/// <param name="key">The key to use while locking</param>
 	/// <param name="func">The function to perform and result returned</param>
+	/// <param name="masterLock">Masterlock instance to use. When <c>null</c> uses <see cref="MasterLock.Instance"/>.</param>
 	public static T LockWhile<T>(string key, Func<T> func, MasterLock? masterLock = null) {
 		lock ((masterLock ?? MasterLock.Instance)[key]) {
 			return func();
@@ -76,6 +78,7 @@ public sealed class MasterLock {
 	/// </summary>
 	/// <param name="key">The key to use while locking</param>
 	/// <param name="action">The action to perform</param>
+	/// <param name="masterLock">Masterlock instance to use. When <c>null</c> uses <see cref="MasterLock.Instance"/>.</param>
 	/// <returns>An awaitable task</returns>
 	public static async Task LockWhileAsync(string key, Func<Task> action, MasterLock? masterLock = null) {
 		SemaphoreSlim semSlimLock = (masterLock ?? MasterLock.Instance).Slim(key);
@@ -93,6 +96,7 @@ public sealed class MasterLock {
 	/// </summary>
 	/// <param name="key">The key to use while locking</param>
 	/// <param name="func">The function to perform and result returned</param>
+	/// <param name="masterLock">Masterlock instance to use. When <c>null</c> uses <see cref="MasterLock.Instance"/>.</param>
 	/// <returns>An awaitable task</returns>
 	public static async Task<T> LockWhileAsync<T>(string key, Func<Task<T>> func, MasterLock? masterLock = null) {
 		SemaphoreSlim semSlimLock = (masterLock ?? MasterLock.Instance).Slim(key);

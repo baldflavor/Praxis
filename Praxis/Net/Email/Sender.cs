@@ -2,8 +2,20 @@ namespace Praxis.Net.Email;
 
 using System.Net.Mail;
 
+/// <summary>
+/// Static class for sending email.
+/// </summary>
 public static class Sender {
 
+	/// <summary>
+	/// Sends an email message.
+	/// </summary>
+	/// <param name="content">Content to send.</param>
+	/// <param name="netSettings">Settings to use.</param>
+	/// <param name="recipients">Message recipients.</param>
+	/// <param name="disposeAttachments">Whether to dispose of attachments.</param>
+	/// <param name="attachments">Attachments to add to the message.</param>
+	/// <exception cref="Exception">Thrown if the message cannot be sent.</exception>
 	public static void Send(Content content, NetworkSettings netSettings, Recipients recipients, bool disposeAttachments = true, params Attachment[] attachments) {
 		try {
 			using MailMessage mail = new();

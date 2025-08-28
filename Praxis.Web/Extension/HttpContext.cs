@@ -33,10 +33,10 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Reads out the request content body as a string
+	/// Reads out the request content body as a string.
 	/// </summary>
-	/// <param name="context"><see cref="HttpRequestBase"/> from which to read the content body</param>
-	/// <returns>String representing the content body of the incoming request</returns>
+	/// <param name="context">Source from which to read the content body.</param>
+	/// <returns><c>string</c></returns>
 	public static async Task<string?> GetRequestContent(this HttpContext context) {
 		try {
 			Stream reqStream = context.Request.BodyReader.AsStream();
