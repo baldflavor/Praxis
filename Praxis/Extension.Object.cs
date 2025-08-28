@@ -20,22 +20,22 @@ public static partial class Extension {
 	public static int MaxFullPropertyDepth { get; set; } = 6;
 
 	/// <summary>
-	/// Delimiter between property name -> value output in <see cref="ToStringProperties{T}(T, string?, string?, string[])"/>
+	/// Delimiter between property name -> value output in <see cref="ToStringProperties{T}(T, string?, string?, string[])"/>.
 	/// </summary>
 	public static string ToStringPropertiesDelimiter { get; set; } = Const.CRLF;
 
 	/// <summary>
-	/// Format to use for property name -> value output in <see cref="ToStringProperties{T}(T, string?, string?, string[])"/>
+	/// Format to use for property name -> value output in <see cref="ToStringProperties{T}(T, string?, string?, string[])"/>.
 	/// </summary>
 	public static string ToStringPropertiesFormat { get; set; } = "{0}" + Const.RIGHTARROWHEAD + "{1}";
 
 	/// <summary>
-	/// Delimiter to use between rich object property->value or collections when calling <see cref="ToStringRich(object?, bool, string?, string?)"/>
+	/// Delimiter to use between rich object property->value or collections when calling <see cref="ToStringRich(object?, ref int, bool, string?, string?)"/>.
 	/// </summary>
 	public static string ToStringRichDelimiter { get; set; } = Const.CRLF;
 
 	/// <summary>
-	/// Format for rich object property->value or collections when calling <see cref="ToStringRich(object?, bool, string?, string?)"/>
+	/// Format for rich object property->value or collections when calling <see cref="ToStringRich(object?, ref int, bool, string?, string?)"/>.
 	/// </summary>
 	public static string ToStringRichFormat { get; set; } = "[{0}" + Const.BROKENVERTBAR + "{1}]";
 
@@ -105,7 +105,6 @@ public static partial class Extension {
 	/// </summary>
 	/// <typeparam name="T">The type to interrogate</typeparam>
 	/// <typeparam name="TProperty">The type of property the expression represents</typeparam>
-	/// <param name="obj">Object used for type retrieval / inference</param>
 	/// <param name="expPropLambda">Expression/func examined for which property should have it's info returned</param>
 	/// <returns>A <see cref="PropertyInfo"/> that matches the property specified in <paramref name="expPropLambda"/></returns>
 	/// <exception cref="ArgumentException">Thrown if the expression-lambda does not point to a valid property</exception>
@@ -119,15 +118,14 @@ public static partial class Extension {
 	/// <summary>
 	/// Pushes matching property values from a source object and type to a destination object and type. Properties are matched in a case insensitive fashion.
 	/// </summary>
+	/// <remarks>
 	/// <b>BE AWARE</b> that this may set <c>null</c> values to properties on the destination (such as the case of <c>string</c>) which are not
 	/// marked as <i>nullable</i> [<c>?</c>].
 	/// </remarks>
 	/// <param name="source">Source object to draw from.</param>
-	/// <param name="sourceType">Source type taken from source.</param>
 	/// <param name="destination">Destination object to push to.</param>
-	/// <param name="destinationType">Destination type taken from destination.</param>
 	/// <param name="skipProperties">Array of property names to skip when pushing values from one object to the other.</param>
-	/// <exception cref="ArgumentException">Source is null or destination is null.</exception>
+	/// <exception cref="ArgumentException">Source or destination is <c>null</c>.</exception>
 	public static void PushPropertiesTo<T, K>(this T source, K destination, params string[] skipProperties) where T : notnull where K : notnull {
 		var sourceType = source.GetType();
 		var destinationType = destination.GetType();
@@ -176,85 +174,85 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Serializes the passed object into Json using <see cref="JsonSerializer.Serialize"/> with <see cref="Tools.JsonOptions"/>
+	/// Serializes the passed object into Json using <see cref="JsonSerializer.Serialize{TValue}(TValue, JsonSerializerOptions?)"/> with <see cref="Json.Options"/>.
 	/// </summary>
-	/// <param name="arg">Object to serialize into JSON</param>
-	/// <returns>A string containing json</returns>
-	/// <exception cref="NotSupportedException">Thrown by the serializer when serialization cannot be completed on the passed object</exception>
+	/// <param name="arg">Object to serialize into Json.</param>
+	/// <returns>Json <c>string</c></returns>
+	/// <exception cref="NotSupportedException">Thrown by the serializer when serialization cannot be completed on the passed object.</exception>
 	public static string ToJson(this object arg) => JsonSerializer.Serialize(arg, Json.Options);
 
 	/// <summary>
-	/// Serializes the passed object into a Json Node using <see cref="JsonSerializer.Serialize"/> with <see cref="Tools.JsonOptions"/>
+	/// Serializes the passed object into a Json Node using <see cref="JsonSerializer.SerializeToNode{TValue}(TValue, JsonSerializerOptions?)"/> with <see cref="Json.Options"/>.
 	/// </summary>
-	/// <param name="arg">Object to serialize into JSON</param>
-	/// <returns>A Json node</returns>
+	/// <param name="arg">Object to serialize into Json node.</param>
+	/// <returns><see cref="JsonNode"/></returns>
 	/// <exception cref="NotSupportedException">Thrown by the serializer when serialization cannot be completed on the passed object</exception>
 	public static JsonNode ToJsonNode(this object arg) => JsonSerializer.SerializeToNode(arg, Json.Options) ?? throw new Exception("Could not create a node from the passed argument");
 
 	/// <summary>
-	/// Returns a string that contains all of the public, instance, readable property values from an object
-	/// <para>If the passed object is <see langword="null"/>, then "null" will be returned</para>
-	/// <para>Does not work on structs</para>
+	/// Returns a string that contains all of the public, instance, readable property values from an object.
+	/// <para>If the passed object is <c>null</c>, then <c>null</c> will be returned.</para>
+	/// <para>Does not work on structs.</para>
 	/// </summary>
-	/// <remarks>
-	/// No longer uses a dictionary to hold onto property per type as this should
-	/// </remarks>
-	/// <param name="arg">The object to return properties for</param>
+	/// <param name="value">The object to return properties for</param>
 	/// <param name="format">A format string desired for displaying each property-value pair on the object (ALT+0155 default separator)</param>
 	/// <param name="delimiter">The delimiter string to use between each item</param>
 	/// <param name="excludeProperties">Properties to exclude by name</param>
 	/// <returns>A string</returns>
-	public static string ToStringProperties<T>(this T arg, string? format = default, string? delimiter = default, params string[] excludeProperties) {
+	public static string ToStringProperties<T>(this T value, string? format = default, string? delimiter = default, params string[] excludeProperties) {
 		int depth = 0;
-		return _ToStringProperties(arg, format, delimiter, ref depth, excludeProperties);
+		return _ToStringProperties(value, format, delimiter, ref depth, excludeProperties);
 	}
 
 	/// <summary>
 	/// Performs validation on an object using data annotations
 	/// </summary>
-	/// <param name="arg">Object being validated</param>
+	/// <param name="value">Object being validated</param>
 	/// <param name="validationResults">Out parameter List of validation results that will be filled with any potential validation failures</param>
 	/// <param name="propertyName">If passed, will only validate the specified property of the object rather than the object as a whole.</param>
 	/// <returns>True if validation passed, otherwise false</returns>
-	public static bool TryValidate(this object arg, out List<ValidationResult> validationResults, string? propertyName = null) {
+	public static bool TryValidate(this object value, out List<ValidationResult> validationResults, string? propertyName = null) {
 		validationResults = [];
 
 		if (propertyName is null) {
-			return Validator.TryValidateObject(arg, new ValidationContext(arg), validationResults, true);
+			return Validator.TryValidateObject(value, new ValidationContext(value), validationResults, true);
 		}
 		else {
 			return
 					Validator.TryValidateProperty(
-							arg.GetType().GetProperty(propertyName)!.GetValue(arg),
-							new ValidationContext(arg) { MemberName = propertyName },
+							value.GetType().GetProperty(propertyName)!.GetValue(value),
+							new ValidationContext(value) { MemberName = propertyName },
 							validationResults);
 		}
 	}
 
 
 	/// <summary>
-	/// Performs validation on a arg object. For any fields that do not pass validation, if those properties are read properties,
+	/// Performs validation on a arg object.
+	/// </summary>
+	/// <remarks>
+	/// For any fields that do not pass validation, if those properties are read properties,
 	/// then their current offending value will be filled into the output list. If they are writeable properties, then they will
 	/// be set to their backing CLR default value. If the harsh mode is used, then .Validate is called post scrubbing, and if the
-	/// object still contains invalid data, then an Exception will be thrown
-	/// </summary>
-	/// <param name="arg">Object to perform validation upon</param>
+	/// object still contains invalid data, then an Exception will be thrown.
+	/// </remarks>
+	/// <param name="value">Object to perform validation upon</param>
 	/// <param name="valresfail">Out list of value tuples describing which properties failed, and their values</param>
 	/// <param name="useHarshMode">If true, will call validate on the arg object post scrubbing. This may throw an exception.</param>
 	/// <returns>True if the object passed validation, false if validation did not pass and the object was scrubbed</returns>
-	public static bool ValidateScrub(this object arg, out List<(string? errorMessage, string memberName, object? failValue)> valresfail, bool useHarshMode = true) {
+	public static bool ValidateScrub(this object value, out List<(string? errorMessage, string memberName, object? failValue)> valresfail, bool useHarshMode = true) {
 		valresfail = [];
 
-		if (arg.TryValidate(out List<ValidationResult> valres))
+		if (value.TryValidate(out List<ValidationResult> valres))
 			return true;
 
-		Type type = arg.GetType();
+		Type type = value.GetType();
 		foreach (ValidationResult vr in valres) {
 			foreach (string vrmemb in vr.MemberNames) {
 				PropertyInfo? prop = type.GetProperty(vrmemb);
 				Type propType = prop!.PropertyType;
 
-				valresfail.Add((vr.ErrorMessage!, vrmemb, prop.CanRead ? prop.GetValue(arg) : null));
+				valresfail.Add((vr.ErrorMessage!, vrmemb, prop.CanRead ? prop.GetValue(value) : null));
 
 				if (prop.CanWrite) {
 					object? valueToSet;
@@ -263,13 +261,13 @@ public static partial class Extension {
 					else
 						valueToSet = null;
 
-					prop.SetValue(arg, valueToSet);
+					prop.SetValue(value, valueToSet);
 				}
 			}
 		}
 
 		if (useHarshMode)
-			Assert.IsValid(arg);
+			Assert.IsValid(value);
 
 		return false;
 	}

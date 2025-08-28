@@ -5,20 +5,20 @@ using LiteDB;
 using LiteDB.Engine;
 
 /// <summary>
-/// Options for configuring and using LiteDb
+/// Options for configuring and using LiteDb.
 /// </summary>
 /// <remarks>
-/// Used in conjunction with <see cref="Factory"/>
+/// Used in conjunction with <see cref="Factory"/>.
 /// <para>
 /// <see cref="InvariantIgnoreCaseCollation"/> and <see cref="RegisterCustomDateTimeDateTimeOffsetMapping(LiteDB.BsonMapper)"/> are both
-/// used during <see cref="Factory"/> operation
+/// used during <see cref="Factory"/> operation.
 /// </para>
 /// </remarks>
 public class FactoryOption {
 
 	/// <summary>
-	/// Format that is used when serializing / deserializing <see cref="DateTime"/> when <see cref="UseCustomDateTimeDateTimeOffsetMapping(BsonMapper)"/>
-	/// is used.
+	/// Format that is used when serializing / deserializing <see cref="DateTime"/> when <see cref="RegisterCustomDateTimeDateTimeOffsetMapping(BsonMapper)"/>
+	/// is executed.
 	/// </summary>
 	public const string DATETIMEFORMAT = "yyyy-MM-ddTHH:mm:ss.fffffff";
 

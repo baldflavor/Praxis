@@ -2,6 +2,9 @@ namespace Praxis.Net.Email;
 
 using System.Net.Mail;
 
+/// <summary>
+/// Network settings used when sending email.
+/// </summary>
 public sealed class NetworkSettings {
 
 	/// <summary>

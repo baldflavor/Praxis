@@ -9,17 +9,17 @@ using System.ComponentModel.DataAnnotations;
 /// </summary>
 public static partial class Extension {
 	/// <summary>
-	/// Default delimter to use between each item in <see cref="ToStringSummary(IEnumerable{ValidationResult}, string?, string?, string?, bool)"/>
+	/// Default delimter to use between when joining items / strings.
 	/// </summary>
 	public static string JoinDelimiter { get; set; } = Const.BROKENVERTBARSTRING;
 
 	/// <summary>
-	/// Inner delimiter (for full property) for each item in <see cref="ToStringEach(IEnumerable, bool, string?, string?, string?)"/>, <see cref="ToStringEach(IDictionary, bool, string?, string?, string?)"/>, <see cref="ToStringEach(NameValueCollection, string?, string?)"/>
+	/// Inner delimiter (for full property) for items in <see cref="ToStrings(IEnumerable, bool, string?, string?)"/> or <see cref="ToStrings(IEnumerable{ValidationResult}, string?, string?, bool)"/>.
 	/// </summary>
 	public static string ToStringsDelimiterInner { get; set; } = Const.BROKENVERTBARSTRING;
 
 	/// <summary>
-	/// Format to use for <see cref="ToStringEach(IEnumerable, bool, string?, string?, string?)"/>, <see cref="ToStringEach(IDictionary, bool, string?, string?, string?)"/>, <see cref="ToStringEach(NameValueCollection, string?, string?)"/>
+	/// Format to use for <see cref="ToStrings(IEnumerable, bool, string?, string?)"/> or <see cref="ToStrings(IEnumerable{ValidationResult}, string?, string?, bool)"/>.
 	/// </summary>
 	public static string ToStringsFormat { get; set; } = "{0}" + Const.RIGHTARROWHEAD + "{1}";
 
@@ -96,6 +96,7 @@ public static partial class Extension {
 	/// <param name="arg">The collection to run the code upon</param>
 	/// <param name="useFullPropertyMode">Whether full/nested properties of each item should be returned</param>
 	/// <param name="format">Format to use when displaying property name/value combinations when useFullPropertyMode is true</param>
+	/// <param name="delimiterInner">Delimiter to use for nested calls to string/value formatting.</param>
 	/// <returns><see cref="List{T}"/> of <see cref="string"/></returns>
 	public static List<string> ToStrings(this IEnumerable arg, bool useFullPropertyMode = false, string? format = null, string? delimiterInner = null) {
 		format ??= ToStringsFormat;

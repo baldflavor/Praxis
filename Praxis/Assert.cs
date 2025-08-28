@@ -173,8 +173,8 @@ public static class Assert {
 	/// <param name="arg">String to assert against</param>
 	/// <param name="cae">Caller argument expression captured for logging / attachment to the exception if thrown. Do not pass in this value.</param>
 	/// <returns>The passed string which is not null or whitespace</returns>
-	/// <exception cref="ArgumentNullException"><paramref name="argument"/> is null.</exception>
-	/// <exception cref="ArgumentException"><paramref name="argument"/> is empty or consists only of white-space characters.</exception>
+	/// <exception cref="ArgumentNullException"><paramref name="arg"/> is null.</exception>
+	/// <exception cref="ArgumentException"><paramref name="arg"/> is empty or consists only of white-space characters.</exception>
 	public static string IsNotNullOrWhiteSpace(this string? arg, [CallerArgumentExpression(nameof(arg))] string cae = "") {
 		try {
 			ArgumentException.ThrowIfNullOrWhiteSpace(arg);

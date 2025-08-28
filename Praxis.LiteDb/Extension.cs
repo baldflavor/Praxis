@@ -3,6 +3,9 @@ namespace Praxis.LiteDb;
 using System.Linq.Expressions;
 using LiteDB;
 
+/// <summary>
+/// Extensions for <see cref="LiteDb"/> objects.
+/// </summary>
 public static class Extension {
 
 	/// <summary>

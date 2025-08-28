@@ -13,8 +13,8 @@ using NLog.Targets.Wrappers;
 /// <remarks>
 /// <para>When using the configure methods for Json output, a particular point of note is the <c>LogID</c>. This is initialized as: <c>DateTime.UtcNow.ToOADate()_${sequenceid}</c>.</para>
 /// <para>This means that every logged entry past that point will all have, essentially, a batch prefix of the current UTC OADate, combined with a rolling sequence that starts at <c>1</c>.</para>
-/// <para>Thus you can find all logs that belong to a specific application domain "<i>run</i>" using the OADate portion that comes before the _</para>
-/// <para>It is recommended that immediately after setup on call the <see cref="LogBase.Initialize(InitializeInfo, string, string)"/> method to record machine information as the start of a log batch</para>
+/// <para>Thus you can find all logs that belong to a specific application domain "<i>run</i>" using the OADate portion that comes before the <c>_</c>.</para>
+/// <para>It is recommended that immediately after setup on call the <see cref="Extension.Initialized(NLog.Logger, InitializeInfo, string)"/> method to record machine information as the start of a log batch.</para>
 /// The static constructor of this class sets up and configures some global options in NLog.
 /// <list type="bullet">
 /// <item>TimeSource is globally set to FastUtcTimeSource</item>
@@ -130,7 +130,6 @@ public static class NLogConfiguration {
 	/// Sets the value of <see cref="LogManager.Configuration"/> to a new configuration, configured for <see cref="LogLevel.Debug"/> to <see cref="LogLevel.Fatal"/>
 	/// logging with the passed targets.
 	/// </summary>
-	/// <param name="configPostSet">Delegate that can be used to perform any other operation on the <see cref="LoggingConfiguration"/> after it has been set to <c>LogManager.Configuration</c>.</param>
 	/// <param name="targets">Targets to add to the configuration.</param>
 	/// <exception cref="ArgumentException"></exception>
 	public static void SetLogManagerConfiguration(params Target[] targets) {

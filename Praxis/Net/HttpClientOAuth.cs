@@ -58,7 +58,8 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="username">Username to send for the token request</param>
 	/// <param name="password">Password to send for the token request</param>
 	/// <param name="tokenUri">The URI to use when requesting the token</param>
-	/// <returns>An AuthTokenResponse</returns>
+	/// <param name="cTok">Cancellation passed to asynchronous operations</param>
+	/// <returns><c>Task</c> of <see cref="OAuthTokenResponse"/>.</returns>
 	public async Task<OAuthTokenResponse> GetOAuthTokenResponse(string username, string password, Uri tokenUri, CancellationToken cTok) {
 		OAuthTokenResponse? oAuthTokenResponse = await client.Retrieve<OAuthTokenResponse>(
 				HttpMethod.Post,
@@ -82,6 +83,7 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="relativeUri">Relative URI portion (e.g. Vehicles/Ford/GetMakes) to use when making the request</param>
 	/// <param name="data">Values to be either sent as part of the query string or posted to the request</param>
 	/// <param name="headers">List of headers to send with the request</param>
+	/// <param name="cTok">Cancellation passed to asynchronous operations</param>
 	/// <returns>A type TData object</returns>
 	public async Task<T?> Retrieve<T>(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) where T : class {
 		return await client.Retrieve<T>(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, cTok).ConfigureAwait(false), cTok).ConfigureAwait(false);
@@ -96,6 +98,7 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// <param name="relativeUri">Relative URI portion (e.g. Vehicles/Ford/GetMakes) to use when making the request</param>
 	/// <param name="data">Values to be either sent as part of the query string or posted to the request</param>
 	/// <param name="headers">List of headers to send with the request</param>
+	/// <param name="cTok">Cancellation passed to asynchronous operations</param>
 	/// <returns>A string</returns>
 	public async Task<string> Retrieve(HttpMethod method, Uri baseUri, string? relativeUri = default, object? data = default, Dictionary<string, string>? headers = default, CancellationToken cTok = default) {
 		return await client.Retrieve(method, baseUri, relativeUri, data, await _GetAuthHeaders(headers, cTok).ConfigureAwait(false), cTok).ConfigureAwait(false);
@@ -129,7 +132,8 @@ public class HttpClientOAuth(string username, string password, Uri tokenUri, Htt
 	/// Adds a token to the request header; if a token is needed then one is retrieved internally by the method
 	/// </summary>
 	/// <param name="headers">Existing headers to accont for when making the new ones</param>
-	/// <returns>An awaitable task</returns>
+	/// <param name="cTok">Cancellation passed to asynchronous operations</param>
+	/// <returns><c>Task</c> of <see cref="Dictionary{TKey, TValue}"/> of <c>string</c>, <c>string</c>.</returns>
 	private async Task<Dictionary<string, string>> _GetAuthHeaders(Dictionary<string, string>? headers, CancellationToken cTok) {
 		headers ??= [];
 

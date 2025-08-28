@@ -96,7 +96,7 @@ public static partial class Extension {
 			using var tempFont = new Font(fontFam, startingFontSize);
 
 			Size textSize = TextRenderer.MeasureText(text, tempFont, clientSize, TextFormatFlags.WordBreak);
-			if (textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height || startingFontSize == 1f) {
+			if ((textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height) || startingFontSize == 1f) {
 				label.Font = tempFont;
 				return label;
 			}
@@ -258,7 +258,7 @@ public static partial class Extension {
 	/// <para>myCbo.SetSelectedItem((MyClass ssi) => ssi.Food == foodVariable);</para>
 	/// </summary>
 	/// <typeparam name="T">Type of item to cast / operate on in the items of the combo box</typeparam>
-	/// <param name="control">Target combo box to work with</param>
+	/// <param name="control">Target control.</param>
 	/// <param name="evaluator">Function used for evaluating which object should be selected (matches equivalency)</param>
 	/// <returns>A value indicating whether the value was set or not</returns>
 	public static bool TrySetSelectedItem<T>(this ComboBox control, Func<T, bool> evaluator) => _TrySetSelectedItem(control, evaluator);
@@ -268,8 +268,8 @@ public static partial class Extension {
 	/// <para>myCbo.SetSelectedItem((MyClass ssi) => ssi.Food == foodVariable);</para>
 	/// </summary>
 	/// <typeparam name="T">Type of item to cast / operate on in the items of the combo box</typeparam>
-	/// <param name="comboBox">Target combo box to work with</param>
-	/// <param name="evaluator">Function used for evaluating which object should be selected (matches equivalency)</param>
+	/// <param name="control">Target control.</param>
+	/// <param name="evaluator">Function used for evaluating which object should be selected (matches equivalency).</param>
 	/// <returns>A value indicating whether the value was set or not</returns>
 	public static bool TrySetSelectedItem<T>(this ListBox control, Func<T, bool> evaluator) => _TrySetSelectedItem(control, evaluator);
 

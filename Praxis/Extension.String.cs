@@ -254,7 +254,8 @@ public static partial class Extension {
 	/// <para>There is no other special consideration for IP6 addresses other than that they succeed IPAddress.Parse()</para>
 	/// </summary>
 	/// <param name="arg">source string to work with</param>
-	/// <returns>True if valid, otherwise false</returns>
+	/// <param name="ipEndpoint">Resultant <see cref="System.Net.IPEndPoint"/> if valid.</param>
+	/// <returns><c>True</c> if valid, otherwise <c>false</c>.</returns>
 	public static bool IsValidIPEndpoint(this string? arg, out System.Net.IPEndPoint? ipEndpoint) {
 		bool successful = System.Net.IPEndPoint.TryParse(arg!, out System.Net.IPEndPoint? res);
 		ipEndpoint = res;

@@ -4,6 +4,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
+/// <summary>
+/// Base class used for classes that want to broadcast when properties have changed.
+/// </summary>
 public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged {
 
 	/// <summary>
@@ -13,7 +16,7 @@ public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged {
 
 
 	/// <summary>
-	/// Code that is used to set property values, checking to see if the value set is the current value and will call <see cref="NotifyPropertyChanged(string)"/>
+	/// Code that is used to set property values, checking to see if the value set is the current value and will call <see cref="_NotifyPropertyChanged(string)"/>
 	/// if a new value is being set
 	/// </summary>
 	/// <typeparam name="T">Type of data in a backing field or property</typeparam>
@@ -36,6 +39,6 @@ public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged {
 	/// This method should be called everywhere that a set operation is being triggered; the callermembername will then supply the name of the property
 	/// that was changed to the event handler
 	/// </summary>
-	/// <param name="propertyName"></param>
+	/// <param name="propertyName">The name of the property that has changed. Read by compiler services; only pass to override.</param>
 	private void _NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 }

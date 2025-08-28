@@ -58,7 +58,9 @@ public sealed class Recipients {
 		}
 	}
 
-
+	/// <summary>
+	/// Properties describing an email recipient.
+	/// </summary>
 	public sealed class Recipient {
 
 		/// <summary>
@@ -84,6 +86,7 @@ public sealed class Recipients {
 			this.Address = address;
 		}
 
+		/// <inheritdoc/>
 		public override string ToString() {
 			if (string.IsNullOrWhiteSpace(this.Name))
 				return this.Address;
