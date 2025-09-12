@@ -68,22 +68,21 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Shallow clones the passed in object source to a new type -- using reflection to property match by name and type.
+	/// Creates a new instance of an object <typeparamref name="T"/>, and then pushes member values where <c>Name</c> (ordinal, case insensitive) and
+	/// <c>Type</c> match between source/destination objects.
 	/// </summary>
 	/// <remarks>
-	/// <b>BE AWARE</b> that this may set <c>null</c> values to properties on the destination (such as the case of <c>string</c>) which are not
-	/// marked as <i>nullable</i> [<c>?</c>].
+	/// <b>BE AWARE</b> that this may set <c>null</c> values on the destination (such as the case of <c>string</c>) which are not marked
+	/// as <i>nullable</i> [<c>?</c>].
 	/// </remarks>
-	/// <typeparam name="T">The type to clone to.</typeparam>
-	/// <param name="source">The source object to clone from.</param>
-	/// <returns>An object of type TData with set values that match from source.</returns>
-	/// <exception cref="ArgumentException">Source is null.</exception>
-	public static T CloneToType<T>(this object source) where T : notnull {
-		T destination = Activator.CreateInstance<T>();
-
-		source.PushPropertiesTo(destination);
-
-		return destination;
+	/// <typeparam name="T">Type of new object instance to clone to.</typeparam>
+	/// <param name="source">Source object for values.</param>
+	/// <param name="includeFields">Whether to include fields in source/destination push.</param>
+	/// <param name="includeProperties">Whether to include properties in source/destination push.</param>
+	/// <param name="skipNames">Names of property/fields excluded from push.</param>
+	/// <exception cref="Exception">Thrown if reflective or property violations occur.</exception>
+	public static T CloneTo<T>(this object source, bool includeFields = false, bool includeProperties = true, params string[] skipNames) where T : notnull {
+		return source.PushTo(Activator.CreateInstance<T>(), includeFields, includeProperties, skipNames);
 	}
 
 	/// <summary>
@@ -116,45 +115,118 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Pushes matching property values from a source object and type to a destination object and type. Properties are matched in a case insensitive fashion.
+	/// Pushes member values where <c>Name</c> (ordinal, case insensitive) and <c>Type</c> match between source/destination objects.
 	/// </summary>
 	/// <remarks>
-	/// <b>BE AWARE</b> that this may set <c>null</c> values to properties on the destination (such as the case of <c>string</c>) which are not
-	/// marked as <i>nullable</i> [<c>?</c>].
+	/// <b>BE AWARE</b> that this may set <c>null</c> values on the destination (such as the case of <c>string</c>) which are not marked
+	/// as <i>nullable</i> [<c>?</c>].
 	/// </remarks>
-	/// <param name="source">Source object to draw from.</param>
-	/// <param name="destination">Destination object to push to.</param>
-	/// <param name="skipProperties">Array of property names to skip when pushing values from one object to the other.</param>
-	/// <exception cref="ArgumentException">Source or destination is <c>null</c>.</exception>
-	public static void PushPropertiesTo<T, K>(this T source, K destination, params string[] skipProperties) where T : notnull where K : notnull {
+	/// <param name="source">Source object for values.</param>
+	/// <param name="destination">Destination object for values.</param>
+	/// <param name="includeFields">Whether to include fields in source/destination push.</param>
+	/// <param name="includeProperties">Whether to include properties in source/destination push.</param>
+	/// <param name="skipNames">Names of property/fields excluded from push.</param>
+	/// <exception cref="Exception">Thrown if reflective or property violations occur.</exception>
+	public static K PushTo<T, K>(this T source, K destination, bool includeFields = false, bool includeProperties = true, params string[] skipNames) where T : notnull where K : notnull {
 		var sourceType = source.GetType();
 		var destinationType = destination.GetType();
 
-		// Binding flags do not work on these calls other than the access modifiers
-		IEnumerable<PropertyInfo> sourceProperties = sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead);
-		IEnumerable<PropertyInfo> destinationProperties = destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite);
-
-		if (skipProperties.Length > 0)
-			destinationProperties = destinationProperties.Where(d => !skipProperties.Contains(d.Name));
-
-		foreach (PropertyInfo? destPi in destinationProperties) {
-			bool destPiTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
-
-			PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
-			if (sourcePi is null)
-				continue;
-
-			bool sourcePiTypeIsNullable = _IsNullableType(sourcePi, out Type sourcePiType);
-
-			if (sourcePiType != destPiType)
-				continue;
-
-			if (sourcePiTypeIsNullable && !destPiTypeIsNullable)
-				destPi.SetValue(destination, sourcePi.GetValue(source) ?? Activator.CreateInstance(sourcePiType));
-			else
-				destPi.SetValue(destination, sourcePi.GetValue(source));
+		IEnumerable<PropertyInfo> sourceProperties;
+		IEnumerable<PropertyInfo> destinationProperties;
+		if (includeProperties) {
+			// Binding flags do not work on these calls other than the access modifiers
+			sourceProperties = sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead);
+			destinationProperties = destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite);
 		}
+		else {
+			sourceProperties = [];
+			destinationProperties = [];
+		}
+
+		IEnumerable<FieldInfo> sourceFields;
+		IEnumerable<FieldInfo> destinationFields;
+		if (includeFields) {
+			// Binding flags do not work on these calls other than the access modifiers
+			sourceFields = sourceType.GetFields(BindingFlags.Instance | BindingFlags.Public);
+			destinationFields = destinationType.GetFields(BindingFlags.Instance | BindingFlags.Public);
+		}
+		else {
+			sourceFields = [];
+			destinationFields = [];
+		}
+
+		if (skipNames.Length > 0) {
+			destinationProperties = destinationProperties.Where(d => !skipNames.Contains(d.Name, StringComparer.OrdinalIgnoreCase));
+			destinationFields = destinationFields.Where(d => !skipNames.Contains(d.Name, StringComparer.OrdinalIgnoreCase));
+		}
+
+		if (includeProperties) {
+			foreach (PropertyInfo? destPi in destinationProperties) {
+				bool destMembTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
+
+				PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
+				FieldInfo? sourceFi = null;
+				bool sourceTypeIsNullable;
+				Type sourceMembType;
+				if (sourcePi is not null) {
+					sourceTypeIsNullable = _IsNullableType(sourcePi, out sourceMembType);
+				}
+				else {
+					sourceFi = sourceFields.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
+					if (sourceFi is not null) {
+						sourceTypeIsNullable = _IsNullableType(sourceFi, out sourceMembType);
+					}
+					else {
+						continue;
+					}
+				}
+
+				if (sourceMembType != destPiType)
+					continue;
+
+				destPi.SetValue(
+					destination,
+					sourcePi?.GetValue(source) ??
+					sourceFi?.GetValue(source) ??
+					(destMembTypeIsNullable ? null : Activator.CreateInstance(destPiType)));
+			}
+		}
+
+		if (includeFields) {
+			foreach (FieldInfo? destFi in destinationFields) {
+				bool destMembTypeIsNullable = _IsNullableType(destFi, out Type destFiType);
+
+				PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destFi.Name));
+				FieldInfo? sourceFi = null;
+				bool sourceTypeIsNullable;
+				Type sourceMembType;
+				if (sourcePi is not null) {
+					sourceTypeIsNullable = _IsNullableType(sourcePi, out sourceMembType);
+				}
+				else {
+					sourceFi = sourceFields.SingleOrDefault(spi => spi.Name.EqualsOIC(destFi.Name));
+					if (sourceFi is not null) {
+						sourceTypeIsNullable = _IsNullableType(sourceFi, out sourceMembType);
+					}
+					else {
+						continue;
+					}
+				}
+
+				if (sourceMembType != destFiType)
+					continue;
+
+				destFi.SetValue(
+					destination,
+					sourcePi?.GetValue(source) ??
+					sourceFi?.GetValue(source) ??
+					(destMembTypeIsNullable ? null : Activator.CreateInstance(destFiType)));
+			}
+		}
+
+		return destination;
 	}
+
 
 	/// <summary>
 	/// On the target object, walks through type/base type heirarchy and retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is a 
@@ -375,17 +447,35 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Determines whether the passed property info has a backing type that is nullable
+	/// Determines whether the passed property info has a backing type that is nullable.
 	/// </summary>
-	/// <param name="arg">Target property info to check</param>
-	/// <param name="actualType">The actual CLR type backing / boxed inside a potential nullable type, or the original type if not nullable</param>
-	/// <returns>True if the backing type was nullable, otherwise false</returns>
-	private static bool _IsNullableType(PropertyInfo arg, out Type actualType) {
-		Type argPiType = arg.PropertyType;
+	/// <param name="pi">Value to check.</param>
+	/// <param name="actualType">The actual CLR type backing / boxed inside a potential nullable type, or the original type if not nullable.</param>
+	/// <returns><c>true</c> if the backing type is nullable, otherwise <c>false</c></returns>
+	private static bool _IsNullableType(PropertyInfo pi, out Type actualType) {
+		Type argPiType = pi.PropertyType;
 		bool argPiTypeIsNullable = argPiType.IsGenericType && argPiType.GetGenericTypeDefinition() == typeof(Nullable<>);
 
 		if (argPiTypeIsNullable)
-			actualType = Nullable.GetUnderlyingType(arg.PropertyType) ?? throw new Exception("Unable to get underlycing type of the passed arg");
+			actualType = Nullable.GetUnderlyingType(pi.PropertyType) ?? throw new Exception("Unable to get underlying type").AddData(pi.Name);
+		else
+			actualType = argPiType;
+
+		return argPiTypeIsNullable;
+	}
+
+	/// <summary>
+	/// Determines whether the passed field info has a backing type that is nullable.
+	/// </summary>
+	/// <param name="fi">Value to check.</param>
+	/// <param name="actualType">The actual CLR type backing / boxed inside a potential nullable type, or the original type if not nullable.</param>
+	/// <returns><c>true</c> if the backing type is nullable, otherwise <c>false</c></returns>
+	private static bool _IsNullableType(FieldInfo fi, out Type actualType) {
+		Type argPiType = fi.FieldType;
+		bool argPiTypeIsNullable = argPiType.IsGenericType && argPiType.GetGenericTypeDefinition() == typeof(Nullable<>);
+
+		if (argPiTypeIsNullable)
+			actualType = Nullable.GetUnderlyingType(fi.FieldType) ?? throw new Exception("Unable to get underlying type").AddData(fi.Name);
 		else
 			actualType = argPiType;
 
