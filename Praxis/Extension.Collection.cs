@@ -21,7 +21,7 @@ public static partial class Extension {
 	/// <summary>
 	/// Format to use for <see cref="ToStrings(IEnumerable, bool, string?, string?)"/> or <see cref="ToStrings(IEnumerable{ValidationResult}, string?, string?, bool)"/>.
 	/// </summary>
-	public static string ToStringsFormat { get; set; } = "{0}" + Const.RIGHTARROWHEAD + "{1}";
+	public static string ToStringsFormat { get; set; } = "{0}" + Const.VERTICALELLIPSIS + "{1}";
 
 	/// <summary>
 	/// Returns a value that indicates if the passed <paramref name="arg"/> has any elements.

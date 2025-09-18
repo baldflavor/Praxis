@@ -27,7 +27,7 @@ public static partial class Extension {
 	/// <summary>
 	/// Format to use for property name -> value output in <see cref="ToStringProperties{T}(T, string?, string?, string[])"/>.
 	/// </summary>
-	public static string ToStringPropertiesFormat { get; set; } = "{0}" + Const.RIGHTARROWHEAD + "{1}";
+	public static string ToStringPropertiesFormat { get; set; } = "{0}" + Const.VERTICALELLIPSIS + "{1}";
 
 	/// <summary>
 	/// Delimiter to use between rich object property->value or collections when calling <see cref="ToStringRich(object?, ref int, bool, string?, string?)"/>.
