@@ -75,7 +75,7 @@ public partial class PropertyGridder : Form {
 					_GetProps(selObj)
 					.Where(p => _ogProperties[p.Key] != p.Value)
 					.OrderBy(p => p.Key)
-					.Select(p => $"{p.Key}{Const.RIGHTARROWHEAD}{p.Value}");
+					.Select(p => $"{p.Key}{Const.VERTICALELLIPSIS}{p.Value}");
 
 			foreach (var chp in changedProps)
 				sb.AppendLine(chp);

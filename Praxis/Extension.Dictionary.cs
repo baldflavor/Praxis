@@ -8,8 +8,11 @@ using System.Collections.Generic;
 public static partial class Extension {
 
 	/// <summary>
-	/// Attempts to retrieve a key / value and supplies a value if it does not exist
+	/// Attempts to retrieve a key / value and supplies a value if it does not exist.
 	/// </summary>
+	/// <remarks>
+	/// Course <c>lock</c> applied over <paramref name="arg"/> during execution.
+	/// </remarks>
 	/// <typeparam name="K">Type of Key</typeparam>
 	/// <typeparam name="V">Type of Value</typeparam>
 	/// <param name="arg">Target dictionary to check</param>
@@ -29,6 +32,9 @@ public static partial class Extension {
 	/// <summary>
 	/// Attempts to retrieve a key / value and generates a value if it does not exist
 	/// </summary>
+	/// <remarks>
+	/// Course <c>lock</c> applied over <paramref name="arg"/> during execution.
+	/// </remarks>
 	/// <typeparam name="K">Type of Key</typeparam>
 	/// <typeparam name="V">Type of Value</typeparam>
 	/// <param name="arg">Target dictionary to check</param>
@@ -50,6 +56,9 @@ public static partial class Extension {
 	/// <summary>
 	/// Attempts to retrieve a key / value and generates a value if it does not exist
 	/// </summary>
+	/// <remarks>
+	/// If <paramref name="semSlimKey"/> is provided, then locked during execution.
+	/// </remarks>
 	/// <typeparam name="K">Type of Key</typeparam>
 	/// <typeparam name="V">Type of Value</typeparam>
 	/// <param name="arg">Target dictionary to check</param>

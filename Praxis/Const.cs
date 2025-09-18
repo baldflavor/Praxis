@@ -76,19 +76,19 @@ public static class Const {
 	public const string NULL = "null";
 
 	/// <summary>
-	/// Right arrowhead
+	/// Vertical ellipsis
 	/// </summary>
 	/// <remarks>
-	/// C#: <c>(char)9658</c>
-	/// <para>Unic Number: <c>U+25BA</c></para>
-	/// <para>Html Code: <c>&amp;#9658;</c></para>
+	/// C#: <c>(char)8942</c>
+	/// <para>Unic Number: <c>U+22EE</c></para>
+	/// <para>Html Code: <c>&amp;#8942;</c></para>
 	/// </remarks>
-	public const char RIGHTARROWHEAD = '►';
+	public const char VERTICALELLIPSIS = '⋮';
 
 	/// <summary>
-	/// Right arrowhead (<see cref="RIGHTARROWHEAD"/> as string)
+	/// Vertical ellipsis (<see cref="VERTICALELLIPSIS"/> as string)
 	/// </summary>
-	public const string RIGHTARROWHEADSTRING = "►";
+	public const string VERTICALELLIPSISSTRING = "⋮";
 
 	/// <summary>
 	/// Represents the numeric equivalent of a <see langword="true"/> value.

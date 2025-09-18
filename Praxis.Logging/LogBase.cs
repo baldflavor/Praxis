@@ -4,13 +4,11 @@ using System.Runtime.CompilerServices;
 using NLog;
 
 /// <summary>
-/// Class used for working with various logging facilities
+/// Class used for logging messages which includes parameter capture and extra data support.
 /// </summary>
-/// <remarks>
-/// Initializes a new instance of the <see cref="Logging" /> class
-/// </remarks>
 /// <param name="type">Type used for getting internal log reference.</param>
 public class LogBase(Type type) {
+
 	/// <summary>
 	/// Holds a reference to an <see cref="Logger"/> used for writing log entries
 	/// </summary>
@@ -89,22 +87,22 @@ public class LogBase(Type type) {
 	}
 
 	/// <summary>
-	/// Used for adding properties to a <see cref="Logger"/> before performing a log operation
+	/// Used for adding properties to a <see cref="Logger"/> before performing a log operation.
 	/// </summary>
 	/// <remarks>
 	/// Base level code performs the following and should be called when overriden unless specifically not needed:
 	/// <list type="number">
-	///	<item>If <paramref name="data"/> is <see langword="null"/>, <c>returns</c></item>
+	///	<item>If <paramref name="data"/> is <c>null</c> -> <c>returns</c>.</item>
 	///	<item>If <paramref name="data"/> is <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/>
-	///	of <see cref="string"/>, <see cref="object"/>, adds each to the <paramref name="logger"/>, then <c>returns</c></item>
-	///	<item>Adds <paramref name="data"/> to a property named <see cref="Constant.DATA"/></item>
+	///	of <c>string</c>, <c>object</c>, adds each to the <paramref name="logger"/>, then <c>returns</c>.</item>
+	///	<item>Else, adds <paramref name="data"/> to a property named <see cref="Constant.DATA"/></item>
 	/// </list>
 	/// </remarks>
-	/// <param name="data">Data used for <paramref name="logger"/> properties</param>
-	/// <param name="logger">The logger that is being used for logging purposes</param>
+	/// <param name="data">Data used for <paramref name="logger"/> properties.</param>
+	/// <param name="logger">Target logger to add properties to.</param>
 	/// <returns><see cref="Logger"/></returns>
 	protected virtual Logger AddProperties(object? data, Logger logger) {
-		if (data == null)
+		if (data is null)
 			return logger;
 		else if (data is IEnumerable<KeyValuePair<string, object?>> dDict)
 			return logger.WithProperties(dDict);

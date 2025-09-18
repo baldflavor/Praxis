@@ -22,7 +22,7 @@ public class ObjectExtension {
 			Rating = "R"
 		};
 
-		film.PushPropertiesTo(movie);
+		film.PushTo(movie);
 
 
 
