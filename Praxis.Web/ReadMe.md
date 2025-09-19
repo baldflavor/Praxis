@@ -1,4 +1,8 @@
-﻿# Overview
+# UNMAINTAINED
+
+This project is no longer being updated or maintained and is thus unloaded in the parent solution. (2025-09-18)
+
+# Overview
 
 The code contained in this library was written by Bald Flavor, beginning back in ... 2015?
 

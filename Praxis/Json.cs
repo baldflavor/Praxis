@@ -21,6 +21,8 @@ public static partial class Json {
 			new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
 		},
 		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+		Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+		NumberHandling = JsonNumberHandling.Strict,
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
 		PreferredObjectCreationHandling = JsonObjectCreationHandling.Populate,
 		ReadCommentHandling = JsonCommentHandling.Skip,
@@ -49,12 +51,20 @@ public static partial class Json {
 	/// </summary>
 	/// <remarks>
 	/// <para><b>Immutable</b></para>
-	/// Note that this differs from the <see cref="JsonSerializerDefaults.Web"/> in the following ways:
+	/// Note that this differs from <see cref="JsonSerializerDefaults.General"/>/<see cref="JsonSerializerDefaults.Web"/> in the following ways:
 	/// <list type="table">
 	/// <listheader>
 	///     <term>Property</term>
 	///     <description>Value</description>
 	/// </listheader>
+	/// <item>
+	///     <term><see cref="JsonSerializerOptions.Encoder"/></term>
+	///     <description>Set to: <see cref="System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping"/> instead of <see cref="System.Text.Encodings.Web.JavaScriptEncoder.Default"/>.
+	///     <para>This encoder instance does not escape HTML-sensitive characters like &lt;, &gt;, &amp;, etc. and hence must be used cautiously (for example, if the output data is within a response whose content-type is known with a charset set to UTF-8).
+	///     <br/>The quotation mark is encoded as \" rather than \u0022.
+	///     <br/>Using this encoder instance allows <see cref="System.Text.Unicode.UnicodeRanges.All"/> to go through unescaped.
+	///     <br/>This encoder instance allows some other characters to go through unescaped (for example, '+'), and hence must be used cautiously.</para></description>
+	/// </item>
 	/// <item>
 	///     <term><see cref="JsonSerializerOptions.DefaultIgnoreCondition"/></term>
 	///     <description><see cref="JsonIgnoreCondition.WhenWritingNull"/></description>

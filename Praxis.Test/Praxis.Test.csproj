@@ -11,18 +11,16 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-		<PackageReference Include="MSTest.TestAdapter" Version="3.10.1" />
-		<PackageReference Include="MSTest.TestFramework" Version="3.10.1" />
+		<PackageReference Include="MSTest.TestAdapter" Version="3.10.4" />
+		<PackageReference Include="MSTest.TestFramework" Version="3.10.4" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<ProjectReference Include="..\Praxis.Cache\Praxis.Cache.csproj" />
-		<ProjectReference Include="..\Praxis.Data.Cosmos\Praxis.Data.Cosmos.csproj" />
 		<ProjectReference Include="..\Praxis.Data\Praxis.Data.csproj" />
 		<ProjectReference Include="..\Praxis.Knowledge\Praxis.Knowledge.csproj" />
 		<ProjectReference Include="..\Praxis.LiteDb\Praxis.LiteDb.csproj" />
 		<ProjectReference Include="..\Praxis.Logging\Praxis.Logging.csproj" />
-		<ProjectReference Include="..\Praxis.Web\Praxis.Web.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>
