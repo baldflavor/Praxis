@@ -25,6 +25,10 @@ public class JsonExtension {
 				DateTime.Now.ToUnspecifiedKind(),
 				DateTime.UtcNow.ToUnspecifiedKind());
 
+		var joA = Json.Options;
+
+
+
 		string json = objOg.ToJson();
 
 		var objDes = json.Deserialize<DateTimeRT>();

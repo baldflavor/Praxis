@@ -8,7 +8,6 @@ using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Net;
 
 /// <summary>
 /// Extension methods for various object types
@@ -131,101 +130,88 @@ public static partial class Extension {
 		var sourceType = source.GetType();
 		var destinationType = destination.GetType();
 
-		IEnumerable<PropertyInfo> sourceProperties;
-		IEnumerable<PropertyInfo> destinationProperties;
+		HashSet<string> membNameSkip = new HashSet<string>(skipNames ?? [], StringComparer.OrdinalIgnoreCase);
+		List<MemberInfo> sourceMembers = [];
 		if (includeProperties) {
-			// Binding flags do not work on these calls other than the access modifiers
-			sourceProperties = sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead);
-			destinationProperties = destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite);
-		}
-		else {
-			sourceProperties = [];
-			destinationProperties = [];
-		}
-
-		IEnumerable<FieldInfo> sourceFields;
-		IEnumerable<FieldInfo> destinationFields;
-		if (includeFields) {
-			// Binding flags do not work on these calls other than the access modifiers
-			sourceFields = sourceType.GetFields(BindingFlags.Instance | BindingFlags.Public);
-			destinationFields = destinationType.GetFields(BindingFlags.Instance | BindingFlags.Public);
-		}
-		else {
-			sourceFields = [];
-			destinationFields = [];
-		}
-
-		if (skipNames.Length > 0) {
-			destinationProperties = destinationProperties.Where(d => !skipNames.Contains(d.Name, StringComparer.OrdinalIgnoreCase));
-			destinationFields = destinationFields.Where(d => !skipNames.Contains(d.Name, StringComparer.OrdinalIgnoreCase));
-		}
-
-		if (includeProperties) {
-			foreach (PropertyInfo? destPi in destinationProperties) {
-				bool destMembTypeIsNullable = _IsNullableType(destPi, out Type destPiType);
-
-				PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
-				FieldInfo? sourceFi = null;
-				bool sourceTypeIsNullable;
-				Type sourceMembType;
-				if (sourcePi is not null) {
-					sourceTypeIsNullable = _IsNullableType(sourcePi, out sourceMembType);
-				}
-				else {
-					sourceFi = sourceFields.SingleOrDefault(spi => spi.Name.EqualsOIC(destPi.Name));
-					if (sourceFi is not null) {
-						sourceTypeIsNullable = _IsNullableType(sourceFi, out sourceMembType);
-					}
-					else {
-						continue;
-					}
-				}
-
-				if (sourceMembType != destPiType)
-					continue;
-
-				destPi.SetValue(
-					destination,
-					sourcePi?.GetValue(source) ??
-					sourceFi?.GetValue(source) ??
-					(destMembTypeIsNullable ? null : Activator.CreateInstance(destPiType)));
-			}
+			foreach (var smpi in sourceType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanRead && !membNameSkip.Contains(pi.Name)))
+				sourceMembers.Add(smpi);
 		}
 
 		if (includeFields) {
-			foreach (FieldInfo? destFi in destinationFields) {
-				bool destMembTypeIsNullable = _IsNullableType(destFi, out Type destFiType);
+			foreach (var smfi in sourceType.GetFields(BindingFlags.Instance | BindingFlags.Public).Where(pi => !membNameSkip.Contains(pi.Name)))
+				sourceMembers.Add(smfi);
+		}
 
-				PropertyInfo? sourcePi = sourceProperties.SingleOrDefault(spi => spi.Name.EqualsOIC(destFi.Name));
-				FieldInfo? sourceFi = null;
-				bool sourceTypeIsNullable;
-				Type sourceMembType;
-				if (sourcePi is not null) {
-					sourceTypeIsNullable = _IsNullableType(sourcePi, out sourceMembType);
-				}
-				else {
-					sourceFi = sourceFields.SingleOrDefault(spi => spi.Name.EqualsOIC(destFi.Name));
-					if (sourceFi is not null) {
-						sourceTypeIsNullable = _IsNullableType(sourceFi, out sourceMembType);
-					}
-					else {
-						continue;
-					}
-				}
+		HashSet<string> sourceMembNames = new HashSet<string>(sourceMembers.Select(s => s.Name), StringComparer.OrdinalIgnoreCase);
+		Dictionary<string, MemberInfo> destinationMembers = new(StringComparer.OrdinalIgnoreCase);
 
-				if (sourceMembType != destFiType)
-					continue;
+		if (includeProperties) {
+			foreach (var destPi in destinationType.GetProperties(BindingFlags.Instance | BindingFlags.Public).Where(pi => pi.CanWrite && sourceMembNames.Contains(pi.Name)))
+				destinationMembers[destPi.Name] = destPi;
+		}
 
-				destFi.SetValue(
-					destination,
+		if (includeFields) {
+			foreach (var destFi in destinationType.GetFields(BindingFlags.Instance | BindingFlags.Public).Where(fi => sourceMembNames.Contains(fi.Name)))
+				destinationMembers[destFi.Name] = destFi;
+		}
+
+		foreach (MemberInfo sourceMi in sourceMembers) {
+			if (!destinationMembers.TryGetValue(sourceMi.Name, out MemberInfo? destMi))
+				continue;
+
+			_GetPiFi(destMi, out var destPi, out var destFi);
+			bool destMembIsNullableValueType = _IsNullableValueType((destPi?.PropertyType ?? destFi?.FieldType)!, out Type destMembType);
+
+			_GetPiFi(sourceMi, out var sourcePi, out var sourceFi);
+			_IsNullableValueType((sourcePi?.PropertyType ?? sourceFi?.FieldType)!, out Type sourceMembType);
+
+			if (sourceMembType != destMembType)
+				continue;
+
+			object? valToSet =
 					sourcePi?.GetValue(source) ??
 					sourceFi?.GetValue(source) ??
-					(destMembTypeIsNullable ? null : Activator.CreateInstance(destFiType)));
-			}
+					(destMembType.IsValueType ?
+						(destMembIsNullableValueType ? null : Activator.CreateInstance(destMembType)) :
+						null);
+
+			destPi?.SetValue(destination, valToSet);
+			destFi?.SetValue(destination, valToSet);
 		}
 
 		return destination;
+
+		/* ----------------------------------------------------------------------------------------------------------
+		 * The method below determine whether the passed property/file info has a backing type that is Nullable<T>.
+		 * It then also returns either the backing member info type, accounting for the member type if it is of Nullable<T>.
+		 */
+		static bool _IsNullableValueType(Type memberType, out Type actualType) {
+			bool membTypeIsNullable = memberType.IsGenericType && memberType.GetGenericTypeDefinition() == typeof(Nullable<>);
+
+			if (membTypeIsNullable)
+				actualType = Nullable.GetUnderlyingType(memberType) ?? throw new Exception("Unable to get underlying type").AddData(memberType.ToString());
+			else
+				actualType = memberType;
+
+			return membTypeIsNullable;
+		}
+
+		/* ----------------------------------------------------------------------------------------------------------
+		 * From a MemberInfo value, get either a PropertyInfo or FieldInfo value. If it is not either of these
+		 * than an Exception will be thrown */
+		static void _GetPiFi(MemberInfo mi, out PropertyInfo? pi, out FieldInfo? fi) {
+			pi = mi as PropertyInfo;
+			if (pi is not null) {
+				fi = null;
+			}
+			else {
+				fi = mi as FieldInfo;
+				if (fi is null)
+					throw new Exception("Neither property nor field information available").AddData(mi.Name);
+			}
+		}
 	}
+
 
 
 	/// <summary>
@@ -424,7 +410,7 @@ public static partial class Extension {
 
 		if (arg is string argString)
 			return argString;
-		else if (t.IsPrimitive || arg is DateTimeOffset)
+		else if (t.IsPrimitive || arg is DateTimeOffset || arg is Enum)
 			return arg.ToString() ?? Const.NULL;
 		else if (arg is Guid argGuid)
 			return argGuid.ToString("N");
@@ -446,41 +432,6 @@ public static partial class Extension {
 			return useFullPropertyMode ? _ToStringProperties(arg, format, delimiter, ref depth) ?? Const.NULL : arg.ToString() ?? Const.NULL;
 	}
 
-	/// <summary>
-	/// Determines whether the passed property info has a backing type that is nullable.
-	/// </summary>
-	/// <param name="pi">Value to check.</param>
-	/// <param name="actualType">The actual CLR type backing / boxed inside a potential nullable type, or the original type if not nullable.</param>
-	/// <returns><c>true</c> if the backing type is nullable, otherwise <c>false</c></returns>
-	private static bool _IsNullableType(PropertyInfo pi, out Type actualType) {
-		Type argPiType = pi.PropertyType;
-		bool argPiTypeIsNullable = argPiType.IsGenericType && argPiType.GetGenericTypeDefinition() == typeof(Nullable<>);
-
-		if (argPiTypeIsNullable)
-			actualType = Nullable.GetUnderlyingType(pi.PropertyType) ?? throw new Exception("Unable to get underlying type").AddData(pi.Name);
-		else
-			actualType = argPiType;
-
-		return argPiTypeIsNullable;
-	}
-
-	/// <summary>
-	/// Determines whether the passed field info has a backing type that is nullable.
-	/// </summary>
-	/// <param name="fi">Value to check.</param>
-	/// <param name="actualType">The actual CLR type backing / boxed inside a potential nullable type, or the original type if not nullable.</param>
-	/// <returns><c>true</c> if the backing type is nullable, otherwise <c>false</c></returns>
-	private static bool _IsNullableType(FieldInfo fi, out Type actualType) {
-		Type argPiType = fi.FieldType;
-		bool argPiTypeIsNullable = argPiType.IsGenericType && argPiType.GetGenericTypeDefinition() == typeof(Nullable<>);
-
-		if (argPiTypeIsNullable)
-			actualType = Nullable.GetUnderlyingType(fi.FieldType) ?? throw new Exception("Unable to get underlying type").AddData(fi.Name);
-		else
-			actualType = argPiType;
-
-		return argPiTypeIsNullable;
-	}
 
 	/// <summary>
 	/// Returns a string that contains all of the public, instance, readable property values from an object

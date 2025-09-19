@@ -15,9 +15,6 @@
   <Project Path="Praxis.Cache/Praxis.Cache.csproj">
     <Platform Project="x64" />
   </Project>
-  <Project Path="Praxis.Data.Cosmos/Praxis.Data.Cosmos.csproj">
-    <Platform Project="x64" />
-  </Project>
   <Project Path="Praxis.Data/Praxis.Data.csproj">
     <Platform Project="x64" />
   </Project>
@@ -31,9 +28,6 @@
     <Platform Project="x64" />
   </Project>
   <Project Path="Praxis.Test/Praxis.Test.csproj">
-    <Platform Project="x64" />
-  </Project>
-  <Project Path="Praxis.Web/Praxis.Web.csproj">
     <Platform Project="x64" />
   </Project>
   <Project Path="Praxis.WinForm/Praxis.WinForm.csproj">

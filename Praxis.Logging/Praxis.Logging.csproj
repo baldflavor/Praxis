@@ -3,6 +3,6 @@
 		<Description>Used to facilitate common logging setup and output</Description>
 	</PropertyGroup>
 	<ItemGroup>
-		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.3" />
+		<PackageReference Include="NLog.Targets.AtomicFile" Version="6.0.4" />
 	</ItemGroup>
 </Project>
