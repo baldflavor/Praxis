@@ -8,6 +8,24 @@ using System.Collections.Generic;
 public static partial class Extension {
 
 	/// <summary>
+	/// Enumerates through keys and values in an <c>IDictionary</c> where they are <c>OfType&lt;IDisposable&gt;</c> and calls
+	/// <c>Dispose()</c> on each.<br />
+	/// Then the dictionary is cleared.
+	/// </summary>
+	/// <typeparam name="K">Type of key in the dictionary.</typeparam>
+	/// <typeparam name="V">Type of values in the dictionary.</typeparam>
+	/// <param name="arg">Dictionary to operate upon.</param>
+	public static void ClearDispose<K, V>(IDictionary<K, V> arg) {
+		foreach (var iDisposableKey in arg.Keys.OfType<IDisposable>())
+			iDisposableKey.Dispose();
+
+		foreach (var iDisposableValue in arg.Values.OfType<IDisposable>())
+			iDisposableValue.Dispose();
+
+		arg.Clear();
+	}
+
+	/// <summary>
 	/// Attempts to retrieve a key / value and supplies a value if it does not exist.
 	/// </summary>
 	/// <remarks>

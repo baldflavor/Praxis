@@ -23,6 +23,24 @@ public static partial class Extension {
 	/// </summary>
 	public static string ToStringsFormat { get; set; } = "{0}" + Const.VERTICALELLIPSIS + "{1}";
 
+
+	/// <summary>
+	/// Enumerates through elements in a collection where they are <c>OfType&lt;IDisposable&gt;</c> and calls
+	/// <c>Dispose()</c> on each.<br />
+	/// Then the collection is cleared.
+	/// </summary>
+	/// <typeparam name="T">Type of objects held in the collection.</typeparam>
+	/// <param name="arg">Collection to operate upon.</param>
+	public static void ClearDispose<T>(this ICollection<T> arg) {
+		foreach (var iDisposable in arg.OfType<IDisposable>())
+			iDisposable.Dispose();
+
+		arg.Clear();
+	}
+
+
+
+
 	/// <summary>
 	/// Returns a value that indicates if the passed <paramref name="arg"/> has any elements.
 	/// <para>If the passed argument is null then false is returned</para>

@@ -254,6 +254,42 @@ public static partial class Extension {
 	}
 
 	/// <summary>
+	/// Shows a property grid for a control in a new form.
+	/// </summary>
+	/// <remarks>
+	/// The created form will have the control's form set as its owner.
+	/// <para>If the control is disposed, the newly created form will be disposed.</para>
+	/// </remarks>
+	/// <param name="arg">Control used as the property grid source.</param>
+	/// <param name="autoShow">Whether to call <c>Show</c> on the created form.</param>
+	/// <param name="formSize">Size of the new form to create as the property grid container.</param>
+	/// <returns><c>Form</c></returns>
+	public static Form ShowPropertyGrid(this Control arg, bool autoShow = true, Size? formSize = null) {
+		var form = new Form() {
+			CausesValidation = false,
+			FormBorderStyle = FormBorderStyle.SizableToolWindow,
+			Owner = arg.FindForm(),
+			Size = formSize ?? new Size(360, 560),
+			Text = arg.Name
+		};
+
+		arg.Disposed += (_, _) => form.Dispose();
+
+		form.Controls.Add(new PropertyGrid {
+			CausesValidation = false,
+			Dock = DockStyle.Fill,
+			Name = arg.Name,
+			Text = arg.Name,
+			SelectedObject = arg
+		});
+
+		if (autoShow)
+			form.Show();
+
+		return form;
+	}
+
+	/// <summary>
 	/// Sets the selected item of the target combo box to be the FIRST matching item that maches the result of the evaluator function
 	/// <para>myCbo.SetSelectedItem((MyClass ssi) => ssi.Food == foodVariable);</para>
 	/// </summary>
