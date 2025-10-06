@@ -26,16 +26,16 @@ public static partial class Extension {
 
 	/// <summary>
 	/// Enumerates through elements in a collection where they are <c>OfType&lt;IDisposable&gt;</c> and calls
-	/// <c>Dispose()</c> on each.<br />
-	/// Then the collection is cleared.
+	/// <c>Dispose()</c> on each.
 	/// </summary>
-	/// <typeparam name="T">Type of objects held in the collection.</typeparam>
+	/// <typeparam name="T">Collection type holding objects to dispose of.</typeparam>
 	/// <param name="arg">Collection to operate upon.</param>
-	public static void ClearDispose<T>(this ICollection<T> arg) {
+	/// <returns><paramref name="arg"/></returns>
+	public static T DisposeAny<T>(this T arg) where T : ICollection {
 		foreach (var iDisposable in arg.OfType<IDisposable>())
 			iDisposable.Dispose();
 
-		arg.Clear();
+		return arg;
 	}
 
 

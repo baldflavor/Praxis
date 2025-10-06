@@ -9,20 +9,21 @@ public static partial class Extension {
 
 	/// <summary>
 	/// Enumerates through keys and values in an <c>IDictionary</c> where they are <c>OfType&lt;IDisposable&gt;</c> and calls
-	/// <c>Dispose()</c> on each.<br />
-	/// Then the dictionary is cleared.
+	/// <c>Dispose()</c> on each.
 	/// </summary>
+	/// <typeparam name="D">The IDictionary to operate upon.</typeparam>
 	/// <typeparam name="K">Type of key in the dictionary.</typeparam>
 	/// <typeparam name="V">Type of values in the dictionary.</typeparam>
 	/// <param name="arg">Dictionary to operate upon.</param>
-	public static void ClearDispose<K, V>(IDictionary<K, V> arg) {
+	/// <returns><paramref name="arg"/></returns>
+	public static D DisposeAny<D, K, V>(this D arg) where D : IDictionary<K, V> {
 		foreach (var iDisposableKey in arg.Keys.OfType<IDisposable>())
 			iDisposableKey.Dispose();
 
 		foreach (var iDisposableValue in arg.Values.OfType<IDisposable>())
 			iDisposableValue.Dispose();
 
-		arg.Clear();
+		return arg;
 	}
 
 	/// <summary>
