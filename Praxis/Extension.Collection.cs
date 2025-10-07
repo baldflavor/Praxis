@@ -28,32 +28,47 @@ public static partial class Extension {
 	/// Enumerates through elements in a collection where they are <c>OfType&lt;IDisposable&gt;</c> and calls
 	/// <c>Dispose()</c> on each.
 	/// </summary>
+	/// <remarks>
+	/// Exceptions encountered during <c>Dispose</c> calls are aggregated and thrown before the method exits, but will not break
+	/// the loop of calling <c>Dispose</c> on subsequent elements.
+	/// </remarks>
 	/// <typeparam name="T">Collection type holding objects to dispose of.</typeparam>
 	/// <param name="arg">Collection to operate upon.</param>
 	/// <returns><paramref name="arg"/></returns>
-	public static T DisposeAny<T>(this T arg) where T : ICollection {
-		foreach (var iDisposable in arg.OfType<IDisposable>())
-			iDisposable.Dispose();
+	/// <exception cref="AggregateException">Thrown if exceptions are encountered as result of the dispose call.</exception>
+	public static T DisposeAny<T>(this T arg) where T : IEnumerable {
+		List<Exception> exceptions = [];
+
+		foreach (var item in arg) {
+			if (item is IDisposable iDisp) {
+				try {
+					iDisp.Dispose();
+				}
+				catch (Exception ex) {
+					exceptions.Add(ex);
+				}
+			}
+		}
+
+		if (exceptions.Count > 0)
+			throw new AggregateException("Exceptions encountered during disposal", exceptions);
 
 		return arg;
 	}
 
-
-
-
 	/// <summary>
 	/// Returns a value that indicates if the passed <paramref name="arg"/> has any elements.
-	/// <para>If the passed argument is null then false is returned</para>
-	/// <para>If the passed argument has a <see cref="ICollection.Count"/> greater than <c>zero</c> true is returned</para>
+	/// <para>If the passed argument is <c>null</c> then <c>false</c> is returned.</para>
+	/// <para>If the passed argument has a <c>Count</c> greater than <b>0</b> <c>true</c> is returned.</para>
 	/// </summary>
-	/// <param name="arg">Collection argument to check for existence of elements</param>
-	/// <returns>True if <paramref name="arg"/> has elements, otherwise false</returns>
-	public static bool HasElements(this ICollection? arg) => arg != null && arg.Count > 0;
+	/// <param name="arg">Target collection.</param>
+	/// <returns><c>true</c> if <paramref name="arg"/> has elements otherwise <c>false</c>.</returns>
+	public static bool HasElements(this ICollection? arg) => arg?.Count > 0;
 
 	/// <summary>
-	/// Joins a string array into a single string using an optional delimiter
+	/// Joins a string array into a single string using an optional delimiter.
 	/// </summary>
-	/// <param name="arg">Array to join together</param>
+	/// <param name="arg">Array to join together.</param>
 	/// <param name="delimiter">Optional delimiter. If <see langword="null"/> then <see cref="JoinDelimiter"/> is used</param>
 	/// <returns><see cref="string"/></returns>
 	public static string Join(this IEnumerable<string> arg, string? delimiter = null) => string.Join(delimiter ?? JoinDelimiter, arg);
@@ -63,17 +78,15 @@ public static partial class Extension {
 	/// </summary>
 	/// <param name="arg">Collection used as source data</param>
 	/// <returns><see cref="KeyValuePair{TKey, TValue}"/> of <see cref="string"/>/<see cref="string"/></returns>
-	public static List<KeyValuePair<string, string?>> KeysValues(this NameValueCollection arg) {
-		List<KeyValuePair<string, string?>> toReturn = [];
+	public static KeyValuePair<string, string?>[] KeysValues(this NameValueCollection arg) {
+		return [.. _GetKvps(arg)];
 
-		foreach (string? key in arg.AllKeys) {
-			if (key is null)
-				continue;
-
-			toReturn.Add(KeyValuePair.Create(key, arg[key]));
+		static IEnumerable<KeyValuePair<string, string?>> _GetKvps(NameValueCollection arg) {
+			foreach (string? key in arg.AllKeys) {
+				if (key is not null)
+					yield return KeyValuePair.Create(key, arg[key]);
+			}
 		}
-
-		return toReturn;
 	}
 
 	/// <summary>
@@ -132,7 +145,6 @@ public static partial class Extension {
 
 		return toReturn;
 	}
-
 
 	/// <summary>
 	/// Returns validation results formatted with member names and error messages
