@@ -10,34 +10,32 @@ using System.Text.RegularExpressions;
 /// </summary>
 public static class Assert {
 	/// <summary>
-	/// Affirms that the value passed to the method does not throw any exceptions (as a result of a failed set of assertions) during exectution
-	/// in <paramref name="assertion"/>
-	/// thrown
+	/// Affirms that no exception is thrown during invocation of <paramref name="assertDelegate"/> when passed <paramref name="value"/>.
 	/// </summary>
-	/// <typeparam name="T">Type of value being affirmed</typeparam>
-	/// <param name="value">value to affirm</param>
-	/// <param name="assertion">Function used for assertion against <paramref name="value"/></param>
-	/// <returns><typeparamref name="T"/> if assertion passes</returns>
-	/// <exception cref="Exception">Thrown if the assertion function throws an exception during evaluation</exception>
-	public static T? Affirm<T>(T? value, Action<T?> assertion) {
-		assertion(value);
+	/// <typeparam name="T">Type of value being affirmed.</typeparam>
+	/// <param name="value">Value to affirm.</param>
+	/// <param name="assertDelegate">Delegate called with <paramref name="value"/>.</param>
+	/// <returns><typeparamref name="T"/></returns>
+	/// <exception cref="Exception">May be thrown during invocation of <paramref name="assertDelegate"/>.</exception>
+	public static T Affirm<T>(T value, Action<T> assertDelegate) {
+		assertDelegate(value);
 		return value;
 	}
 
 	/// <summary>
-	/// Affirms that the value passed to the method evaluates to true against the assertion function. If it does not, an exception is
-	/// thrown
+	/// Affirms that the value passed to the method evaluates to <c>true</c> against the assertion function.
+	/// If it does not, an exception is thrown.
 	/// </summary>
-	/// <typeparam name="T">Type of value being affirmed</typeparam>
-	/// <param name="value">value to affirm</param>
-	/// <param name="assertion">Function used for assertion against <paramref name="value"/></param>
-	/// <param name="cae">Caller argument expression captured for logging / attachment to the exception if thrown. Do not pass in this value.</param>
-	/// <returns><typeparamref name="T"/> if assertion passes</returns>
-	/// <exception cref="Exception">Thrown if the assertion function throws an exception during evaluation, or, if the result of the function
-	/// is not <see langword="true"/></exception>
-	public static T? Affirm<T>(T? value, Func<T?, bool> assertion, [CallerArgumentExpression(nameof(value))] string cae = "") {
+	/// <typeparam name="T">Type of value being affirmed.</typeparam>
+	/// <param name="value">Value to affirm.</param>
+	/// <param name="assertDelegate">Function used for assertion against <paramref name="value"/>.</param>
+	/// <param name="cae">Caller argument expression captured for logging / attachment to the exception if thrown. Only pass to override.</param>
+	/// <returns><typeparamref name="T"/></returns>
+	/// <exception cref="Exception">May be thrown during invocation of <paramref name="assertDelegate"/> or if <paramref name="assertDelegate"/> does
+	/// not return <c>true</c>.</exception>
+	public static T Affirm<T>(T value, Func<T, bool> assertDelegate, [CallerArgumentExpression(nameof(value))] string cae = "") {
 		return
-				!assertion(value) ?
+				!assertDelegate(value) ?
 				throw new Exception("Affirmation of value did not succeed").AddData(new { value, cae }) :
 				value;
 	}
