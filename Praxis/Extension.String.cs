@@ -529,12 +529,11 @@ public static partial class Extension {
 	public static string ToTitleCase(this string source, System.Globalization.CultureInfo? cultureInfo = null) => (cultureInfo ?? System.Globalization.CultureInfo.CurrentCulture).TextInfo.ToTitleCase(source);
 
 	/// <summary>
-	/// Returns the result of <c>Encoding.UTF8.GetBytes(<paramref name="arg"/>)</c>
+	/// Using the passed string, get it's representation as a UTF-8 byte array.
 	/// </summary>
 	/// <param name="arg">Source value.</param>
-	/// <returns><c>byte[]</c></returns>
-	[return: NotNullIfNotNull(nameof(arg))]
-	public static byte[]? ToUTF8Bytes(this string? arg) => arg is null ? null : Encoding.UTF8.GetBytes(arg);
+	/// <returns>Binary data representation of <paramref name="arg"/> in UTF-8 encoding.</returns>
+	public static byte[] ToUTF8Bytes(this string arg) => Encoding.UTF8.GetBytes(arg);
 
 	/// <summary>
 	/// Trims a string and returns <c>null</c> if it contains only whitespace characters.

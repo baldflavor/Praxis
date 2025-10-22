@@ -40,10 +40,18 @@ public static partial class Extension {
 	public static bool IsTrue(this byte arg) => arg == Const.TRUEINT;
 
 	/// <summary>
+	/// Returns a Base64 encoded string from the passed byte array
+	/// </summary>
+	/// <param name="arg">Byte values used for conversion.</param>
+	/// <param name="options">Formatting options used when composing output.</param>
+	/// <returns>string</returns>
+	public static string ToBase64String(this byte[] arg, Base64FormattingOptions options = Base64FormattingOptions.None) => Convert.ToBase64String(arg, options);
+
+	/// <summary>
 	/// Returns the hexadecimal string representation of a byte array
 	/// </summary>
 	/// <param name="arg">The arg array of bytes</param>
-	/// <returns><see langword="string"/></returns>
+	/// <returns>string</returns>
 	public static string ToHexString(this byte[] arg) => string.Join("", arg.Select(b => b.ToString("X2")));
 
 	/// <summary>
@@ -79,6 +87,6 @@ public static partial class Extension {
 	/// Returns a UTF-8 encoded string from the passed UTF-8 byte array
 	/// </summary>
 	/// <param name="arg">Byte array composing a UTF-8 string</param>
-	/// <returns><see langword="string"/></returns>
+	/// <returns>string</returns>
 	public static string ToUTF8String(this byte[] arg) => Encoding.UTF8.GetString(arg);
 }

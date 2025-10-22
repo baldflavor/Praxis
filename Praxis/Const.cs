@@ -61,6 +61,11 @@ public static class Const {
 	public const char FIGURESPACE = '\u2007';
 
 	/// <summary>
+	/// Binary size of a Kilobyte (KB).
+	/// </summary>
+	public const int KILOBYTE = 1024;
+
+	/// <summary>
 	/// Number of milliseconds in one minute
 	/// </summary>
 	public const int MILLISECONDSONEMINUTE = 60_000;

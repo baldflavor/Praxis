@@ -3,7 +3,9 @@ namespace Praxis;
 #nullable disable
 
 using System.Collections.ObjectModel;
+using System.IO.Compression;
 using System.Reflection;
+using System.Text.Json;
 using System.Xml.Linq;
 using IO;
 
@@ -279,23 +281,18 @@ public static class Location {
 	/// Dictionary of city and states by 5 digit zip codes
 	/// </summary>
 	private static readonly Lazy<Dictionary<string, ZipCityState>> _locationDict = new(() => {
-
 		#region Initialization Of Zip City State Data
 
-		byte[] data;
-		using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Praxis.EmbeddedResource.ZipCityState.dat")) {
-			using var memStream = new MemoryStream();
-			stream.CopyTo(memStream);
-			data = memStream.ToArray();
-		}
+		using Stream inputStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Praxis.EmbeddedResource.ZipCityState.dat");
+		using BrotliStream compStream = new(inputStream, CompressionMode.Decompress);
+
+		using MemoryStream output = new();
+		compStream.CopyTo(output);
+		output.Position = 0;
 
 		return
-			XElement.Parse(Compression.DecompressToString(data))
-			.Elements("zcs")
-			.Select(ele => new ZipCityState(
-				(string)ele.Attribute("z"),
-				(string)ele.Attribute("c"),
-				(string)ele.Attribute("s")))
+			JsonSerializer
+				.Deserialize<ZipCityState[]>(output, Json.DefaultOptions)
 			.ToDictionary(zcs => zcs.ZipCode, StringComparer.OrdinalIgnoreCase);
 
 		#endregion Initialization Of Zip City State Data
@@ -427,7 +424,7 @@ public static class Location {
 	/// <returns>A country</returns>
 	/// <exception cref="KeyNotFoundException">Thrown if the requested arg short does not exist in the backing country dictionary</exception>
 	public static Country CountryByNumeric(short arg) {
-		return _countryDict.Value[arg].Clone();
+		return _countryDict.Value[arg];
 	}
 
 	/// <summary>
@@ -462,60 +459,13 @@ public static class Location {
 	/// <summary>
 	/// Class that represents the fields for identifying countries
 	/// </summary>
-	public class Country {
+	/// <param name="Name">Name of the country</param>
+	/// <param name="Alpha2">2 character alphanumeric code</param>
+	/// <param name="Alpha3">3 character alphanumeric code</param>
+	/// <param name="Numeric">Integer code</param>
+	public record class Country(string Name, string Alpha2, string Alpha3, short Numeric) {
 
-		/// <summary>
-		/// Gets or sets the two character alpha code of this country
-		/// </summary>
-		public string Alpha2 { get; set; }
-
-		/// <summary>
-		/// Gets or sets the three character alpha code of this country
-		/// </summary>
-		public string Alpha3 { get; set; }
-
-		/// <summary>
-		/// Gets or sets name of this country
-		/// </summary>
-		public string Name { get; set; }
-
-		/// <summary>
-		/// Gets or sets the numeric code of this country
-		/// </summary>
-		public short Numeric { get; set; }
-
-		/// <summary>
-		/// Initializes a new instance of the Country class.
-		/// </summary>
-		public Country() {
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the Country class.
-		/// </summary>
-		/// <param name="name">Name of the country</param>
-		/// <param name="alpha2">2 character alphanumeric code</param>
-		/// <param name="alpha3">3 character alphanumeric code</param>
-		/// <param name="numeric">Integer code</param>
-		public Country(string name, string alpha2, string alpha3, short numeric) {
-			this.Name = name;
-			this.Alpha2 = alpha2;
-			this.Alpha3 = alpha3;
-			this.Numeric = numeric;
-		}
-
-		/// <summary>
-		/// Returns a shallow clone of this class
-		/// </summary>
-		/// <returns>A cloned Country object</returns>
-		public Country Clone() {
-			return (Country)MemberwiseClone();
-		}
-
-		/// <summary>
-		/// Returns the name of the country and it's three character alpha code
-		/// </summary>
-		/// <returns>A string</returns>
+		/// <inheritdoc/>
 		public override string ToString() {
 			return this.Name + " (" + this.Alpha3 + ")";
 		}
@@ -525,39 +475,5 @@ public static class Location {
 	/// <summary>
 	/// Class that holds a zip code, a city, and a state
 	/// </summary>
-	public class ZipCityState {
-
-		/// <summary>
-		/// Gets or sets the city
-		/// </summary>
-		public string City { get; set; }
-
-		/// <summary>
-		/// Gets or sets the state
-		/// </summary>
-		public string State { get; set; }
-
-		/// <summary>
-		/// Gets or sets the zip code
-		/// </summary>
-		public string ZipCode { get; set; }
-
-		/// <summary>
-		/// Initializes a new instance of the ZipCityState class.
-		/// </summary>
-		public ZipCityState() {
-		}
-
-		/// <summary>
-		/// Initializes a new instance of the ZipCityState class.
-		/// </summary>
-		/// <param name="zipCode">Zip code to initialize to the class</param>
-		/// <param name="city">City to initialize to the class</param>
-		/// <param name="state">State to initialize to the class</param>
-		public ZipCityState(string zipCode, string city, string state) {
-			this.ZipCode = zipCode;
-			this.City = city;
-			this.State = state;
-		}
-	}
+	public record class ZipCityState(string ZipCode, string City, string State);
 }

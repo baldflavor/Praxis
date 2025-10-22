@@ -1,6 +1,5 @@
 namespace Praxis.Test;
 
-using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PAssert = Praxis.Assert;
 

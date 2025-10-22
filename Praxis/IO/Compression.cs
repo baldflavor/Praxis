@@ -1,50 +1,49 @@
 namespace Praxis.IO;
 
 using System.IO.Compression;
-using System.Text;
 
 /// <summary>
-/// This class is used to serialize and compress objects.   Note that if using the non-XML smash
-/// and rebuild methods, that the object will need to have the [Serializable] attribute set to it.
+/// Static methods for utilizing built in compression algorithms.
 /// </summary>
+/// <remarks>
+/// Compression / decompression all utilizes <c>Brotli</c>. This was chosen because when using the <see cref="CompressionLevel.Optimal"/>
+/// setting, repeatedly performs the fastest with compression levels nearing that of <see cref="CompressionLevel.SmallestSize"/>. As such,
+/// these methods all use <see cref="CompressionLevel.Optimal"/> internally.
+/// </remarks>
 public static class Compression {
 
 	/// <summary>
-	/// UTF8Encoding byte conversion is performed on the passed arg string and then compressed
+	/// Applies compression to a byte array.
 	/// </summary>
-	/// <param name="arg">Target data to compress</param>
-	/// <returns>A byte array</returns>
-	public static byte[] Compress(string arg) {
-		byte[] bytes = Encoding.UTF8.GetBytes(arg);
-		return _Compress(bytes);
+	/// <param name="arg">Bytes to be compressed.</param>
+	/// <returns>Compressed representation of source bytes.</returns>
+	public static byte[] Compress(byte[] arg) {
+		using MemoryStream ms = new();
+		using BrotliStream cs = new(ms, CompressionLevel.Optimal);
+		cs.Write(arg, 0, arg.Length);
+		cs.Flush();
+		return ms.ToArray();
 	}
 
 	/// <summary>
-	/// Compresses the passed array of bytes
+	/// Compresses the contents of a stream.
 	/// </summary>
-	/// <param name="arg">Target data to compress</param>
-	/// <returns>A byte array</returns>
-	public static byte[] Compress(byte[] arg) => _Compress(arg);
+	/// <param name="inputStream">Stream used as input for compression. Does not set position before reading.</param>
+	/// <param name="outStream">Stream where compressed output is written. Does not set position before writing.</param>
+	/// <param name="bufferSizeKB">Number of kilobytes to use for the buffer during read/write.</param>
+	/// <returns>Task</returns>
+	/// <exception cref="Exception">May be thrown if the input stream cannot be read or a failure occurs during compression.</exception>
+	public static async Task Compress(Stream inputStream, Stream outStream, int bufferSizeKB = 64) {
+		ArgumentOutOfRangeException.ThrowIfLessThan(bufferSizeKB, 1);
 
+		using var compStream = new BrotliStream(outStream, CompressionLevel.Optimal);
+		byte[] buffer = new byte[bufferSizeKB * Const.KILOBYTE];
 
-	/// <summary>
-	/// Compresses the passed array of bytes and returns it as a base64 string
-	/// </summary>
-	/// <param name="arg">Target data to compress</param>
-	/// <returns>A base64 string</returns>
-	public static string CompressToBase64(byte[] arg) => Convert.ToBase64String(_Compress(arg));
-
-
-	/// <summary>
-	/// UTF8Encoding byte conversion is performed on the passed arg string and then compressed and returned as a base64 string
-	/// </summary>
-	/// <param name="arg">Target data to compress</param>
-	/// <returns>A base64 string</returns>
-	public static string CompressToBase64(string arg) {
-		byte[] bytes = Encoding.UTF8.GetBytes(arg);
-		return Convert.ToBase64String(_Compress(bytes));
+		int bytesRead;
+		while ((bytesRead = await inputStream.ReadAsync(buffer).ConfigureAwait(false)) > 0) {
+			await compStream.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
+		}
 	}
-
 
 
 	/// <summary>
@@ -52,66 +51,36 @@ public static class Compression {
 	/// </summary>
 	/// <param name="source">Source data to decompress</param>
 	/// <returns>A decompressed byte array</returns>
-	public static byte[] Decompress(byte[] source) => _Decompress(source);
+	public static byte[] Decompress(byte[] source) {
+		using MemoryStream sourceMs = new(source);
+		sourceMs.Position = 0;
 
+		using BrotliStream compStream = new(sourceMs, CompressionMode.Decompress);
 
-	/// <summary>
-	/// Decompresses the source base64 string data into an array of bytes
-	/// </summary>
-	/// <param name="source">Source base64 string data to decompress</param>
-	/// <returns>A decompressed byte array</returns>
-	public static byte[] Decompress(string source) => _Decompress(Convert.FromBase64String(source));
+		using MemoryStream returnMs = new();
+		compStream.CopyTo(returnMs);
 
-
-	/// <summary>
-	/// Decompresses the source data into a utf8 encoded string
-	/// </summary>
-	/// <param name="source">Source data to decompress</param>
-	/// <returns>A decompressed string</returns>
-	public static string DecompressToString(byte[] source) => Encoding.UTF8.GetString(_Decompress(source));
-
-
-	/// <summary>
-	/// Decompresses the source base64 string data into a utf8 encoded string
-	/// </summary>
-	/// <param name="source">Source base64 string data to decompress</param>
-	/// <returns>A decompressed string</returns>
-	public static string DecompressToString(string source) => Encoding.UTF8.GetString(_Decompress(Convert.FromBase64String(source)));
-
-
-
-	/// <summary>
-	/// Compresses an array of bytes using deflate compression
-	/// </summary>
-	/// <param name="bytes">The bytes to compress</param>
-	/// <returns>A byte array</returns>
-	private static byte[] _Compress(byte[] bytes) {
-		using MemoryStream ms = new();
-		using DeflateStream ds = new(ms, CompressionLevel.Optimal);
-		ds.Write(bytes, 0, bytes.Length);
-		ds.Flush();
-		ds.Close();
-		return ms.ToArray();
+		return returnMs.ToArray();
 	}
 
 	/// <summary>
-	/// Decompresses the passed byte array
+	/// Compresses the contents of a stream.
 	/// </summary>
-	/// <param name="source">The source array of bytes</param>
-	/// <returns>Uncompressed bytes</returns>
-	private static byte[] _Decompress(byte[] source) {
-		byte[] toReturn;
+	/// <param name="inputStream">Stream used as input for decompression. Does not set position before reading.</param>
+	/// <param name="outStream">Stream where decompressed output is written. Does not set position before writing.</param>
+	/// <param name="bufferSizeKB">Number of kilobytes to use for the buffer during read/write.</param>
+	/// <returns>Task</returns>
+	/// <exception cref="Exception">May be thrown if the input stream cannot be read or a failure occurs during decompression.</exception>
+	public static async Task Decompress(Stream inputStream, Stream outStream, int bufferSizeKB = 64) {
+		ArgumentOutOfRangeException.ThrowIfLessThan(bufferSizeKB, 1);
 
-		using MemoryStream outer = new(source);
-		outer.Position = 0;
+		using var compStream = new BrotliStream(inputStream, CompressionMode.Decompress);
+		byte[] buffer = new byte[bufferSizeKB * Const.KILOBYTE];
 
-		using DeflateStream ds = new(outer, CompressionMode.Decompress);
-		ds.Flush();
+		int bytesRead;
 
-		using MemoryStream inner = new();
-		ds.CopyTo(inner);
-		toReturn = inner.ToArray();
-
-		return toReturn;
+		while ((bytesRead = await compStream.ReadAsync(buffer).ConfigureAwait(false)) > 0) {
+			await outStream.WriteAsync(buffer.AsMemory(0, bytesRead)).ConfigureAwait(false);
+		}
 	}
 }
