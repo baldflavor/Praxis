@@ -81,6 +81,11 @@ public static class Const {
 	public const string NULL = "null";
 
 	/// <summary>
+	/// Represents the numeric equivalent of a <see langword="true"/> value.
+	/// </summary>
+	public const int TRUEINT = 1;
+
+	/// <summary>
 	/// Vertical ellipsis
 	/// </summary>
 	/// <remarks>
@@ -96,9 +101,15 @@ public static class Const {
 	public const string VERTICALELLIPSISSTRING = "⋮";
 
 	/// <summary>
-	/// Represents the numeric equivalent of a <see langword="true"/> value.
+	/// Zero width space.
 	/// </summary>
-	public const int TRUEINT = 1;
+	/// <remarks>
+	/// C#: <c>(char)8203</c>
+	/// <para>Unic Number: <c>U+200B</c></para>
+	/// <para>Html Code: <c>&amp;#8203;</c></para>
+	/// </remarks>
+	public const char ZEROWIDTHSPACE = (char)0x200B;
+
 
 	/// <summary>
 	/// Binding Flags that describes, effectively, "all":
