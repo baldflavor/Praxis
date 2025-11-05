@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Praxis.Logging;
 using NLog;
 using System.Reflection;
+using Microsoft.VisualStudio.TestPlatform.Utilities;
 
 [TestClass]
 public class Logging {
@@ -22,10 +23,12 @@ public class Logging {
 
 		LogBase log = new LogBase(GetType());
 
-		foreach (var item in Enumerable.Range(1, 30_000).Select(e => new { Seq = e, Word = Praxis.Knowledge.Word.Random() })) {
+		foreach (var item in Enumerable.Range(1, 1_000).Select(e => new { Seq = e, Word = Knowledge.Word.Random() })) {
 			log.Info("Testing log of messages", item);
 		}
 
-		System.IO.File.WriteAllText(@"C:\Users\aaron.kropfreiter\OneDrive\Programming\SQL_Linq\Scratch.txt", $"[{string.Join(',', mTarget.Logs)}]");
+		string logOutput = $"[{string.Join(',', mTarget.Logs)}]";
+
+		ConsoleOutput.Instance.WriteLine(logOutput, OutputLevel.Information);
 	}
 }

@@ -72,7 +72,16 @@ public partial class NLogViewerForm : Form {
 		var isSorted = _allEntriesTreeView.Sorted;
 
 		_allEntriesTreeView.Sorted = true;
-		_allEntriesTreeView.TreeViewNodeSorter = _CreateSorter();
+		_allEntriesTreeView.TreeViewNodeSorter = Comparer<TreeNode>.Create((x, y) => {
+			var xId = x.Name.ToNLogIDComponents();
+			var yId = y.Name.ToNLogIDComponents();
+
+			if (xId.oadBatch == yId.oadBatch)
+				return xId.sequence.CompareTo(yId.sequence);
+			else
+				return xId.oadBatch.CompareTo(yId.oadBatch);
+		});
+
 
 		_clearButton.Click += (s, e) => {
 			_allEntriesTreeView.BeginUpdate();
@@ -136,8 +145,8 @@ public partial class NLogViewerForm : Form {
 				//	_allEntriesTreeView.Nodes.AddRange(orderedNodes);
 				//}
 				//else {
-					if (_allEntriesTreeView.SelectedNode == null)
-						_allEntriesTreeView.Nodes[0].EnsureVisible();
+				if (_allEntriesTreeView.SelectedNode == null)
+					_allEntriesTreeView.Nodes[0].EnsureVisible();
 				//}
 
 				_allEntriesTreeView.EndUpdate();
@@ -332,16 +341,5 @@ public partial class NLogViewerForm : Form {
 			_statusLabel.AutoSizeFont(arg);
 			_statusPanel.Visible = true;
 		}
-	}
-
-	private Comparer<TreeNode> _CreateSorter() {
-		return Comparer<TreeNode>.Create((x, y) => {
-			return 9;
-
-
-		});
-
-
-		//x.Name.CompareTo(y.Name)
 	}
 }
