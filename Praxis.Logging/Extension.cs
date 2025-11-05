@@ -20,32 +20,4 @@ public static class Extension {
 				.WithProperty(Constant.CALLER, callerMemberName)
 				.Info(Constant.INITIALIZED);
 	}
-
-	/// <summary>
-	/// Using an ID from an NLog entry, returns numerical components.
-	/// </summary>
-	/// <remarks>
-	/// Argument should be in the form of:<br/>"[double]_[int]"
-	/// <para>Typically created from an NLog layout using: <c>$"{DateTime.UtcNow.ToOADate()}_${{sequenceid}}"</c>.</para>
-	/// Example: <c>45965.950441388886_133</c>
-	/// </remarks>
-	/// <param name="idKit">Combination ID as created by an NLog layout.</param>
-	/// <returns>Tuple of: double that represents an OADate (batch), and the sequence underneath the batch.</returns>
-	/// <exception cref="ArgumentOutOfRangeException">Thrown if the index of the separator character is less than 1.</exception>
-	/// <exception cref="FormatException">Thrown if portions of the passed value cannot be parsed into respective numeric values.</exception>
-	public static (double oadBatch, int sequence) ToNLogIDComponents(this string idKit) {
-		try {
-			int undIndex = idKit.IndexOf('_');
-			ArgumentOutOfRangeException.ThrowIfLessThan(undIndex, 1);
-
-			return (
-				double.Parse(idKit.AsSpan(0, undIndex)),
-				int.Parse(idKit.AsSpan(undIndex + 1))
-			);
-		}
-		catch (Exception ex) {
-			ex.Data[nameof(idKit)] = idKit;
-			throw;
-		}
-	}
 }
