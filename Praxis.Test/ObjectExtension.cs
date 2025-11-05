@@ -38,6 +38,7 @@ public class ObjectExtension {
 		movieStub = new MovieStub {
 			AwardsWon = 20,
 			GeNrE = "Action",
+			IsInTheaters = true,
 			// LengthMinutes -> nullable value type should set int default on movie since it is not a nullable value type
 			Rating = "PG-13",
 			TagLine = "DO NOT SET ME ON THE OTHER OBJECT",
@@ -48,6 +49,7 @@ public class ObjectExtension {
 			AwardsWon = 10,
 			ColorSpace = ColorSpace.Color,
 			Genre = "UNKNOWN",
+			IsInTheaters = false,
 			LengthMinutes = 94,
 			Promotion = new Promotion { Code = "SBC12", DiscountPercent = 0.12 },
 			Rating = "UNKNOWN",
@@ -85,7 +87,7 @@ public class ObjectExtension {
 	}
 
 	private class MovieStub {
-		public bool IsInTheaters = true;
+		public bool IsInTheaters;
 
 		public short AwardsWon { get; set; }
 

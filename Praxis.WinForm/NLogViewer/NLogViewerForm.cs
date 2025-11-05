@@ -2,6 +2,7 @@ namespace Praxis.WinForm.NLogViewer;
 
 using System;
 using System.Drawing;
+using System.Drawing.Text;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -68,6 +69,11 @@ public partial class NLogViewerForm : Form {
 	public NLogViewerForm(string directory, int maxNodeCount, TimeSpan tickFrequency, TimeSpan startupDelay) {
 		InitializeComponent();
 
+		var isSorted = _allEntriesTreeView.Sorted;
+
+		_allEntriesTreeView.Sorted = true;
+		_allEntriesTreeView.TreeViewNodeSorter = _CreateSorter();
+
 		_clearButton.Click += (s, e) => {
 			_allEntriesTreeView.BeginUpdate();
 			_allEntriesTreeView.Nodes.Clear();
@@ -101,7 +107,7 @@ public partial class NLogViewerForm : Form {
 		};
 
 
-		bool firstRun = true;
+		//bool firstRun = true;
 
 		var watcher =
 			new FileWatcher(
@@ -123,16 +129,16 @@ public partial class NLogViewerForm : Form {
 		void _FinishedReadDelegate() {
 			BeginInvoke(_ActualWork);
 			void _ActualWork() {
-				if (firstRun == true) {
-					firstRun = false;
-					TreeNode[] orderedNodes = [.. _allEntriesTreeView.Nodes.Cast<TreeNode>().OrderByDescending(t => t.Text)];
-					_allEntriesTreeView.Nodes.Clear();
-					_allEntriesTreeView.Nodes.AddRange(orderedNodes);
-				}
-				else {
+				//if (firstRun == true) {
+				//	firstRun = false;
+				//	TreeNode[] orderedNodes = [.. _allEntriesTreeView.Nodes.Cast<TreeNode>().OrderByDescending(t => t.Text)];
+				//	_allEntriesTreeView.Nodes.Clear();
+				//	_allEntriesTreeView.Nodes.AddRange(orderedNodes);
+				//}
+				//else {
 					if (_allEntriesTreeView.SelectedNode == null)
 						_allEntriesTreeView.Nodes[0].EnsureVisible();
-				}
+				//}
 
 				_allEntriesTreeView.EndUpdate();
 			}
@@ -150,13 +156,10 @@ public partial class NLogViewerForm : Form {
 				if (!line.StartsWith('{'))
 					return;
 
-				_allEntriesTreeView.BeginUpdate();
 				_allEntriesTreeView.Nodes.Insert(0, _TreeNodeFromJson(line, _expandNewCheckBox.Checked));
 
 				if (_allEntriesTreeView.Nodes.Count > maxNodeCount)
 					_allEntriesTreeView.Nodes.Remove(_allEntriesTreeView.Nodes[^1]);
-
-				_allEntriesTreeView.EndUpdate();
 			}
 		}
 	}
@@ -329,5 +332,16 @@ public partial class NLogViewerForm : Form {
 			_statusLabel.AutoSizeFont(arg);
 			_statusPanel.Visible = true;
 		}
+	}
+
+	private Comparer<TreeNode> _CreateSorter() {
+		return Comparer<TreeNode>.Create((x, y) => {
+			return 9;
+
+
+		});
+
+
+		//x.Name.CompareTo(y.Name)
 	}
 }
