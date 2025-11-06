@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Windows.Forms;
@@ -57,7 +58,7 @@ public partial class NLogViewerForm : Form {
 	/// <summary>
 	/// Represents the name of properties to avoid creating nodes for from a json payload
 	/// </summary>
-	private static readonly string[] _skipNames = [_ID, _LEVEL, _TZI];
+	private static readonly string[] _skipNames = [_LEVEL, _TZI];
 
 	/// <summary>
 	/// Creates an instance of the <see cref="NLogViewerForm"/> class.
@@ -73,15 +74,17 @@ public partial class NLogViewerForm : Form {
 
 		_allEntriesTreeView.Sorted = true;
 		_allEntriesTreeView.TreeViewNodeSorter = Comparer<TreeNode>.Create((x, y) => {
+			if (x.Parent is not null && y.Parent is not null)
+				return x.Index.CompareTo(y.Index);
+
 			var xId = x.Name.ToNLogIDComponents();
 			var yId = y.Name.ToNLogIDComponents();
 
 			if (xId.oadBatch == yId.oadBatch)
-				return xId.sequence.CompareTo(yId.sequence);
+				return yId.sequence.CompareTo(xId.sequence);
 			else
-				return xId.oadBatch.CompareTo(yId.oadBatch);
+				return yId.oadBatch.CompareTo(xId.oadBatch);
 		});
-
 
 		_clearButton.Click += (s, e) => {
 			_allEntriesTreeView.BeginUpdate();
@@ -105,8 +108,8 @@ public partial class NLogViewerForm : Form {
 
 		_statusPanel.VisibleChanged += (_, _) => _clearButton.Enabled = !_statusPanel.Visible;
 
-		_allEntriesTreeView.MouseUp += _CopyToClipboard;
-		_filteredTreeView.MouseUp += _CopyToClipboard;
+		_allEntriesTreeView.NodeMouseClick += _CopyToClipboard;
+		_filteredTreeView.NodeMouseClick += _CopyToClipboard;
 
 		_filterTextBox.HandleEnterAction(_ApplyFilter);
 
@@ -115,8 +118,7 @@ public partial class NLogViewerForm : Form {
 			_ApplyFilter();
 		};
 
-
-		//bool firstRun = true;
+		Panel? blockPnl = this.AddBlockingPanel("Loading data\r\nPlease wait..", out _, 78, Cursors.WaitCursor);
 
 		var watcher =
 			new FileWatcher(
@@ -138,16 +140,13 @@ public partial class NLogViewerForm : Form {
 		void _FinishedReadDelegate() {
 			BeginInvoke(_ActualWork);
 			void _ActualWork() {
-				//if (firstRun == true) {
-				//	firstRun = false;
-				//	TreeNode[] orderedNodes = [.. _allEntriesTreeView.Nodes.Cast<TreeNode>().OrderByDescending(t => t.Text)];
-				//	_allEntriesTreeView.Nodes.Clear();
-				//	_allEntriesTreeView.Nodes.AddRange(orderedNodes);
-				//}
-				//else {
+				if (blockPnl is not null) {
+					blockPnl.Dispose();
+					blockPnl = null;
+				}
+
 				if (_allEntriesTreeView.SelectedNode == null)
 					_allEntriesTreeView.Nodes[0].EnsureVisible();
-				//}
 
 				_allEntriesTreeView.EndUpdate();
 			}
@@ -183,11 +182,11 @@ public partial class NLogViewerForm : Form {
 	}
 
 	/// <summary>
-	/// Creates a string with padding between the name and value
+	/// Creates a string with padding between a name and value.
 	/// </summary>
-	/// <param name="name">FullName</param>
-	/// <param name="value">value</param>
-	/// <returns><see cref="string"/></returns>
+	/// <param name="name">Represents the name of a property.</param>
+	/// <param name="value">Represents a property's value.</param>
+	/// <returns>string with padding</returns>
 	private static string _PaddedString(string name, string value) => $"{$"{name}: ",-25}{value.Trim()}";
 
 	/// <summary>
@@ -206,8 +205,7 @@ public partial class NLogViewerForm : Form {
 				_ERROR => Color.Red,
 				_ => Color.Orchid
 			},
-			Name = jObj[_ID]!.ToString(),
-			Tag = jObj
+			Name = jObj[_ID]!.ToString()
 		};
 
 		_AddDescendants(newNode, jObj, true);
@@ -228,7 +226,7 @@ public partial class NLogViewerForm : Form {
 
 				JsonNode? value = jObjProperty.Value;
 
-				if (value == null) {
+				if (value is null) {
 					parentNode.Nodes.Add(_PaddedString(key, "null"));
 				}
 				else {
@@ -255,7 +253,7 @@ public partial class NLogViewerForm : Form {
 			var dt =
 				TimeZoneInfo.ConvertTimeFromUtc(utcValue, tzi);
 
-			return dt.ToString("yyyy-MM-ddTHH:mm:ss.fff");
+			return dt.ToString("yyyy-MM-dd HH:mm:ss.ffff");
 		}
 	}
 
@@ -306,21 +304,23 @@ public partial class NLogViewerForm : Form {
 	/// <summary>
 	/// Copies the Json of a node to the clipboard
 	/// </summary>
-	/// <param name="sender"></param>
-	/// <param name="e"></param>
-	private void _CopyToClipboard(object? sender, MouseEventArgs e) {
-		var treeView = (TreeView)(sender ?? throw new Exception("Handler must supply the sending treeview"));
-
-		TreeNode? topParentClickNode;
-		if (e.Button != MouseButtons.Right || (topParentClickNode = treeView.GetNodeAt(e.Location)?.GetTopParent()) == null)
+	/// <param name="sender">Sender of the event - should be a TreeView.</param>
+	/// <param name="e">Arguments for the event.</param>
+	private void _CopyToClipboard(object? sender, TreeNodeMouseClickEventArgs e) {
+		if (e.Button != MouseButtons.Right)
 			return;
 
-		treeView.SelectedNode = topParentClickNode;
+		bool isAllEntriesSender =
+			((sender as TreeView) ?? throw new Exception("Handler must supply the sending treeview")) == _allEntriesTreeView;
+
+		var topParentClickNode = e.Node.GetTopParent();
 
 		Clipboard.SetText(
-			treeView == _allEntriesTreeView ?
-			((JsonObject)topParentClickNode.Tag).ToJsonString(Json.Options) :
-			((JsonObject)_allEntriesTreeView.Nodes.Find(topParentClickNode.Name, false).Single().Tag).ToJsonString(Json.Options));
+			(isAllEntriesSender ?
+				topParentClickNode :
+				_allEntriesTreeView.Nodes.Find(topParentClickNode.Name, false).Single()
+			)
+			.ToIndentedRecursiveString());
 	}
 
 	/// <summary>

@@ -30,6 +30,9 @@
   <Project Path="Praxis.Test/Praxis.Test.csproj">
     <Platform Project="x64" />
   </Project>
+  <Project Path="Praxis.Winform.Test/Praxis.Winform.Test.csproj" Id="78085244-b58a-4f86-b662-23a44fbc3fed">
+    <Platform Project="x64" />
+  </Project>
   <Project Path="Praxis.WinForm/Praxis.WinForm.csproj">
     <Platform Project="x64" />
   </Project>
