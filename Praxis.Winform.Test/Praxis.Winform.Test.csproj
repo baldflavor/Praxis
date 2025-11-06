@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows</TargetFramework>
+		<UseWindowsForms>true</UseWindowsForms>
+		<IsPackable>false</IsPackable>
+		<GenerateDocumentationFile>false</GenerateDocumentationFile>
+	</PropertyGroup>
+	<ItemGroup>
+	  <ProjectReference Include="..\Praxis.Cache\Praxis.Cache.csproj" />
+	  <ProjectReference Include="..\Praxis.Data\Praxis.Data.csproj" />
+	  <ProjectReference Include="..\Praxis.Knowledge\Praxis.Knowledge.csproj" />
+	  <ProjectReference Include="..\Praxis.LiteDb\Praxis.LiteDb.csproj" />
+	  <ProjectReference Include="..\Praxis.Logging\Praxis.Logging.csproj" />
+	  <ProjectReference Include="..\Praxis.WinForm\Praxis.WinForm.csproj" />
+	  <ProjectReference Include="..\Praxis\Praxis.csproj" />
+	</ItemGroup>
+</Project>

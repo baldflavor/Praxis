@@ -6,26 +6,6 @@ using System.Collections.Generic;
 /// Extension methods for various object types
 /// </summary>
 public static partial class Extension {
-
-	/// <summary>
-	/// Enumerates through keys and values in an <c>IDictionary</c> where they are <c>OfType&lt;IDisposable&gt;</c> and calls
-	/// <c>Dispose()</c> on each.
-	/// </summary>
-	/// <typeparam name="D">The IDictionary to operate upon.</typeparam>
-	/// <typeparam name="K">Type of key in the dictionary.</typeparam>
-	/// <typeparam name="V">Type of values in the dictionary.</typeparam>
-	/// <param name="arg">Dictionary to operate upon.</param>
-	/// <returns><paramref name="arg"/></returns>
-	public static D DisposeAny<D, K, V>(this D arg) where D : IDictionary<K, V> {
-		foreach (var iDisposableKey in arg.Keys.OfType<IDisposable>())
-			iDisposableKey.Dispose();
-
-		foreach (var iDisposableValue in arg.Values.OfType<IDisposable>())
-			iDisposableValue.Dispose();
-
-		return arg;
-	}
-
 	/// <summary>
 	/// Attempts to retrieve a key / value and supplies a value if it does not exist.
 	/// </summary>
@@ -73,40 +53,25 @@ public static partial class Extension {
 	}
 
 	/// <summary>
-	/// Attempts to retrieve a key / value and generates a value if it does not exist
+	/// Attempts to retrieve a key / value and generates a value if it does not exist.
 	/// </summary>
 	/// <remarks>
-	/// If <paramref name="semSlimKey"/> is provided, then locked during execution.
+	/// This method <b>DOES NOT</b> <c>lock</c> during execution and should thus be handled by calling code.
 	/// </remarks>
 	/// <typeparam name="K">Type of Key</typeparam>
 	/// <typeparam name="V">Type of Value</typeparam>
 	/// <param name="arg">Target dictionary to check</param>
 	/// <param name="key">Key to use for value lookup</param>
 	/// <param name="generator">Function used to generate a value when not found by key</param>
-	/// <param name="semSlimKey">Key to use for locking access to this dictionary in multithreaded scenarios when necessary</param>
 	/// <returns>A <typeparamref name="V"/> value</returns>
-	public static async Task<V> GetOrAdd<K, V>(this IDictionary<K, V> arg, K key, Func<Task<V>> generator, string? semSlimKey = default) {
-		SemaphoreSlim? semSlim;
-		if (semSlimKey is null)
-			semSlim = null;
-		else
-			semSlim = MasterLock.Instance.Slim(semSlimKey);
+	public static async Task<V> GetOrAdd<K, V>(this IDictionary<K, V> arg, K key, Func<Task<V>> generator) {
+		if (arg.TryGetValue(key, out V? v))
+			return v;
 
-		try {
-			if (semSlim != null)
-				await semSlim.WaitAsync().ConfigureAwait(false);
+		V toReturn = await generator().ConfigureAwait(false);
+		arg[key] = toReturn;
 
-			if (arg.TryGetValue(key, out V? v))
-				return v;
-
-			V toReturn = await generator().ConfigureAwait(false);
-			arg[key] = toReturn;
-
-			return toReturn;
-		}
-		finally {
-			semSlim?.Release();
-		}
+		return toReturn;
 	}
 
 	/// <summary>

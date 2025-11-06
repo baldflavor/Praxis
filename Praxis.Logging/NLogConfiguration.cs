@@ -17,7 +17,11 @@ using NLog.Targets.Wrappers;
 /// <para>It is recommended that immediately after setup on call the <see cref="Extension.Initialized(NLog.Logger, InitializeInfo, string)"/> method to record machine information as the start of a log batch.</para>
 /// The static constructor of this class sets up and configures some global options in NLog.
 /// <list type="bullet">
-/// <item>TimeSource is globally set to FastUtcTimeSource</item>
+/// <item>TimeSource is globally set to FastUtcTimeSource.</item>
+/// <item>The LogFactory has its <see cref="LogFactory.AutoShutdown"/> (defaulted to but also explicitly set to) <c>true</c>.</item>
+/// <item>Assembly types are registered for transform.</item>
+/// <item>FileSystemInfo types are registered for transform.</item>
+/// <item>Types are registered for transform.</item>
 /// </list>
 /// </remarks>
 public static class NLogConfiguration {
@@ -33,6 +37,8 @@ public static class NLogConfiguration {
 		NLog.Time.TimeSource.Current = new NLog.Time.FastUtcTimeSource(); // Fast time source with UTC stamp updated every 15ms
 
 		LogManager.Setup().SetupSerialization((s) => {
+			s.LogFactory.AutoShutdown = true;
+
 			s.RegisterObjectTransformation<Assembly>(e => {
 				AssemblyName assemblyName = e.GetName();
 				return new { assemblyName.FullName, assemblyName.Version };

@@ -61,6 +61,11 @@ public static class Const {
 	public const char FIGURESPACE = '\u2007';
 
 	/// <summary>
+	/// Binary size of a Kilobyte (KB).
+	/// </summary>
+	public const int KILOBYTE = 1024;
+
+	/// <summary>
 	/// Number of milliseconds in one minute
 	/// </summary>
 	public const int MILLISECONDSONEMINUTE = 60_000;
@@ -74,6 +79,11 @@ public static class Const {
 	/// A string indicating that a value was <see langword="null"/>
 	/// </summary>
 	public const string NULL = "null";
+
+	/// <summary>
+	/// Represents the numeric equivalent of a <see langword="true"/> value.
+	/// </summary>
+	public const int TRUEINT = 1;
 
 	/// <summary>
 	/// Vertical ellipsis
@@ -91,9 +101,15 @@ public static class Const {
 	public const string VERTICALELLIPSISSTRING = "⋮";
 
 	/// <summary>
-	/// Represents the numeric equivalent of a <see langword="true"/> value.
+	/// Zero width space.
 	/// </summary>
-	public const int TRUEINT = 1;
+	/// <remarks>
+	/// C#: <c>(char)8203</c>
+	/// <para>Unic Number: <c>U+200B</c></para>
+	/// <para>Html Code: <c>&amp;#8203;</c></para>
+	/// </remarks>
+	public const char ZEROWIDTHSPACE = (char)0x200B;
+
 
 	/// <summary>
 	/// Binding Flags that describes, effectively, "all":

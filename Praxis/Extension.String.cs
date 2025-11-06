@@ -518,6 +518,34 @@ public static partial class Extension {
 	public static string TokenEncode(this string arg) => arg.ToUTF8Bytes()!.TokenEncode();
 
 	/// <summary>
+	/// Using an ID from an NLog entry, returns numerical components.
+	/// </summary>
+	/// <remarks>
+	/// Argument should be in the form of:<br/>"[double]_[int]"
+	/// <para>Typically created from an NLog layout using: <c>$"{DateTime.UtcNow.ToOADate()}_${{sequenceid}}"</c>.</para>
+	/// Example: <c>45965.950441388886_133</c>
+	/// </remarks>
+	/// <param name="idKit">Combination ID as created by an NLog layout.</param>
+	/// <returns>Tuple of: double that represents an OADate (batch), and the sequence underneath the batch.</returns>
+	/// <exception cref="ArgumentOutOfRangeException">Thrown if the index of the separator character is less than 1.</exception>
+	/// <exception cref="FormatException">Thrown if portions of the passed value cannot be parsed into respective numeric values.</exception>
+	public static (double oadBatch, int sequence) ToNLogIDComponents(this string idKit) {
+		try {
+			int undIndex = idKit.IndexOf('_');
+			ArgumentOutOfRangeException.ThrowIfLessThan(undIndex, 1);
+
+			return (
+				double.Parse(idKit.AsSpan(0, undIndex)),
+				int.Parse(idKit.AsSpan(undIndex + 1))
+			);
+		}
+		catch (Exception ex) {
+			ex.Data[nameof(idKit)] = idKit;
+			throw;
+		}
+	}
+
+	/// <summary>
 	/// Returns the source string title cased.
 	/// </summary>
 	/// <remarks>
@@ -529,12 +557,11 @@ public static partial class Extension {
 	public static string ToTitleCase(this string source, System.Globalization.CultureInfo? cultureInfo = null) => (cultureInfo ?? System.Globalization.CultureInfo.CurrentCulture).TextInfo.ToTitleCase(source);
 
 	/// <summary>
-	/// Returns the result of <c>Encoding.UTF8.GetBytes(<paramref name="arg"/>)</c>
+	/// Using the passed string, get it's representation as a UTF-8 byte array.
 	/// </summary>
 	/// <param name="arg">Source value.</param>
-	/// <returns><c>byte[]</c></returns>
-	[return: NotNullIfNotNull(nameof(arg))]
-	public static byte[]? ToUTF8Bytes(this string? arg) => arg is null ? null : Encoding.UTF8.GetBytes(arg);
+	/// <returns>Binary data representation of <paramref name="arg"/> in UTF-8 encoding.</returns>
+	public static byte[] ToUTF8Bytes(this string arg) => Encoding.UTF8.GetBytes(arg);
 
 	/// <summary>
 	/// Trims a string and returns <c>null</c> if it contains only whitespace characters.

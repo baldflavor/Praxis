@@ -30,7 +30,6 @@ public static partial class Extension {
 	/// <returns><paramref name="ex"/></returns>
 	/// <exception cref="Exception">Thrown if the dictionary has reached a maximum size or if an invalid operation is attempted while putting the various key-values into the dictionary.</exception>
 	public static Exception AddData(this Exception ex, object? value, [CallerArgumentExpression(nameof(value))] string callerArgumentExpression = "", [CallerMemberName] string callerMemberName = "", [CallerFilePath] string callerFilePath = "") {
-		Stopwatch sw = Stopwatch.StartNew();
 		var cfpSpan = callerFilePath.AsSpan();
 		cfpSpan = cfpSpan[(cfpSpan.LastIndexOf('\\') + 1)..];
 
@@ -61,8 +60,6 @@ public static partial class Extension {
 			}
 		}
 
-		sw.Stop();
-		var elTM = sw.Elapsed.TotalMilliseconds;
 		return ex;
 
 		/* ----------------------------------------------------------------------------------------------------------
