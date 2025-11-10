@@ -1,9 +1,11 @@
 namespace Praxis.WinForm.NLogViewer;
 
 using System;
+using System.Collections.Concurrent;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -61,6 +63,27 @@ public partial class NLogViewerForm : Form {
 	private static readonly string[] _skipNames = [_LEVEL, _TZI];
 
 	/// <summary>
+	/// Holds a reference to a comparer for TreeNode instances.
+	/// </summary>
+	private static readonly Comparer<TreeNode> _treeNodeComparer = _CreateTreeNodeComparer();
+
+	/// <summary>
+	/// Maximum number of nodes that should be displayed in the tree.
+	/// </summary>
+	private readonly int _maxNodeCount;
+
+	/// <summary>
+	/// Panel showing that the control is performing its initial load.
+	/// </summary>
+	private Panel? _loadingBlockingPanel;
+
+	/// <summary>
+	/// Used for locking while updating nodes / reading.
+	/// </summary>
+	private readonly object _lock = new();
+
+
+	/// <summary>
 	/// Creates an instance of the <see cref="NLogViewerForm"/> class.
 	/// </summary>
 	/// <param name="directory">The directory to watch</param>
@@ -70,39 +93,24 @@ public partial class NLogViewerForm : Form {
 	public NLogViewerForm(string directory, int maxNodeCount, TimeSpan tickFrequency, TimeSpan startupDelay) {
 		InitializeComponent();
 
-		var isSorted = _allEntriesTreeView.Sorted;
+		_loadingBlockingPanel = this.AddBlockingPanel("Loading data...\r\nPlease wait", out _, 72, Cursors.WaitCursor);
 
-		_allEntriesTreeView.Sorted = true;
-		_allEntriesTreeView.TreeViewNodeSorter = Comparer<TreeNode>.Create((x, y) => {
-			if (x.Parent is not null && y.Parent is not null)
-				return x.Index.CompareTo(y.Index);
-
-			var xId = x.Name.ToNLogIDComponents();
-			var yId = y.Name.ToNLogIDComponents();
-
-			if (xId.oadBatch == yId.oadBatch)
-				return yId.sequence.CompareTo(xId.sequence);
-			else
-				return yId.oadBatch.CompareTo(xId.oadBatch);
-		});
+		_maxNodeCount = maxNodeCount;
 
 		_clearButton.Click += (s, e) => {
 			_allEntriesTreeView.BeginUpdate();
+			_allEntriesTreeView.SuspendLayout();
 			_allEntriesTreeView.Nodes.Clear();
+			_allEntriesTreeView.ResumeLayout(false);
 			_allEntriesTreeView.EndUpdate();
 		};
 
 		_collapseButton.Click += (s, e) => {
 			var tv = _GetVisibleTreeView();
 			tv.BeginUpdate();
+			tv.SuspendLayout();
 			tv.CollapseAll();
-			tv.EndUpdate();
-		};
-
-		_expandButton.Click += (s, e) => {
-			var tv = _GetVisibleTreeView();
-			tv.BeginUpdate();
-			tv.ExpandAll();
+			tv.ResumeLayout(false);
 			tv.EndUpdate();
 		};
 
@@ -118,58 +126,102 @@ public partial class NLogViewerForm : Form {
 			_ApplyFilter();
 		};
 
-		Panel? blockPnl = this.AddBlockingPanel("Loading data\r\nPlease wait..", out _, 78, Cursors.WaitCursor);
-
 		var watcher =
 			new FileWatcher(
 				directory,
 				tickFrequency,
 				startupDelay,
 				_HandleException,
-				_ProcessLineDelegate,
-				() => BeginInvoke(() => _allEntriesTreeView.BeginUpdate()),
-				_FinishedReadDelegate)
+				_ProcessLines)
 			.Start();
 
 		FormClosed += (_, _) => watcher.Dispose();
 
-		// -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
-
-		/* ----------------------------------------------------------------------------------------------------------
-		 * Delegate for when reading from a file / changes has been completed */
-		void _FinishedReadDelegate() {
-			BeginInvoke(_ActualWork);
-			void _ActualWork() {
-				if (blockPnl is not null) {
-					blockPnl.Dispose();
-					blockPnl = null;
-				}
-
-				if (_allEntriesTreeView.SelectedNode == null)
-					_allEntriesTreeView.Nodes[0].EnsureVisible();
-
-				_allEntriesTreeView.EndUpdate();
-			}
-		}
-
 		/* ----------------------------------------------------------------------------------------------------------
 		 * Gets the currently visible tree view */
 		TreeView _GetVisibleTreeView() => _allEntriesTreeView.Visible ? _allEntriesTreeView : _filteredTreeView;
+	}
 
-		/* ----------------------------------------------------------------------------------------------------------
-		 * Delegate wrapper for processing a line from the file watcher */
-		void _ProcessLineDelegate(string line) {
-			BeginInvoke(_ActualWork);
-			void _ActualWork() {
+
+	void _ProcessLines(Queue<string> lines) {
+		lock (_lock) {
+			List<TreeNode> nodes = new List<TreeNode>(lines.Count);
+
+			bool expandNew = Invoke(() => _expandNewCheckBox.Checked);
+
+			while (lines.TryDequeue(out string? line)) {
 				if (!line.StartsWith('{'))
-					return;
+					continue;
 
-				_allEntriesTreeView.Nodes.Insert(0, _TreeNodeFromJson(line, _expandNewCheckBox.Checked));
-
-				if (_allEntriesTreeView.Nodes.Count > maxNodeCount)
-					_allEntriesTreeView.Nodes.Remove(_allEntriesTreeView.Nodes[^1]);
+				nodes.Add(_TreeNodeFromJson(line, expandNew));
 			}
+
+			nodes.Sort(_treeNodeComparer);
+
+			if (_loadingBlockingPanel is not null) {
+				if (nodes.Count > _maxNodeCount)
+					nodes = [.. nodes.Skip(_maxNodeCount)];
+			}
+
+			_PushToTreeView(nodes);
 		}
+
+		void _PushToTreeView(List<TreeNode> nodes) {
+			BeginInvoke(async () => {
+				if (_loadingBlockingPanel is not null)
+					_allEntriesTreeView.Scrollable = false;
+
+				TreeNode? selNode = _allEntriesTreeView.SelectedNode;
+				bool isBottom = selNode is null || selNode.Index == _allEntriesTreeView.Nodes.Count - 1;
+
+				_allEntriesTreeView.BeginUpdate();
+				_allEntriesTreeView.SuspendLayout();
+
+				foreach (TreeNode[] nChunk in nodes.Chunk(250)) {
+					_allEntriesTreeView.Nodes.AddRange(nChunk);
+
+					while (_allEntriesTreeView.Nodes.Count > _maxNodeCount)
+						_allEntriesTreeView.Nodes.RemoveAt(0);
+
+					await Task.Delay(20);
+				}
+
+				if (_loadingBlockingPanel is not null) {
+					_allEntriesTreeView.Scrollable = true;
+					_loadingBlockingPanel.Dispose();
+					_loadingBlockingPanel = null;
+				}
+
+				_allEntriesTreeView.ResumeLayout(false);
+				_allEntriesTreeView.EndUpdate();
+
+				if (selNode is not null)
+					selNode.EnsureVisible();
+				else
+					_allEntriesTreeView.Nodes[^1].EnsureVisible();
+			});
+		}
+	}
+
+
+	/// <summary>
+	/// Creates a comparer used for sorting TreeNodes.
+	/// </summary>
+	/// <returns>Comparer</returns>
+	private static Comparer<TreeNode> _CreateTreeNodeComparer() {
+		return
+			Comparer<TreeNode>.Create((x, y) => {
+				if (x.Parent is not null && y.Parent is not null)
+					return x.Index.CompareTo(y.Index);
+
+				var xId = ((double oadBatch, int sequence))x.Tag;
+				var yId = ((double oadBatch, int sequence))y.Tag;
+
+				if (xId.oadBatch == yId.oadBatch)
+					return xId.sequence.CompareTo(yId.sequence);
+				else
+					return xId.oadBatch.CompareTo(yId.oadBatch);
+			});
 	}
 
 
@@ -193,10 +245,12 @@ public partial class NLogViewerForm : Form {
 	/// Initializes a new instance of the <see cref="TreeNode" /> class from a source Json string.
 	/// </summary>
 	/// <param name="json">Source Json string.</param>
-	/// <param name="expanded">Indicates whether the node should be fully expanded.</param>
-	/// <exception cref="Exception"></exception>
-	private static TreeNode _TreeNodeFromJson(string json, bool expanded = false) {
+	/// <param name="expand">Indicates whether the node should be expanded.</param>
+	/// <exception cref="Exception">Thrown if TreeNode creation fails.</exception>
+	private static TreeNode _TreeNodeFromJson(string json, bool expand) {
 		var jObj = JsonNode.Parse(json)!.AsObject();
+
+		string nlId = jObj[_ID]!.ToString();
 
 		TreeNode newNode = new($"{_UTCToLocal(jObj)}    {jObj.FindNodeValues(_MESSAGE).FirstOrDefault()?.ToString().SubstringLeft(140)}") {
 			BackColor = jObj[_LEVEL]!.ToString() switch {
@@ -205,12 +259,13 @@ public partial class NLogViewerForm : Form {
 				_ERROR => Color.Red,
 				_ => Color.Orchid
 			},
-			Name = jObj[_ID]!.ToString()
+			Name = nlId,
+			Tag = nlId.ToNLogIDComponents()
 		};
 
 		_AddDescendants(newNode, jObj, true);
 
-		if (expanded)
+		if (expand)
 			newNode.ExpandAll();
 
 		return newNode;

@@ -13,16 +13,16 @@ public partial class Simple : Form {
 	}
 
 
-	
+
 	private void _InitNLogViewerButton() {
 		_nLogViewerButton.Click += (_, _) => {
 			if (_ChooseDir() is string dir) {
 				new Praxis.WinForm.NLogViewer.NLogViewerForm(
 					dir,
 					5000,
-					TimeSpan.FromMilliseconds(1000),
+					TimeSpan.FromMilliseconds(500),
 					TimeSpan.FromMilliseconds(1650))
-				.Show();
+			.Show();
 			}
 		};
 

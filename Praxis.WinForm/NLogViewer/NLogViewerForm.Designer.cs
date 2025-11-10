@@ -1,4 +1,4 @@
-﻿namespace Praxis.WinForm.NLogViewer;
+namespace Praxis.WinForm.NLogViewer;
 
 partial class NLogViewerForm {
 	/// <summary>
@@ -29,7 +29,6 @@ partial class NLogViewerForm {
 		var resources = new System.ComponentModel.ComponentResourceManager(typeof(NLogViewerForm));
 		_expandNewCheckBox = new CheckBox();
 		_collapseButton = new Button();
-		_expandButton = new Button();
 		_clearButton = new Button();
 		_filterTextBox = new TextBox();
 		_clearFilterButton = new Button();
@@ -49,7 +48,6 @@ partial class NLogViewerForm {
 		_optionsFlowLayoutPanel.BorderStyle = BorderStyle.Fixed3D;
 		_optionsFlowLayoutPanel.Controls.Add(_expandNewCheckBox);
 		_optionsFlowLayoutPanel.Controls.Add(_collapseButton);
-		_optionsFlowLayoutPanel.Controls.Add(_expandButton);
 		_optionsFlowLayoutPanel.Controls.Add(_clearButton);
 		_optionsFlowLayoutPanel.Controls.Add(_filterPanel);
 		_optionsFlowLayoutPanel.Dock = DockStyle.Top;
@@ -80,17 +78,6 @@ partial class NLogViewerForm {
 		_collapseButton.TabStop = false;
 		_collapseButton.Text = "Collapse";
 		_collapseButton.UseVisualStyleBackColor = true;
-		// 
-		// _expandButton
-		// 
-		_expandButton.Location = new Point(204, 9);
-		_expandButton.Margin = new Padding(16, 3, 0, 3);
-		_expandButton.Name = "_expandButton";
-		_expandButton.Size = new Size(75, 32);
-		_expandButton.TabIndex = 2;
-		_expandButton.TabStop = false;
-		_expandButton.Text = "Expand";
-		_expandButton.UseVisualStyleBackColor = true;
 		// 
 		// _clearButton
 		// 
@@ -216,7 +203,6 @@ partial class NLogViewerForm {
 	private TreeView _allEntriesTreeView;
 	private CheckBox _expandNewCheckBox;
 	private Button _collapseButton;
-	private Button _expandButton;
 	private Button _clearButton;
 	private TextBox _filterTextBox;
 	private Button _clearFilterButton;
