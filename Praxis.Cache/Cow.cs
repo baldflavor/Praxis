@@ -10,11 +10,11 @@ public static class Cow {
 	/// <summary>
 	/// MasterLock class used for generating locks when accessing cached information
 	/// </summary>
-	private static readonly MasterLock _masterLock = new();
+	private static readonly MasterLock<string> _masterLock = new();
 
 	/// <summary>
 	/// Removes all items from the cache if the passed interface is of type <see cref="MemoryCache"/>. If it is not, then no clearing operation will be performed. Check the
-	/// return value to determine whether or not the cache could be cleared
+	/// return value to determine whether or not the cache could be cleared.
 	/// </summary>
 	/// <returns>True if the cache could be cleared, otherwise false</returns>
 	public static bool Clear(this IMemoryCache cache) {
