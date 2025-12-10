@@ -144,6 +144,9 @@ public partial class NLogViewerForm : Form {
 
 
 	void _ProcessLines(Queue<string> lines) {
+		if (lines.Count == 0)
+			return;
+
 		lock (_lock) {
 			List<TreeNode> nodes = new List<TreeNode>(lines.Count);
 
@@ -172,18 +175,17 @@ public partial class NLogViewerForm : Form {
 					_allEntriesTreeView.Scrollable = false;
 
 				TreeNode? selNode = _allEntriesTreeView.SelectedNode;
-				bool isBottom = selNode is null || selNode.Index == _allEntriesTreeView.Nodes.Count - 1;
 
 				_allEntriesTreeView.BeginUpdate();
 				_allEntriesTreeView.SuspendLayout();
 
-				foreach (TreeNode[] nChunk in nodes.Chunk(250)) {
+				foreach (TreeNode[] nChunk in nodes.Chunk(650)) {
 					_allEntriesTreeView.Nodes.AddRange(nChunk);
 
 					while (_allEntriesTreeView.Nodes.Count > _maxNodeCount)
-						_allEntriesTreeView.Nodes.RemoveAt(0);
+						_allEntriesTreeView.Nodes[0].Remove();
 
-					await Task.Delay(20);
+					await Task.Delay(10); 
 				}
 
 				if (_loadingBlockingPanel is not null) {
