@@ -97,9 +97,9 @@ public static partial class Extension {
 
 			var hrex = new HttpRequestException("HttpResponse message status does not indicate success", contentReadException);
 
-			hrex.Data["StatusCode"] = arg.StatusCode;
-			hrex.Data["ReasonPhrase"] = arg.ReasonPhrase;
-			hrex.Data["Content"] = content;
+			hrex.Data[nameof(arg.StatusCode)] = arg.StatusCode;
+			hrex.Data[nameof(arg.ReasonPhrase)] = arg.ReasonPhrase;
+			hrex.Data[nameof(arg.Content)] = content;
 
 			throw hrex;
 		}
