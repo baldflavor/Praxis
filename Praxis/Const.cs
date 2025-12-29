@@ -9,37 +9,35 @@ using System.Reflection;
 public static class Const {
 
 	/// <summary>
-	/// Broken vertical bar
+	/// Broken vertical bar.
 	/// </summary>
 	/// <remarks>
-	/// C#: <c>(char)166</c>
-	/// <para>Unic Number: <c>U+00A6</c></para>
+	/// Unic Number: <c>U+00A6</c>
 	/// <para>Html Code: <c>&amp;brvbar;</c></para>
 	/// </remarks>
 	public const char BROKENVERTBAR = '¦';
 
 	/// <summary>
-	/// Broken vertical bar (<see cref="BROKENVERTBAR"/> as <see cref="string"/>)
+	/// Broken vertical bar (<see cref="BROKENVERTBAR"/>) as a string.
 	/// </summary>
 	public const string BROKENVERTBARSTRING = "¦";
 
 	/// <summary>
-	/// Bullet point
+	/// Bullet point.
 	/// </summary>
 	/// <remarks>
-	/// C#: <c>(char)8226</c>
-	/// <para>Unic Number: <c>U+2022</c></para>
+	/// Unic Number: <c>U+2022</c>
 	/// <para>Html Code: <c>&amp;bull;</c></para>
 	/// </remarks>
 	public const char BULLET = '•';
 
 	/// <summary>
-	/// Bullet point (<see cref="BULLET"/> as <see cref="string"/>)
+	/// Bullet point (<see cref="BULLET"/>) as a string.
 	/// </summary>
 	public const string BULLETSTRING = "•";
 
 	/// <summary>
-	/// Carriage return / newline
+	/// Carriage return / newline.
 	/// </summary>
 	public const string CRLF = "\r\n";
 
@@ -54,11 +52,15 @@ public static class Const {
 	/// <remarks>
 	/// <para>A figure space or numeric space is a typographic unit equal to the size of a single numerical digit. Its size can fluctuate somewhat depending on which font is being used.
 	/// This is the preferred space to use in numbers. It has the same width as a digit and keeps the number together for the purpose of line breaking.</para>
-	/// C#: <c>(char)8199</c>
-	/// <para>Unic Number: <c>U+2077</c></para>
+	/// <para>Unic Number: <c>U+2007</c></para>
 	/// <para>Html Code: <c>&amp;numsp;</c></para>
 	/// </remarks>
 	public const char FIGURESPACE = '\u2007';
+
+	/// <summary>
+	/// Typographical spacing figure (<see cref="FIGURESPACE"/>) as a string.
+	/// </summary>
+	public const string FIGURESPACESTRING = "\u2007";
 
 	/// <summary>
 	/// Binary size of a Kilobyte (KB).
@@ -66,19 +68,37 @@ public static class Const {
 	public const int KILOBYTE = 1024;
 
 	/// <summary>
-	/// Number of milliseconds in one minute
+	/// Number of milliseconds in one minute.
 	/// </summary>
 	public const int MILLISECONDSONEMINUTE = 60_000;
 
 	/// <summary>
-	/// Number of milliseconds in ten minutes
+	/// Number of milliseconds in ten minutes.
 	/// </summary>
 	public const int MILLISECONDTENMINUTES = 600_000;
 
 	/// <summary>
-	/// A string indicating that a value was <see langword="null"/>
+	/// A string indicating that a value was <see langword="null"/>.
 	/// </summary>
 	public const string NULL = "null";
+
+	/// <summary>
+	/// Soft-hyphen appears as a hyphen that is only displayed when a word is to be broken to a second line.
+	/// </summary>
+	/// <remarks>
+	/// In WinForms, compatible text rendering must be enabled.
+	/// <para>Unic Number: <c>U+00AD</c></para>
+	/// <para>Html Code: <c>&amp;shy;</c></para>
+	/// </remarks>
+	public const char SOFTHYPHEN = '\u00AD';
+
+	/// <summary>
+	/// Soft-hyphen (<see cref="SOFTHYPHEN"/>) as a string.
+	/// </summary>
+	/// <remarks>
+	/// In WinForms, compatible text rendering must be enabled.
+	/// </remarks>
+	public const string SOFTHYPHENSTRING = "\u00AD";
 
 	/// <summary>
 	/// Represents the numeric equivalent of a <see langword="true"/> value.
@@ -89,14 +109,13 @@ public static class Const {
 	/// Vertical ellipsis
 	/// </summary>
 	/// <remarks>
-	/// C#: <c>(char)8942</c>
 	/// <para>Unic Number: <c>U+22EE</c></para>
 	/// <para>Html Code: <c>&amp;#8942;</c></para>
 	/// </remarks>
 	public const char VERTICALELLIPSIS = '⋮';
 
 	/// <summary>
-	/// Vertical ellipsis (<see cref="VERTICALELLIPSIS"/> as string)
+	/// Vertical ellipsis (<see cref="VERTICALELLIPSIS"/>) as a string.
 	/// </summary>
 	public const string VERTICALELLIPSISSTRING = "⋮";
 
@@ -104,11 +123,17 @@ public static class Const {
 	/// Zero width space.
 	/// </summary>
 	/// <remarks>
-	/// C#: <c>(char)8203</c>
+	/// In WinForms, compatible text rendering must be enabled.
 	/// <para>Unic Number: <c>U+200B</c></para>
 	/// <para>Html Code: <c>&amp;#8203;</c></para>
 	/// </remarks>
-	public const char ZEROWIDTHSPACE = (char)0x200B;
+	public const char ZEROWIDTHSPACE = '\u200B';
+
+	/// <summary>
+	/// Zero width space (<see cref="ZEROWIDTHSPACE"/>) as a string.
+	/// </summary>
+	/// <remarks>In WinForms, compatible text rendering must be enabled.</remarks>
+	public const string ZEROWIDTHSPACESTRING = "\u200B";
 
 
 	/// <summary>
