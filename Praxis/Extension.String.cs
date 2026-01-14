@@ -27,8 +27,7 @@ public static partial class Extension {
 	/// <param name="arg">String to use for source</param>
 	/// <returns>A string with spaces added</returns>
 	public static string AddSpacesBeforeUppercase(this string arg) {
-		var sb = new StringBuilder();
-		sb.Append(arg[0]);
+		var sb = new StringBuilder().Append(arg[0]);
 
 		for (int i = 1; i < arg.Length; i++) {
 			char currentChar = arg[i];
