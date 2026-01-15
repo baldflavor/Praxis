@@ -1,8 +1,6 @@
 namespace Praxis.Test;
 
-using System.Collections;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Praxis.Knowledge;
 
 [TestClass]
 public class ObjectExtension {
@@ -63,6 +61,47 @@ public class ObjectExtension {
 	}
 
 
+	[TestMethod]
+	public void SetEventHandlersNull() {
+		var ep = new EPubSub();
+		List<object> stuff = [];
+		ep.GotNumber += (s, e) => {
+			stuff.Add(e);
+		};
+		ep.GotNumber += (s, e) => {
+			stuff.Add(((int)e) + 10);
+		};
+
+		ep.GotString += (s, e) => {
+			stuff.Add(e);
+		};
+		ep.GotString += (s, e) => {
+			stuff.Add($"Sweet {e}");
+		};
+
+		ep.Fire();
+		ep.SetEventHandlersNull();
+		ep.Fire();
+
+		Assert.HasCount(4, stuff);
+	}
+
+
+	private class EPub {
+		public event EventHandler<int>? GotNumber;
+
+		public virtual void Fire() => GotNumber?.Invoke(this, 777);
+	}
+
+	private class EPubSub : EPub {
+		public event EventHandler<string>? GotString;
+
+
+		public override void Fire() {
+			GotString?.Invoke(this, "Corn");
+			base.Fire();
+		}
+	}
 
 
 

@@ -243,7 +243,7 @@ public static partial class Extension {
 	/// <param name="otherForm">Another form to use relative for the location of <paramref name="arg"/></param>
 	/// <param name="setOwner">Whether to set <paramref name="otherForm"/> as the <see cref="Form.Owner"/> or <paramref name="arg"/></param>
 	/// <returns><paramref name="arg"/></returns>
-	public static Form SetStartLoc(this Form arg, Form otherForm, bool setOwner = false) {
+	public static T SetStartLoc<T>(this T arg, Form otherForm, bool setOwner = false) where T : Form {
 		if (setOwner)
 			arg.Owner = otherForm;
 

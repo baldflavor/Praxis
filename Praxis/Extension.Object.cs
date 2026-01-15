@@ -215,8 +215,8 @@ public static partial class Extension {
 
 
 	/// <summary>
-	/// On the target object, walks through type/base type heirarchy and retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is a 
-	/// subclass of <see cref="MulticastDelegate"/>.
+	/// On the target object, walks through type/base type heirarchy and retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is assignable 
+	/// from <see cref="MulticastDelegate"/>.
 	/// <para>For each of those fields the value will be set to <see langword="null"/></para>
 	/// </summary>
 	/// <param name="arg">Object being targeted</param>
@@ -224,7 +224,7 @@ public static partial class Extension {
 		Type multicastDelegateType = typeof(MulticastDelegate);
 		Type? type = arg.GetType();
 		while (type != null) {
-			foreach (FieldInfo field in type.GetFields(Const.BindingFlagsAll).Where(f => f.FieldType.IsSubclassOf(multicastDelegateType)))
+			foreach (FieldInfo field in type.GetFields(Const.BindingFlagsAll | BindingFlags.DeclaredOnly).Where(f => multicastDelegateType.IsAssignableFrom(f.FieldType)))
 				field.SetValue(arg, null);
 
 			type = type.BaseType;
