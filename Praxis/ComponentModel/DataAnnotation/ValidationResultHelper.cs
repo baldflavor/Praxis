@@ -33,13 +33,21 @@ public static class ValidationResultHelper {
 	public static ValidationResult MustBeOneOfValue<T>(IEnumerable<T> values, params string[] propertyNames) => new($"Must be one of the following values: [{string.Join(',', values.Order())}]", _AssertHasElement(propertyNames));
 
 	/// <summary>
+	/// Creates a validation result indicating that a value cannot be a negative value.
+	/// </summary>
+	/// <param name="propertyNames"><see cref="string"/> array of property names to assign to <see cref="ValidationResult.MemberNames"/>. Must contain at least one element</param>
+	/// <returns><see cref="ValidationResult"/></returns>
+	/// <exception cref="Exception">Thrown if <paramref name="propertyNames"/> does not contain at least one element</exception>
+	public static ValidationResult NonNegative(params string[] propertyNames) => new("Cannot be a negative value", _AssertHasElement(propertyNames));
+
+	/// <summary>
 	/// Asserts that the passed array is not null and contains at least one element
 	/// </summary>
 	/// <param name="arg"><see cref="string"/> array</param>
 	/// <returns><paramref name="arg"/></returns>
 	/// <exception cref="Exception">Thrown if there is not at least one element in <paramref name="arg"/></exception>
 	private static string[] _AssertHasElement(string[] arg) {
-		if ((arg?.Length > 0) != true)
+		if (!arg.HasElements())
 			throw new Exception("Must be non-null and contain at least one element");
 		return arg;
 	}
