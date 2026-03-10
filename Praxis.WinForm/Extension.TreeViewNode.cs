@@ -3,7 +3,6 @@ namespace Praxis.WinForm;
 using System.Text;
 using System.Windows.Forms;
 
-// Extension methods for treeviews / nodes
 public static partial class Extension {
 
 	/// <summary>

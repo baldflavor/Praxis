@@ -2,9 +2,6 @@ namespace Praxis;
 
 using System.Text;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Removes whitespace characters by back walking from the end of the string builder until the first non-whitespace character is encountered.

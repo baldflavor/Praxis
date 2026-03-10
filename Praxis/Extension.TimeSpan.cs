@@ -1,8 +1,5 @@
 namespace Praxis;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Constant string format for a negative <see cref="TimeSpan"/> that includes the number of days

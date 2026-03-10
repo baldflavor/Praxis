@@ -2,9 +2,6 @@ namespace Praxis;
 
 using System.Collections.Generic;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Attempts to retrieve a key / value and supplies a value if it does not exist.

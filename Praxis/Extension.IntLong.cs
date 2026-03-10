@@ -1,8 +1,5 @@
 namespace Praxis;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 
 	/// <summary>

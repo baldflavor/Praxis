@@ -2,9 +2,6 @@ namespace Praxis;
 
 using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Default delimter to use between each member name in <see cref="ToStringFull(ValidationResult, string?, string?)"/>

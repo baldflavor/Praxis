@@ -4,9 +4,6 @@ using System.Collections;
 using System.Collections.Specialized;
 using System.ComponentModel.DataAnnotations;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Default delimter to use between when joining items / strings.

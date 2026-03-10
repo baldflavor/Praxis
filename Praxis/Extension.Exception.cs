@@ -2,15 +2,11 @@ namespace Praxis;
 
 using System.Collections;
 using System.ComponentModel.DataAnnotations;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// Adds an entry into this exception's .Data dictionary, utilizing caller information for the key.
