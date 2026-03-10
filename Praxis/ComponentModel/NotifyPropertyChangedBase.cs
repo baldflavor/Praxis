@@ -15,17 +15,15 @@ public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged {
 	public event PropertyChangedEventHandler? PropertyChanged;
 
 
-
 	/// <summary>
-	/// This method should be called everywhere that a set operation is being triggered; the callermembername will then supply the name of the property
-	/// that was changed to the event handler
+	/// This method should be called everywhere that a set operation is being triggered; or when one wishes to notify that something has changed "internally" on a class.
 	/// </summary>
 	/// <param name="propertyName">The name of the property that has changed. Read by compiler services; only pass to override.</param>
 	protected void NotifyPropertyChanged([CallerMemberName] string propertyName = "") => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
 	/// <summary>
-	/// Code that is used to set property values, checking to see if the value set is the current value and will call <see cref="_NotifyPropertyChanged(string)"/>
-	/// if a new value is being set
+	/// Code that is used to set property values, checking to see if the value set is the current value and will call <see cref="NotifyPropertyChanged(string)"/>
+	/// if a new value is set.
 	/// </summary>
 	/// <typeparam name="T">Type of data in a backing field or property</typeparam>
 	/// <param name="field">Reference to the backing field for a property</param>
