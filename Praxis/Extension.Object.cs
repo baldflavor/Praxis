@@ -9,9 +9,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 	/// <summary>
 	/// The maximum object depth to use when getting properties of objects

@@ -2,11 +2,7 @@ namespace Praxis;
 
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 
 	/// <summary>

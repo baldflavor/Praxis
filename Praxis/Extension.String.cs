@@ -4,9 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using System.Text.RegularExpressions;
 
-/// <summary>
-/// Extension methods for various object types
-/// </summary>
 public static partial class Extension {
 
 	/// <summary>

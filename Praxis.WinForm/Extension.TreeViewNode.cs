@@ -3,7 +3,6 @@ namespace Praxis.WinForm;
 using System.Text;
 using System.Windows.Forms;
 
-// Extension methods for treeviews / nodes
 public static partial class Extension {
 
 	/// <summary>
@@ -43,11 +42,14 @@ public static partial class Extension {
 	/// </summary>
 	/// <param name="node">The <see cref="TreeNode"/> to use as an operational target and a source of child nodes</param>
 	/// <param name="action">An action to take on each <see cref="TreeNode"/></param>
-	public static void SelfAndDescendants(this TreeNode node, Action<TreeNode> action) {
+	/// <returns><paramref name="node"/></returns>
+	public static TreeNode SelfAndDescendants(this TreeNode node, Action<TreeNode> action) {
 		action(node);
 
 		foreach (TreeNode child in node.Nodes)
 			child.SelfAndDescendants(action);
+
+		return node;
 	}
 
 	/// <summary>
@@ -56,8 +58,11 @@ public static partial class Extension {
 	/// </summary>
 	/// <param name="node">TreeNode being assigned values to</param>
 	/// <param name="index">The index to assign the values to</param>
-	public static void SetImageIndexes(this TreeNode node, int index) {
+	/// <returns><paramref name="node"/></returns>
+	public static TreeNode SetImageIndexes(this TreeNode node, int index) {
 		node.ImageIndex = index;
 		node.SelectedImageIndex = index;
+
+		return node;
 	}
 }

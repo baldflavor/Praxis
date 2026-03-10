@@ -123,22 +123,28 @@ public static partial class Extension {
 	/// <summary>
 	/// Disposes all child controls
 	/// </summary>
+	/// <typeparam name="T">Type of Control to dispose children for.</typeparam>
 	/// <remarks>
 	/// Dispose on a control disposes all child controls of that control and also removes them from their parent
 	/// </remarks>
 	/// <param name="arg"><see cref="Control"/> to operate on</param>
-	public static void DisposeChildren(this Control arg) {
+	/// <returns><paramref name="arg"/></returns>
+	public static T DisposeChildren<T>(this T arg) where T : Control {
 		while (arg.Controls.Count > 0)
 			arg.Controls[0].Dispose();
+
+		return arg;
 	}
 
 	/// <summary>
 	/// For the given control, will handle perform the passed Action for whenever either Keys.Enter or Keys.Return is depressed
 	/// and does such so that the "ding" will not be played through speaker audio
 	/// </summary>
+	/// <typeparam name="T">Type to handle "Enter" on; must be inherited from or type of <c>Control</c>.</typeparam>
 	/// <param name="control">Control to target for handling</param>
 	/// <param name="action">An Action to be performed when the handler fires</param>
-	public static void HandleEnterAction(this Control control, Action action) {
+	/// <returns><paramref name="control"/></returns>
+	public static T HandleEnterAction<T>(this T control, Action action) where T : Control {
 		void kd(object? s, KeyEventArgs e) {
 			bool suppress = e.KeyCode is Keys.Enter or Keys.Return;
 			e.SuppressKeyPress = suppress;
@@ -153,6 +159,8 @@ public static partial class Extension {
 
 		control.KeyDown += kd;
 		control.KeyPress += kp;
+
+		return control;
 	}
 
 	/// <summary>
@@ -312,10 +320,11 @@ public static partial class Extension {
 	/// <summary>
 	/// Peforms an action on all controls that are recursive children of <paramref name="control"/>
 	/// </summary>
+	/// <typeparam name="T">Type of Control.</typeparam>
 	/// <param name="control"><paramref name="control"/></param>
 	/// <param name="action">Delegate to perform on each recursively found child</param>
 	/// <returns><paramref name="control"/></returns>
-	public static Control WithChildren(this Control control, Action<Control> action) {
+	public static T WithChildren<T>(this T control, Action<Control> action) where T:Control {
 		action(control);
 		foreach (Control child in control.Controls)
 			_ = child.WithChildren(action);
