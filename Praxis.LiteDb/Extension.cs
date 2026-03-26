@@ -1,5 +1,6 @@
 namespace Praxis.LiteDb;
 
+using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using LiteDB;
 using LiteDB.Engine;
@@ -48,15 +49,23 @@ public static class Extension {
 	public static IEnumerable<T> Find<T>(this ILiteRepository lr, Expression<Func<T, bool>> predicate, int skip = 0, int limit = int.MaxValue) => lr.Database.GetCollection<T>().Find(predicate, skip, limit);
 
 	/// <summary>
-	/// Inserts a value into the database. The passed data will have <see cref="Assert.IsValid{T}(T, string?)"/> called before insertion attempt
+	/// Inserts a value into the database after asserting that <see cref="Validator.TryValidateObject(object, ValidationContext, ICollection{ValidationResult}?, bool)"/> returns <c>true</c>.
 	/// </summary>
 	/// <typeparam name="T">Type of data to insert</typeparam>
 	/// <param name="db">Database used for data insertion</param>
 	/// <param name="data">Data to insert. (Note that for auto incremented ID values it should be set post insert)</param>
 	/// <returns><see cref="BsonValue"/> of the document id post insert</returns>
 	public static BsonValue InsertValidated<T>(this ILiteDatabase db, T data) where T : class {
-		Assert.IsValid(data);
-		return db.GetCollection<T>().Insert(data);
+		return db.GetCollection<T>().Insert(_AssertValid(data));
+
+		static K _AssertValid<K>(K data) where K : class {
+			List<ValidationResult> validationResults = [];
+
+			if(!Validator.TryValidateObject(data, new ValidationContext(data), validationResults, true))
+				throw new AggregateException("Validation failed on arg object", [.. validationResults.Select(v => new ValidationException(v, null, null))]);
+
+			return data;
+		}
 	}
 
 	/// <summary>
@@ -76,7 +85,7 @@ public static class Extension {
 	/// <param name="destinationFullName">The fullname of a file where the new database should be written.</param>
 	/// <param name="ensureIndexes">Action to use for ensuring indexes before data is copied.</param>
 	/// <param name="password">Password to set on the new database.</param>
-	public static void RebuildCopy(this ILiteRepository sourceLr, Collation collation, string destinationFullName, Action<LiteRepository>? ensureIndexes = null, string ? password = null) {
+	public static void RebuildCopy(this ILiteRepository sourceLr, Collation collation, string destinationFullName, Action<LiteRepository>? ensureIndexes = null, string? password = null) {
 		var conStr = new ConnectionString { Connection = ConnectionType.Direct, Collation = collation, Filename = destinationFullName };
 		if (password is not null)
 			conStr.Password = password;
