@@ -82,7 +82,7 @@ public class FactoryOption {
 	/// <remarks>
 	/// This should run once per lifetime of an application context.
 	/// </remarks>
-	public Action<ILiteRepository>? OnInitialized { get; init; }
+	public Action<ILiteRepository, FactoryOption>? OnInitialized { get; init; }
 
 	/// <summary>
 	/// Gets or inits a value indicating whether strings will have whitespace auto trimmed during storage
