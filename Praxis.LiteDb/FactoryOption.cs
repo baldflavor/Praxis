@@ -9,10 +9,6 @@ using LiteDB.Engine;
 /// </summary>
 /// <remarks>
 /// Used in conjunction with <see cref="Factory"/>.
-/// <para>
-/// <see cref="InvariantIgnoreCaseCollation"/> and <see cref="RegisterCustomDateTimeDateTimeOffsetMapping(LiteDB.BsonMapper)"/> are both
-/// used during <see cref="Factory"/> operation.
-/// </para>
 /// </remarks>
 public class FactoryOption {
 
@@ -22,17 +18,11 @@ public class FactoryOption {
 	/// </summary>
 	public const string DATETIMEFORMAT = "yyyy-MM-ddTHH:mm:ss.fffffff";
 
-
 	/// <summary>
-	/// Rebuild options that contain collation for invariant culture and with comparison for ordinal ignore case on strings
+	/// Collation that specifies binary culture (127) and CompareOptions.OrdinalIgnoreCase.
 	/// </summary>
-	public static RebuildOptions DefaultRebuildOptions { get; } = new() { Collation = InvariantIgnoreCaseCollation };
-
-	/// <summary>
-	/// Collation that specified an invariant culture (127) and CompareOptions.OrdinalIgnoreCase
-	/// </summary>
-	/// <remarks>Use this as part of a connection string as follows: new ConnectionString { Collation = FactoryOption.InvariantIgnoreCaseCollation, Filename = fileName }</remarks>
-	public static Collation InvariantIgnoreCaseCollation { get; } = new(127, CompareOptions.OrdinalIgnoreCase);
+	/// <remarks>Use this as part of a connection string as follows: new ConnectionString { Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase, Filename = fileName }</remarks>
+	public static Collation BinaryCultureOrdinalIgnoreCase { get; } = new(Collation.Binary.LCID, CompareOptions.OrdinalIgnoreCase);
 
 
 	/// <summary>
@@ -85,6 +75,14 @@ public class FactoryOption {
 	/// </summary>
 	/// <returns><see cref="Dictionary{TKey, TValue}"/> of <see cref="Type"/> and <see cref="string"/></returns>
 	public Dictionary<Type, string> MapTypesToCollectionNames { get; init; } = [];
+
+	/// <summary>
+	/// Action to call when the first initialization of the database is called, whether newly created or opened.
+	/// </summary>
+	/// <remarks>
+	/// This should run once per lifetime of an application context.
+	/// </remarks>
+	public Action<LiteRepository>? OnInitialized { get; init; }
 
 	/// <summary>
 	/// Gets or inits a value indicating whether strings will have whitespace auto trimmed during storage

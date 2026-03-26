@@ -35,6 +35,17 @@ public static partial class Extension {
 	/// </summary>
 	public static string ToStringRichFormat { get; set; } = "[{0}" + Const.BROKENVERTBAR + "{1}]";
 
+
+
+
+	/// <summary>
+	/// Uses the passed value to populate an array with a single element.
+	/// </summary>
+	/// <typeparam name="T">Type of object.</typeparam>
+	/// <param name="arg">Value to place in the array.</param>
+	/// <returns>Single element array.</returns>
+	public static T[] AsArray<T>(this T arg) => [arg];
+
 	/// <summary>
 	/// Returns a single matching attribute value on the specified object or one of it's members, optionally using ancestor inheritance for searching
 	/// <para>NOTE: Doesn't work for types</para>
@@ -209,8 +220,6 @@ public static partial class Extension {
 		}
 	}
 
-
-
 	/// <summary>
 	/// On the target object, walks through type/base type heirarchy and retrieves all fields (<see cref="Const.BindingFlagsAll"/>) whose type is assignable 
 	/// from <see cref="MulticastDelegate"/>.
@@ -280,7 +289,6 @@ public static partial class Extension {
 							validationResults);
 		}
 	}
-
 
 	/// <summary>
 	/// Performs validation on a arg object.
@@ -385,6 +393,7 @@ public static partial class Extension {
 
 		return isValid;
 	}
+
 
 	/// <summary>
 	/// Returns a string representation of the passed arg object; if the object ends up being either an IDictionary

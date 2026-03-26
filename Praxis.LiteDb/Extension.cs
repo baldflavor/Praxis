@@ -2,6 +2,7 @@ namespace Praxis.LiteDb;
 
 using System.Linq.Expressions;
 using LiteDB;
+using LiteDB.Engine;
 
 /// <summary>
 /// Extensions for <see cref="LiteDb"/> objects.
@@ -47,14 +48,6 @@ public static class Extension {
 	public static IEnumerable<T> Find<T>(this ILiteRepository lr, Expression<Func<T, bool>> predicate, int skip = 0, int limit = int.MaxValue) => lr.Database.GetCollection<T>().Find(predicate, skip, limit);
 
 	/// <summary>
-	/// Inserts a large amount of data
-	/// </summary>
-	/// <typeparam name="T">Type to use for collection target</typeparam>
-	/// <param name="lr"><see cref="ILiteRepository"/> used for operation</param>
-	/// <param name="data">Data to insert</param>
-	public static void InsertBulk<T>(this ILiteRepository lr, IEnumerable<T> data) => lr.Database.GetCollection<T>().InsertBulk(data);
-
-	/// <summary>
 	/// Inserts a value into the database. The passed data will have <see cref="Assert.IsValid{T}(T, string?)"/> called before insertion attempt
 	/// </summary>
 	/// <typeparam name="T">Type of data to insert</typeparam>
@@ -67,11 +60,37 @@ public static class Extension {
 	}
 
 	/// <summary>
-	/// Initiates a rebuild on the database by the way of a repository using <see cref="FactoryOption.DefaultRebuildOptions"/>
+	/// Initiates a rebuild on the database.
 	/// </summary>
-	/// <remarks>Will cause a backup file to be created</remarks>
+	/// <remarks>Will cause a backup file to be created until closed.</remarks>
 	/// <param name="lr"><see cref="ILiteRepository"/> to use for database instance access</param>
-	public static void RebuildWDefaults(this ILiteRepository lr) => lr.Database.Rebuild(FactoryOption.DefaultRebuildOptions);
+	/// <param name="rebuildOptions">Options specifying the rebuild operation. When null, the collation used is <see cref="FactoryOption.BinaryCultureOrdinalIgnoreCase"/>  </param>
+	[Obsolete("This currently does not function due to a bug in the underlying LiteDb engine", true)]
+	public static void Rebuild(this ILiteRepository lr, RebuildOptions? rebuildOptions) => lr.Database.Rebuild(rebuildOptions ?? new RebuildOptions { Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase });
+
+	/// <summary>
+	/// EXPERIMENTAL: Copy all collections and documents from a source repository to a new one.
+	/// </summary>
+	/// <param name="sourceLr">Source ILiteRepository.</param>
+	/// <param name="collation">Collation to use for the new database.</param>
+	/// <param name="destinationFullName">The fullname of a file where the new database should be written.</param>
+	/// <param name="ensureIndexes">Action to use for ensuring indexes before data is copied.</param>
+	/// <param name="password">Password to set on the new database.</param>
+	public static void RebuildCopy(this ILiteRepository sourceLr, Collation collation, string destinationFullName, Action<LiteRepository>? ensureIndexes = null, string ? password = null) {
+		var conStr = new ConnectionString { Connection = ConnectionType.Direct, Collation = collation, Filename = destinationFullName };
+		if (password is not null)
+			conStr.Password = password;
+
+		using var destLr = new LiteRepository(conStr);
+		destLr.Database.CheckpointSize = sourceLr.Database.CheckpointSize;
+		ensureIndexes?.Invoke(destLr);
+
+		foreach (var colName in sourceLr.Database.GetCollectionNames()) {
+			var sCol = sourceLr.Database.GetCollection(colName);
+			var dCol = destLr.Database.GetCollection(colName, sCol.AutoId);
+			dCol.Insert(sCol.FindAll());
+		}
+	}
 
 	/// <summary>
 	/// Uploads a file
