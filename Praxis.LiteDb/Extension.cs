@@ -69,6 +69,30 @@ public static class Extension {
 	public static void Rebuild(this ILiteRepository lr, RebuildOptions? rebuildOptions) => lr.Database.Rebuild(rebuildOptions ?? new RebuildOptions { Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase });
 
 	/// <summary>
+	/// EXPERIMENTAL: Copy all collections and documents from a source repository to a new one.
+	/// </summary>
+	/// <param name="sourceLr">Source ILiteRepository.</param>
+	/// <param name="collation">Collation to use for the new database.</param>
+	/// <param name="destinationFullName">The fullname of a file where the new database should be written.</param>
+	/// <param name="ensureIndexes">Action to use for ensuring indexes before data is copied.</param>
+	/// <param name="password">Password to set on the new database.</param>
+	public static void RebuildCopy(this ILiteRepository sourceLr, Collation collation, string destinationFullName, Action<LiteRepository>? ensureIndexes = null, string ? password = null) {
+		var conStr = new ConnectionString { Connection = ConnectionType.Direct, Collation = collation, Filename = destinationFullName };
+		if (password is not null)
+			conStr.Password = password;
+
+		using var destLr = new LiteRepository(conStr);
+		destLr.Database.CheckpointSize = sourceLr.Database.CheckpointSize;
+		ensureIndexes?.Invoke(destLr);
+
+		foreach (var colName in sourceLr.Database.GetCollectionNames()) {
+			var sCol = sourceLr.Database.GetCollection(colName);
+			var dCol = destLr.Database.GetCollection(colName, sCol.AutoId);
+			dCol.Insert(sCol.FindAll());
+		}
+	}
+
+	/// <summary>
 	/// Uploads a file
 	/// </summary>
 	/// <param name="lr"><see cref="ILiteDatabase"/> used for storage</param>
