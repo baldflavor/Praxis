@@ -82,7 +82,7 @@ public class LiteDb {
 		};
 
 		if (!File.Exists(fileFullName))
-			conString.Collation = FactoryOption.InvariantIgnoreCaseCollation;
+			conString.Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase;
 
 		LiteRepository lr = new(conString, _bMapper);
 

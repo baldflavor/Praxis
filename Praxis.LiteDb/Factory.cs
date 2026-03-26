@@ -76,6 +76,7 @@ public sealed class Factory {
 		// Ensure indexes - used in case of existing edition upgrades with new versions added
 		using var lr = _CreateIfNonExistent() ?? GetLiteRepository();
 		_option.EnsureIndexes(lr);
+		_option.OnInitialized?.Invoke(lr);
 
 		/* ----------------------------------------------------------------------------------------------------------
 		 * Creates a new LiteDb file if it does not already exist on disk */
@@ -84,8 +85,8 @@ public sealed class Factory {
 				return null;
 
 			var conString = new ConnectionString {
-				Collation = FactoryOption.InvariantIgnoreCaseCollation,
-				Connection = ConnectionType.Direct,
+				Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase,
+				Connection = _option.ConnectionType,
 				Filename = _option.FileFullName
 			};
 
