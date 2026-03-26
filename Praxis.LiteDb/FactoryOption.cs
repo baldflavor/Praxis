@@ -55,7 +55,7 @@ public class FactoryOption {
 	/// <remarks>
 	/// Default to performs no action
 	/// </remarks>
-	public Action<LiteRepository> EnsureIndexes { get; init; } = (l) => { };
+	public Action<ILiteRepository> EnsureIndexes { get; init; } = (l) => { };
 
 	/// <summary>
 	/// Gets or inits a value indicating whether or not enums will be stored as integers in data
@@ -82,7 +82,7 @@ public class FactoryOption {
 	/// <remarks>
 	/// This should run once per lifetime of an application context.
 	/// </remarks>
-	public Action<LiteRepository>? OnInitialized { get; init; }
+	public Action<ILiteRepository>? OnInitialized { get; init; }
 
 	/// <summary>
 	/// Gets or inits a value indicating whether strings will have whitespace auto trimmed during storage
