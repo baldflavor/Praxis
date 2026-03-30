@@ -3,7 +3,6 @@ namespace Praxis.LiteDb;
 using System.ComponentModel.DataAnnotations;
 using System.Linq.Expressions;
 using LiteDB;
-using LiteDB.Engine;
 
 /// <summary>
 /// Extensions for <see cref="LiteDb"/> objects.
@@ -61,21 +60,12 @@ public static class Extension {
 		static K _AssertValid<K>(K data) where K : class {
 			List<ValidationResult> validationResults = [];
 
-			if(!Validator.TryValidateObject(data, new ValidationContext(data), validationResults, true))
+			if (!Validator.TryValidateObject(data, new ValidationContext(data), validationResults, true))
 				throw new AggregateException("Validation failed on arg object", [.. validationResults.Select(v => new ValidationException(v, null, null))]);
 
 			return data;
 		}
 	}
-
-	/// <summary>
-	/// Initiates a rebuild on the database.
-	/// </summary>
-	/// <remarks>Will cause a backup file to be created until closed.</remarks>
-	/// <param name="lr"><see cref="ILiteRepository"/> to use for database instance access</param>
-	/// <param name="rebuildOptions">Options specifying the rebuild operation. When null, the collation used is <see cref="FactoryOption.BinaryCultureOrdinalIgnoreCase"/>  </param>
-	[Obsolete("This currently does not function due to a bug in the underlying LiteDb engine", true)]
-	public static void Rebuild(this ILiteRepository lr, RebuildOptions? rebuildOptions) => lr.Database.Rebuild(rebuildOptions ?? new RebuildOptions { Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase });
 
 	/// <summary>
 	/// Uploads a file

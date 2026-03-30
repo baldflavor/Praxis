@@ -25,6 +25,7 @@ public sealed class Factory {
 	private int _initialized = 0;
 
 
+
 	/// <summary>
 	/// Creates an instance of the <see cref="Factory"/> class
 	/// </summary>
@@ -33,6 +34,14 @@ public sealed class Factory {
 		_option = option;
 		_bsonMapper = _CreateBsonMapper();
 	}
+
+
+
+	/// <summary>
+	/// Gets the <c>FactoryOptions</c> instance passed when creating this instance.
+	/// </summary>
+	public FactoryOption FactoryOption => _option;
+
 
 
 	/// <summary>
@@ -98,7 +107,7 @@ public sealed class Factory {
 		// and not serializing null false. Make sure to adjust these per your domain
 		BsonMapper bMapper = new() {
 			EnumAsInteger = _option.EnumAsInteger,
-			ResolveCollectionName = (t) => _option.MapTypesToCollectionNames.TryGetValue(t, out var name) ? name : t.Name,
+			ResolveCollectionName = (t) => _option.ResolveCollectionName(t),
 			TrimWhitespace = _option.TrimWhitespace
 		};
 
@@ -117,6 +126,7 @@ public sealed class Factory {
 		// Ensure indexes - used in case of existing edition upgrades with new versions added
 		using var lr = _CreateIfNonExistent() ?? GetLiteRepository();
 		_option.EnsureIndexes(lr);
+		_option.OnInitialized?.Invoke(lr, this);
 		return true;
 
 		/* ----------------------------------------------------------------------------------------------------------
