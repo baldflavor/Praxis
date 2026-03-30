@@ -47,6 +47,47 @@ public sealed class Factory {
 		return new LiteRepository(new ConnectionString { Connection = _option.ConnectionType, Filename = _option.FileFullName }, _bsonMapper);
 	}
 
+	/// <summary>
+	/// EXPERIMENTAL: Copy all collections and documents from a source repository to a new one.
+	/// </summary>
+	/// <remarks>
+	/// Make sure to Dispose / Close the returned LiteRepository.
+	/// </remarks>
+	/// <param name="destinationFullName">The fullname of a file where the new database should be written.</param>
+	/// <exception cref="ArgumentException">Thrown if <paramref name="destinationFullName"/> already exists.</exception>
+	/// <exception cref="Exception">Thrown if the database cannot be rebuilt into a copy.</exception>
+	public LiteRepository RebuildCopy(string destinationFullName) {
+		try {
+			if (File.Exists(destinationFullName))
+				throw new ArgumentException("Destination filename already exists", nameof(destinationFullName));
+
+			using var sourceLr = new LiteRepository(new ConnectionString { Connection = _option.ConnectionType, Filename = _option.FileFullName }, _bsonMapper);
+
+			var destLr = new LiteRepository(
+				new ConnectionString {
+					Collation = FactoryOption.BinaryCultureOrdinalIgnoreCase,
+					Connection = _option.ConnectionType,
+					Filename = destinationFullName
+				},
+				_bsonMapper);
+
+			destLr.Database.CheckpointSize = _option.CheckpointSize;
+			_option.EnsureIndexes(destLr);
+
+			foreach (var colName in sourceLr.Database.GetCollectionNames()) {
+				var sCol = sourceLr.Database.GetCollection(colName);
+				var dCol = destLr.Database.GetCollection(colName, sCol.AutoId);
+				dCol.Insert(sCol.FindAll());
+			}
+
+			return destLr;
+		}
+		catch (Exception ex) {
+			ex.Data[nameof(destinationFullName)] = destinationFullName;
+			throw;
+		}
+	}
+
 
 	/// <summary>
 	/// Creates a <see cref="BsonMapper"/> with registered types and options for this domain
@@ -69,14 +110,14 @@ public sealed class Factory {
 	/// <summary>
 	/// Initializes a LiteDb file with appropriate collation, checkpoint sizes and indexes
 	/// </summary>
-	private void _InitializeLiteDb() {
+	private bool _InitializeLiteDb() {
 		if (_initialized == 1 || Interlocked.Exchange(ref _initialized, 1) == 1)
-			return;
+			return false;
 
 		// Ensure indexes - used in case of existing edition upgrades with new versions added
 		using var lr = _CreateIfNonExistent() ?? GetLiteRepository();
 		_option.EnsureIndexes(lr);
-		_option.OnInitialized?.Invoke(lr, _option);
+		return true;
 
 		/* ----------------------------------------------------------------------------------------------------------
 		 * Creates a new LiteDb file if it does not already exist on disk */
@@ -93,7 +134,7 @@ public sealed class Factory {
 			var lr = new LiteRepository(conString, _bsonMapper);
 			lr.Database.CheckpointSize = _option.CheckpointSize;
 
-			// Do *NOT* set the database as below as it causes unpredictable behavior -- see the tests in this solution for more information
+			// Do *NOT* set `UtcDate` on the database as it causes unpredictable/alteration of values behavior -- see the tests in this solution for more information
 			//lr.Database.UtcDate = utc;
 
 			return lr;
