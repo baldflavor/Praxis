@@ -10,11 +10,11 @@ using LiteDB.Engine;
 /// <remarks>
 /// Used in conjunction with <see cref="Factory"/>.
 /// </remarks>
-public class FactoryOption {
+public sealed class FactoryOption {
 
 	/// <summary>
-	/// Format that is used when serializing / deserializing <see cref="DateTime"/> when <see cref="RegisterCustomDateTimeDateTimeOffsetMapping(BsonMapper)"/>
-	/// is executed.
+	/// Format used when serializing / deserializing <see cref="DateTime"/>/<see cref="DateTimeOffset"/> when
+	/// <see cref="RegisterCustomDateTimeDateTimeOffsetMapping(BsonMapper)"/> is executed.
 	/// </summary>
 	public const string DATETIMEFORMAT = "yyyy-MM-ddTHH:mm:ss.fffffff";
 
@@ -53,7 +53,7 @@ public class FactoryOption {
 	/// Gets or inits a delegate used to ensure that LiteDb has indexes beyond the default (auto-id) for various collections
 	/// </summary>
 	/// <remarks>
-	/// Default to performs no action
+	/// Default performs no action.
 	/// </remarks>
 	public Action<ILiteRepository> EnsureIndexes { get; init; } = (l) => { };
 
@@ -71,18 +71,21 @@ public class FactoryOption {
 	public required string FileFullName { get; init; }
 
 	/// <summary>
-	/// Used for mapping objects to collection names that are different than their type name
-	/// </summary>
-	/// <returns><see cref="Dictionary{TKey, TValue}"/> of <see cref="Type"/> and <see cref="string"/></returns>
-	public Dictionary<Type, string> MapTypesToCollectionNames { get; init; } = [];
-
-	/// <summary>
-	/// Action to call when the first initialization of the database is called, whether newly created or opened.
+	/// Action to call when the first initialization of the database is called, whether newly created or opened, after <see cref="EnsureIndexes"/>.
 	/// </summary>
 	/// <remarks>
 	/// This should run once per lifetime of an application context.
 	/// </remarks>
-	public Action<ILiteRepository, FactoryOption>? OnInitialized { get; init; }
+	public Action<ILiteRepository, Factory>? OnInitialized { get; init; }
+
+	/// <summary>
+	/// Used for mapping objects to collection names that are different than their type name.
+	/// </summary>
+	/// <remarks>
+	/// The default behavior is simply to return a Type's <c>Name</c>.
+	/// </remarks>
+	/// <returns></returns>
+	public Func<Type, string> ResolveCollectionName { get; init; } = (t) => t.Name;
 
 	/// <summary>
 	/// Gets or inits a value indicating whether strings will have whitespace auto trimmed during storage
