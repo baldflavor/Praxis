@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -236,6 +237,16 @@ public static partial class Extension {
 			type = type.BaseType;
 		}
 	}
+
+	/// <summary>
+	/// Converts a value into a <see cref="KeyValuePair{TKey, TValue}"/> using the caller's argument expression as the key.
+	/// </summary>
+	/// <typeparam name="T">The type of the value.</typeparam>
+	/// <param name="val">The value to store in the pair.</param>
+	/// <param name="cae">The caller argument expression captured automatically at compile time.</param>
+	/// <returns>A <see cref="KeyValuePair{TKey, TValue}"/> with the caller expression as key and <paramref name="val"/> as value.</returns>
+	/// <exception cref="ArgumentNullException">Thrown when <paramref name="cae"/> is <see langword="null"/>.</exception>
+	public static KeyValuePair<string, T> ToKvp<T>(this T val, [CallerArgumentExpression(nameof(val))] string? cae = null) => KeyValuePair.Create(cae.IsNotNull(), val);
 
 	/// <summary>
 	/// Serializes the passed object into Json using <see cref="JsonSerializer.Serialize{TValue}(TValue, JsonSerializerOptions?)"/> with <see cref="Json.Options"/>.
