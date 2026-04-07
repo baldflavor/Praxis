@@ -87,7 +87,9 @@ public static partial class Extension {
 	/// <param name="newText">If not <see langword="default"/> will be set to <see cref="Label.Text"/> before font sizing</param>
 	/// <param name="startingFontSize">The starting font size desired - avoid using abnormally large values</param>
 	/// <returns><paramref name="label"/></returns>
-	public static Label AutoSizeFont(this Label label, string? newText = null, float startingFontSize = 100) {
+	public static Label AutoSizeFont(this Label label, string? newText = null, float startingFontSize = 100f) {
+		const float INCREMENT = 1f;
+
 		if (label.TextAlign != ContentAlignment.MiddleLeft)
 			label.TextAlign = ContentAlignment.MiddleLeft;
 
@@ -100,18 +102,22 @@ public static partial class Extension {
 			label.Text = newText;
 
 		string text = label.Text;
+		float lo = INCREMENT;
+		float hi = startingFontSize;
 
-		while (true) {
-			using var tempFont = new Font(fontFam, startingFontSize);
-
+		while (hi - lo > INCREMENT) {
+			float mid = (lo + hi) / 2f;
+			using var tempFont = new Font(fontFam, mid);
 			Size textSize = TextRenderer.MeasureText(text, tempFont, clientSize, TextFormatFlags.WordBreak);
-			if ((textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height) || startingFontSize == 1f) {
-				label.Font = tempFont;
-				return label;
-			}
 
-			startingFontSize -= .5f;
+			if (textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height)
+				lo = mid;
+			else
+				hi = mid;
 		}
+
+		label.Font = new Font(fontFam, lo);
+		return label;
 	}
 
 	/// <summary>
@@ -387,7 +393,7 @@ public static partial class Extension {
 	/// <param name="control"><paramref name="control"/></param>
 	/// <param name="action">Delegate to perform on each recursively found child</param>
 	/// <returns><paramref name="control"/></returns>
-	public static T WithChildren<T>(this T control, Action<Control> action) where T:Control {
+	public static T WithChildren<T>(this T control, Action<Control> action) where T : Control {
 		action(control);
 		foreach (Control child in control.Controls)
 			_ = child.WithChildren(action);
