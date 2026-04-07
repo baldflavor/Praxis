@@ -243,6 +243,34 @@ public static partial class Extension {
 	}
 
 	/// <summary>
+	/// Scales the specified <paramref name="source"/> point by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="source">The point to scale.</param>
+	/// <returns>A <see cref="Point"/> with the scaled coordinates.</returns>
+	public static Point ScaleDeviceDpi(this Control control, Point source) {
+		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		return new Point((int)(source.X * scale), (int)(source.Y * scale));
+	}
+
+	/// <summary>
+	/// Scales the specified <paramref name="source"/> size by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="source">The size to scale.</param>
+	/// <returns>A <see cref="Size"/> with the scaled dimensions.</returns>
+	public static Size ScaleDeviceDpi(this Control control, Size source) {
+		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		return new Size((int)(source.Width * scale), (int)(source.Height * scale));
+	}
+
+	/// <summary>
 	/// Sets the passed list of enumerable items to the items collection of the target combo box and optionally selects the first item automatically
 	/// </summary>
 	/// <param name="control">ComboBox to set the items to</param>
