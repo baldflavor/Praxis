@@ -2,9 +2,18 @@ namespace Praxis.WinForm;
 
 using System.Collections;
 
-// Extension methods for controls
-
 public static partial class Extension {
+
+	/// <summary>
+	/// Baseline DPI when calculating scale differences.
+	/// </summary>
+	/// <remarks>
+	/// The default is <c>96f</c>; representative of 100% scale size in Windows.
+	/// </remarks>
+	public static float ScaleDeviceDpiBaseline { get; set; } = 96f;
+
+
+
 	/// <summary>
 	/// Adds a panel sized to the client size of its owner and an inner label that displays a text message
 	/// </summary>
@@ -78,7 +87,9 @@ public static partial class Extension {
 	/// <param name="newText">If not <see langword="default"/> will be set to <see cref="Label.Text"/> before font sizing</param>
 	/// <param name="startingFontSize">The starting font size desired - avoid using abnormally large values</param>
 	/// <returns><paramref name="label"/></returns>
-	public static Label AutoSizeFont(this Label label, string? newText = null, float startingFontSize = 100) {
+	public static Label AutoSizeFont(this Label label, string? newText = null, float startingFontSize = 100f) {
+		const float INCREMENT = 1f;
+
 		if (label.TextAlign != ContentAlignment.MiddleLeft)
 			label.TextAlign = ContentAlignment.MiddleLeft;
 
@@ -91,18 +102,22 @@ public static partial class Extension {
 			label.Text = newText;
 
 		string text = label.Text;
+		float lo = INCREMENT;
+		float hi = startingFontSize;
 
-		while (true) {
-			using var tempFont = new Font(fontFam, startingFontSize);
-
+		while (hi - lo > INCREMENT) {
+			float mid = (lo + hi) / 2f;
+			using var tempFont = new Font(fontFam, mid);
 			Size textSize = TextRenderer.MeasureText(text, tempFont, clientSize, TextFormatFlags.WordBreak);
-			if ((textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height) || startingFontSize == 1f) {
-				label.Font = tempFont;
-				return label;
-			}
 
-			startingFontSize -= .5f;
+			if (textSize.Width <= clientSize.Width && textSize.Height <= clientSize.Height)
+				lo = mid;
+			else
+				hi = mid;
 		}
+
+		label.Font = new Font(fontFam, lo);
+		return label;
 	}
 
 	/// <summary>
@@ -205,6 +220,60 @@ public static partial class Extension {
 			_ => throw new Exception("Unknown flow direction"),
 		};
 		return target;
+	}
+
+	/// <summary>
+	/// Scales the specified <paramref name="value"/> by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="value">The value to scale.</param>
+	/// <returns>The scaled value as an <see cref="int"/>.</returns>
+	public static int ScaleDeviceDpi(this Control control, int value) => (int)(value * (control.DeviceDpi / ScaleDeviceDpiBaseline));
+
+	/// <summary>
+	/// Scales the specified coordinates by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="x">The x-coordinate to scale.</param>
+	/// <param name="y">The y-coordinate to scale.</param>
+	/// <returns>A <see cref="Point"/> with the scaled coordinates.</returns>
+	public static Point ScaleDeviceDpi(this Control control, int x, int y) {
+		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		return new Point((int)(x * scale), (int)(y * scale));
+	}
+
+	/// <summary>
+	/// Scales the specified <paramref name="source"/> point by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="source">The point to scale.</param>
+	/// <returns>A <see cref="Point"/> with the scaled coordinates.</returns>
+	public static Point ScaleDeviceDpi(this Control control, Point source) {
+		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		return new Point((int)(source.X * scale), (int)(source.Y * scale));
+	}
+
+	/// <summary>
+	/// Scales the specified <paramref name="source"/> size by the DPI of the <paramref name="control"/>.
+	/// </summary>
+	/// <remarks>
+	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// </remarks>
+	/// <param name="control">The control whose DPI is used for scaling.</param>
+	/// <param name="source">The size to scale.</param>
+	/// <returns>A <see cref="Size"/> with the scaled dimensions.</returns>
+	public static Size ScaleDeviceDpi(this Control control, Size source) {
+		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		return new Size((int)(source.Width * scale), (int)(source.Height * scale));
 	}
 
 	/// <summary>
@@ -324,7 +393,7 @@ public static partial class Extension {
 	/// <param name="control"><paramref name="control"/></param>
 	/// <param name="action">Delegate to perform on each recursively found child</param>
 	/// <returns><paramref name="control"/></returns>
-	public static T WithChildren<T>(this T control, Action<Control> action) where T:Control {
+	public static T WithChildren<T>(this T control, Action<Control> action) where T : Control {
 		action(control);
 		foreach (Control child in control.Controls)
 			_ = child.WithChildren(action);

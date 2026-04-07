@@ -55,7 +55,7 @@ public sealed class FactoryOption {
 	/// <remarks>
 	/// Default performs no action.
 	/// </remarks>
-	public Action<ILiteRepository> EnsureIndexes { get; init; } = (l) => { };
+	public Action<LiteRepository> EnsureIndexes { get; init; } = (l) => { };
 
 	/// <summary>
 	/// Gets or inits a value indicating whether or not enums will be stored as integers in data
@@ -76,7 +76,7 @@ public sealed class FactoryOption {
 	/// <remarks>
 	/// This should run once per lifetime of an application context.
 	/// </remarks>
-	public Action<ILiteRepository, Factory>? OnInitialized { get; init; }
+	public Action<LiteRepository, Factory>? OnInitialized { get; init; }
 
 	/// <summary>
 	/// Used for mapping objects to collection names that are different than their type name.
