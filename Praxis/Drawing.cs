@@ -11,7 +11,7 @@ public static class Drawing {
 	/// <summary>
 	/// Array of all the system named colors
 	/// </summary>
-	private static Color[] _namedColors = [.. typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.Public).Select(p => (Color)p.GetValue(null)!)];
+	private static readonly Color[] _namedColors = [.. typeof(Color).GetProperties(BindingFlags.Static | BindingFlags.Public).Select(p => (Color)p.GetValue(null)!)];
 
 	/// <summary>
 	/// Gets an array of all named colors
