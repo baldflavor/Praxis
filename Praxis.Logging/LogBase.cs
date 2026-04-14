@@ -87,6 +87,7 @@ public class LogBase(Type type) {
 	/// Base level code performs the following and should be called when overriden unless specifically not needed:
 	/// <list type="number">
 	///	<item>If <paramref name="data"/> is <c>null</c> -> <c>returns</c>.</item>
+	///	<item>If <paramref name="data"/> is <see cref="KeyValuePair{TKey, TValue}"/>, then a property is added with Key->Key and Value->Value.</item>
 	///	<item>If <paramref name="data"/> is <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/>
 	///	of <c>string</c>, <c>object</c>, adds each to the <paramref name="logger"/>, then <c>returns</c>.</item>
 	///	<item>Else, adds <paramref name="data"/> to a property named <see cref="Constant.DATA"/></item>
@@ -98,6 +99,8 @@ public class LogBase(Type type) {
 	protected virtual Logger AddProperties(object? data, Logger logger) {
 		if (data is null)
 			return logger;
+		else if(data is KeyValuePair<string, object?> dKvp)
+			return logger.WithProperty(dKvp.Key, dKvp.Value);
 		else if (data is IEnumerable<KeyValuePair<string, object?>> dDict)
 			return logger.WithProperties(dDict);
 		else
