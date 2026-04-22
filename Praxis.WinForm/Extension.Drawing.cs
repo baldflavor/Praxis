@@ -6,7 +6,6 @@ using System.Drawing.Drawing2D;
 
 public static partial class Extension {
 
-
 	/// <summary>
 	/// Clones a <see cref="Bitmap"/> by saving and reloading it through a <see cref="MemoryStream"/>, producing an independent copy.
 	/// </summary>
