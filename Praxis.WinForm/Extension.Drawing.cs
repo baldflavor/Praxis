@@ -12,7 +12,7 @@ public static partial class Extension {
 	/// </summary>
 	/// <param name="source">The bitmap to clone.</param>
 	/// <returns>A new <see cref="Bitmap"/> instance.</returns>
-	public static Bitmap CloneByStream(Bitmap source) {
+	public static Bitmap CloneByStream(this Bitmap source) {
 		using var ms = new MemoryStream();
 		source.Save(ms, source.RawFormat);
 		ms.Position = 0;
