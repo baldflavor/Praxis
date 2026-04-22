@@ -150,7 +150,7 @@ public partial class NLogViewerForm : Form {
 	protected override void OnLoad(EventArgs e) {
 		base.OnLoad(e);
 
-		_filteredTreeView.Font = _allEntriesTreeView.Font = new Font("Cascadia Code", 9F, FontStyle.Regular, GraphicsUnit.Point, 0);
+		_filteredTreeView.Font = _allEntriesTreeView.Font = new Font("Cascadia Code", _allEntriesTreeView.Font.SizeInPoints, FontStyle.Regular, GraphicsUnit.Point, 0);
 		_loadingBlockingPanel = this.AddBlockingPanel("Loading data...\r\nPlease wait", out _, 72, Cursors.WaitCursor);
 	}
 
