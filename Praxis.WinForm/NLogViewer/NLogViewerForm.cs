@@ -93,8 +93,6 @@ public partial class NLogViewerForm : Form {
 	public NLogViewerForm(string directory, int maxNodeCount, TimeSpan tickFrequency, TimeSpan startupDelay) {
 		InitializeComponent();
 
-		_loadingBlockingPanel = this.AddBlockingPanel("Loading data...\r\nPlease wait", out _, 72, Cursors.WaitCursor);
-
 		_maxNodeCount = maxNodeCount;
 
 		_clearButton.Click += (s, e) => {
@@ -135,75 +133,27 @@ public partial class NLogViewerForm : Form {
 				_ProcessLines)
 			.Start();
 
-		FormClosed += (_, _) => watcher.Dispose();
+		FormClosing += (_, e) => {
+			if (e.Cancel)
+				return;
+
+			watcher.Stop(true);
+			watcher.Dispose();
+		};
 
 		/* ----------------------------------------------------------------------------------------------------------
 		 * Gets the currently visible tree view */
 		TreeView _GetVisibleTreeView() => _allEntriesTreeView.Visible ? _allEntriesTreeView : _filteredTreeView;
 	}
 
+	/// <inheritdoc/>
+	protected override void OnLoad(EventArgs e) {
+		base.OnLoad(e);
 
-	void _ProcessLines(Queue<string> lines) {
-		if (lines.Count == 0)
-			return;
-
-		lock (_lock) {
-			List<TreeNode> nodes = new List<TreeNode>(lines.Count);
-
-			bool expandNew = Invoke(() => _expandNewCheckBox.Checked);
-
-			while (lines.TryDequeue(out string? line)) {
-				if (!line.StartsWith('{'))
-					continue;
-
-				nodes.Add(_TreeNodeFromJson(line, expandNew));
-			}
-
-			nodes.Sort(_treeNodeComparer);
-
-			if (_loadingBlockingPanel is not null) {
-				if (nodes.Count > _maxNodeCount)
-					nodes = [.. nodes.Skip(_maxNodeCount)];
-			}
-
-			_PushToTreeView(nodes);
-		}
-
-		void _PushToTreeView(List<TreeNode> nodes) {
-			BeginInvoke(async () => {
-				if (_loadingBlockingPanel is not null)
-					_allEntriesTreeView.Scrollable = false;
-
-				TreeNode? selNode = _allEntriesTreeView.SelectedNode;
-
-				_allEntriesTreeView.BeginUpdate();
-				_allEntriesTreeView.SuspendLayout();
-
-				foreach (TreeNode[] nChunk in nodes.Chunk(650)) {
-					_allEntriesTreeView.Nodes.AddRange(nChunk);
-
-					while (_allEntriesTreeView.Nodes.Count > _maxNodeCount)
-						_allEntriesTreeView.Nodes[0].Remove();
-
-					await Task.Delay(10); 
-				}
-
-				if (_loadingBlockingPanel is not null) {
-					_allEntriesTreeView.Scrollable = true;
-					_loadingBlockingPanel.Dispose();
-					_loadingBlockingPanel = null;
-				}
-
-				_allEntriesTreeView.ResumeLayout(false);
-				_allEntriesTreeView.EndUpdate();
-
-				if (selNode is not null)
-					selNode.EnsureVisible();
-				else
-					_allEntriesTreeView.Nodes[^1].EnsureVisible();
-			});
-		}
+		_filteredTreeView.Font = _allEntriesTreeView.Font = new Font("Cascadia Code", _allEntriesTreeView.Font.SizeInPoints, FontStyle.Regular, GraphicsUnit.Point, 0);
+		_loadingBlockingPanel = this.AddBlockingPanel("Loading data...\r\nPlease wait", out _, 72, Cursors.WaitCursor);
 	}
+
 
 
 	/// <summary>
@@ -224,15 +174,6 @@ public partial class NLogViewerForm : Form {
 				else
 					return xId.oadBatch.CompareTo(yId.oadBatch);
 			});
-	}
-
-
-	/// <summary>
-	/// Prevents calling this method other than by designer support
-	/// </summary>
-	[Obsolete("Designer Only", true)]
-	private NLogViewerForm() {
-		InitializeComponent();
 	}
 
 	/// <summary>
@@ -314,6 +255,7 @@ public partial class NLogViewerForm : Form {
 		}
 	}
 
+
 	/// <summary>
 	/// Apply a filter so that only those that pass are visible in the node list
 	/// </summary>
@@ -385,6 +327,71 @@ public partial class NLogViewerForm : Form {
 	/// </summary>
 	/// <param name="ex">Exception that was thrown</param>
 	private void _HandleException(Exception ex) => BeginInvoke(() => MessageBox.Show(ex.GetDetail(), "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error));
+
+	/// <summary>
+	/// Processes queued log lines by parsing JSON, creating tree nodes, sorting them, and pushing them to the tree view.
+	/// </summary>
+	private void _ProcessLines(Queue<string> lines) {
+		if (lines.Count == 0)
+			return;
+
+		lock (_lock) {
+			List<TreeNode> nodes = new List<TreeNode>(lines.Count);
+
+			bool expandNew = Invoke(() => _expandNewCheckBox.Checked);
+
+			while (lines.TryDequeue(out string? line)) {
+				if (!line.StartsWith('{'))
+					continue;
+
+				nodes.Add(_TreeNodeFromJson(line, expandNew));
+			}
+
+			nodes.Sort(_treeNodeComparer);
+
+			if (_loadingBlockingPanel is not null) {
+				if (nodes.Count > _maxNodeCount)
+					nodes = [.. nodes.Skip(_maxNodeCount)];
+			}
+
+			_PushToTreeView(nodes);
+		}
+
+		void _PushToTreeView(List<TreeNode> nodes) {
+			BeginInvoke(async () => {
+				if (_loadingBlockingPanel is not null)
+					_allEntriesTreeView.Scrollable = false;
+
+				TreeNode? selNode = _allEntriesTreeView.SelectedNode;
+
+				_allEntriesTreeView.BeginUpdate();
+				_allEntriesTreeView.SuspendLayout();
+
+				foreach (TreeNode[] nChunk in nodes.Chunk(650)) {
+					_allEntriesTreeView.Nodes.AddRange(nChunk);
+
+					while (_allEntriesTreeView.Nodes.Count > _maxNodeCount)
+						_allEntriesTreeView.Nodes[0].Remove();
+
+					await Task.Delay(10);
+				}
+
+				if (_loadingBlockingPanel is not null) {
+					_allEntriesTreeView.Scrollable = true;
+					_loadingBlockingPanel.Dispose();
+					_loadingBlockingPanel = null;
+				}
+
+				_allEntriesTreeView.ResumeLayout(false);
+				_allEntriesTreeView.EndUpdate();
+
+				if (selNode is not null)
+					selNode.EnsureVisible();
+				else
+					_allEntriesTreeView.Nodes[^1].EnsureVisible();
+			});
+		}
+	}
 
 	/// <summary>
 	/// Sets a status to be displayed and shown to the user

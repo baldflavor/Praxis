@@ -1,5 +1,7 @@
 namespace Praxis.Logging;
 
+using System.Collections;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using NLog;
 
@@ -87,6 +89,7 @@ public class LogBase(Type type) {
 	/// Base level code performs the following and should be called when overriden unless specifically not needed:
 	/// <list type="number">
 	///	<item>If <paramref name="data"/> is <c>null</c> -> <c>returns</c>.</item>
+	///	<item>If <paramref name="data"/> is <see cref="KeyValuePair{TKey, TValue}"/>, then a property is added with Key->Key and Value->Value.</item>
 	///	<item>If <paramref name="data"/> is <see cref="IEnumerable{T}"/> of <see cref="KeyValuePair{TKey, TValue}"/>
 	///	of <c>string</c>, <c>object</c>, adds each to the <paramref name="logger"/>, then <c>returns</c>.</item>
 	///	<item>Else, adds <paramref name="data"/> to a property named <see cref="Constant.DATA"/></item>
@@ -98,9 +101,47 @@ public class LogBase(Type type) {
 	protected virtual Logger AddProperties(object? data, Logger logger) {
 		if (data is null)
 			return logger;
-		else if (data is IEnumerable<KeyValuePair<string, object?>> dDict)
-			return logger.WithProperties(dDict);
-		else
-			return logger.WithProperty(Constant.DATA, data);
+
+		Type dType = data.GetType();
+		IEnumerable? ieData = null;
+		try {
+			if (_TryAddForTypeWithKey(data, logger, out var aLog)) {
+				logger = aLog;
+			}
+			else if ((ieData = data as IEnumerable) is not null) {
+				foreach (object ieDat in ieData) {
+					if (_TryAddForTypeWithKey(ieDat, logger, out var bLog))
+						logger = bLog;
+				}
+			}
+			else {
+				int dPropCount = logger.Properties.Keys.Count(k => k.StartsWith(Constant.DATA, StringComparison.OrdinalIgnoreCase));
+				logger = logger.WithProperty($"{Constant.DATA}{(dPropCount == 0 ? null : dPropCount + 1)}", data);
+			}
+		}
+		catch (Exception ex) {
+			logger = logger.WithProperty("AssumedKeyValuePairException", ex).WithProperty(Constant.DATA, data);
+		}
+
+		return logger;
+
+
+		/* ----------------------------------------------------------------------------------------------------------
+		 * Attempts to add a property with 'Key' = value of a property 'Key' when it exists and is not null or empty
+		 * and either a value of 'Value' when exists, or the object itself. */
+		static bool _TryAddForTypeWithKey(object fData, Logger fLog, out Logger oLog) {
+			const string KEY = "Key";
+			const string VALUE = "Value";
+
+			Type fType = fData.GetType();
+			if (fType.GetProperty(KEY) is PropertyInfo keyProp && keyProp.GetValue(fData) is string key && !string.IsNullOrWhiteSpace(key)) {
+				oLog = fLog.WithProperty(key, fType.GetProperty(VALUE) is PropertyInfo valProp ? valProp.GetValue(fData) : fData);
+				return true;
+			}
+			else {
+				oLog = fLog;
+				return false;
+			}
+		}
 	}
 }

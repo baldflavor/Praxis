@@ -83,6 +83,20 @@ public static class Const {
 	public const string NULL = "null";
 
 	/// <summary>
+	/// Overline (underline, but to the top!).
+	/// </summary>
+	/// <remarks>
+	/// Unic Number: <c>U+203E</c>
+	/// <para>Html Code: <c>&amp;oline;</c></para>
+	/// </remarks>
+	public const char OVERLINE = '\u203E';
+
+	/// <summary>
+	/// Overline (<see cref="OVERLINE"/>) as a string.
+	/// </summary>
+	public const string OVERLINESTRING = "\u203E";
+
+	/// <summary>
 	/// Soft-hyphen appears as a hyphen that is only displayed when a word is to be broken to a second line.
 	/// </summary>
 	/// <remarks>
