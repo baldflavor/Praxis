@@ -10,7 +10,7 @@ public static partial class Extension {
 	/// <remarks>
 	/// The default is <c>96f</c>; representative of 100% scale size in Windows.
 	/// </remarks>
-	public static float ScaleDeviceDpiBaseline { get; set; } = 96f;
+	public const float SCALEDEVICEDPIBASELINE = 96f;
 
 
 
@@ -226,25 +226,25 @@ public static partial class Extension {
 	/// Scales the specified <paramref name="value"/> by the DPI of the <paramref name="control"/>.
 	/// </summary>
 	/// <remarks>
-	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// Uses <see cref="SCALEDEVICEDPIBASELINE"/> for scaling.
 	/// </remarks>
 	/// <param name="control">The control whose DPI is used for scaling.</param>
 	/// <param name="value">The value to scale.</param>
 	/// <returns>The scaled value as an <see cref="int"/>.</returns>
-	public static int ScaleDeviceDpi(this Control control, int value) => (int)(value * (control.DeviceDpi / ScaleDeviceDpiBaseline));
+	public static int ScaleDeviceDpi(this Control control, int value) => (int)(value * (control.DeviceDpi / SCALEDEVICEDPIBASELINE));
 
 	/// <summary>
 	/// Scales the specified coordinates by the DPI of the <paramref name="control"/>.
 	/// </summary>
 	/// <remarks>
-	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// Uses <see cref="SCALEDEVICEDPIBASELINE"/> for scaling.
 	/// </remarks>
 	/// <param name="control">The control whose DPI is used for scaling.</param>
 	/// <param name="x">The x-coordinate to scale.</param>
 	/// <param name="y">The y-coordinate to scale.</param>
 	/// <returns>A <see cref="Point"/> with the scaled coordinates.</returns>
 	public static Point ScaleDeviceDpi(this Control control, int x, int y) {
-		float scale = (control.DeviceDpi / ScaleDeviceDpiBaseline);
+		float scale = (control.DeviceDpi / SCALEDEVICEDPIBASELINE);
 		return new Point((int)(x * scale), (int)(y * scale));
 	}
 
@@ -252,7 +252,7 @@ public static partial class Extension {
 	/// Scales the specified <paramref name="source"/> point by the DPI of the <paramref name="control"/>.
 	/// </summary>
 	/// <remarks>
-	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// Uses <see cref="SCALEDEVICEDPIBASELINE"/> for scaling.
 	/// </remarks>
 	/// <param name="control">The control whose DPI is used for scaling.</param>
 	/// <param name="source">The point to scale.</param>
@@ -263,7 +263,7 @@ public static partial class Extension {
 	/// Scales the specified <paramref name="source"/> size by the DPI of the <paramref name="control"/>.
 	/// </summary>
 	/// <remarks>
-	/// Uses <see cref="ScaleDeviceDpiBaseline"/> for scaling.
+	/// Uses <see cref="SCALEDEVICEDPIBASELINE"/> for scaling.
 	/// </remarks>
 	/// <param name="control">The control whose DPI is used for scaling.</param>
 	/// <param name="source">The size to scale.</param>
