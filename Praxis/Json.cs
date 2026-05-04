@@ -20,7 +20,6 @@ public static partial class Json {
 			new IPEndpointJsonConverter(),
 			new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
 		},
-		DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
 		Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
 		NumberHandling = JsonNumberHandling.Strict,
 		PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
@@ -64,10 +63,6 @@ public static partial class Json {
 	///     <br/>The quotation mark is encoded as \" rather than \u0022.
 	///     <br/>Using this encoder instance allows <see cref="System.Text.Unicode.UnicodeRanges.All"/> to go through unescaped.
 	///     <br/>This encoder instance allows some other characters to go through unescaped (for example, '+'), and hence must be used cautiously.</para></description>
-	/// </item>
-	/// <item>
-	///     <term><see cref="JsonSerializerOptions.DefaultIgnoreCondition"/></term>
-	///     <description><see cref="JsonIgnoreCondition.WhenWritingNull"/></description>
 	/// </item>
 	/// <item>
 	///     <term><see cref="JsonSerializerOptions.NumberHandling"/></term>

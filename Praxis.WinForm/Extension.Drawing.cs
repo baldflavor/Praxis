@@ -6,13 +6,12 @@ using System.Drawing.Drawing2D;
 
 public static partial class Extension {
 
-
 	/// <summary>
 	/// Clones a <see cref="Bitmap"/> by saving and reloading it through a <see cref="MemoryStream"/>, producing an independent copy.
 	/// </summary>
 	/// <param name="source">The bitmap to clone.</param>
 	/// <returns>A new <see cref="Bitmap"/> instance.</returns>
-	public static Bitmap CloneByStream(Bitmap source) {
+	public static Bitmap CloneByStream(this Bitmap source) {
 		using var ms = new MemoryStream();
 		source.Save(ms, source.RawFormat);
 		ms.Position = 0;
