@@ -14,11 +14,8 @@ using Praxis.LiteDb;
 [TestClass]
 public class LiteDb {
 	// Static reference to a mapper used during connection to a LiteDatabase
-	private static BsonMapper _bMapper =
-		// Comment / uncomment to see the effect this has on dates
-		FactoryOption.RegisterCustomDateTimeDateTimeOffsetMapping(
-			new BsonMapper { EnumAsInteger = true, TrimWhitespace = false }
-		);
+	// This is similiar to the same in CreateBsonMapperWithSensibleDefaults but without the date time registration
+	private static readonly BsonMapper _bMapper = FactoryOption.CreateBsonMapperWithSensibleDefaults();
 
 	[TestMethod]
 	public void SerializeDeserializeDates() {

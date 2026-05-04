@@ -103,17 +103,9 @@ public sealed class Factory {
 	/// </summary>
 	/// <returns><see cref="BsonMapper"/></returns>
 	private BsonMapper _CreateBsonMapper() {
-		// There are several options available on the global mapper, such as auto trimming, empty strings being set to null
-		// and not serializing null false. Make sure to adjust these per your domain
-		BsonMapper bMapper = new() {
-			EnumAsInteger = _option.EnumAsInteger,
-			ResolveCollectionName = (t) => _option.ResolveCollectionName(t),
-			TrimWhitespace = _option.TrimWhitespace
-		};
-
-		_option.BsonMapping(FactoryOption.RegisterCustomDateTimeDateTimeOffsetMapping(bMapper));
-
-		return bMapper;
+		return _option.ConfigureBsonMapper(
+				FactoryOption.RegisterCustomDateTimeDateTimeOffsetMapping(
+					FactoryOption.CreateBsonMapperWithSensibleDefaults()));
 	}
 
 	/// <summary>
@@ -126,7 +118,7 @@ public sealed class Factory {
 		// Ensure indexes - used in case of existing edition upgrades with new versions added
 		using var lr = _CreateIfNonExistent() ?? GetLiteRepository();
 		_option.EnsureIndexes(lr);
-		_option.OnInitialized?.Invoke(lr, this);
+		_option.OnInitialized(lr, this);
 		return true;
 
 		/* ----------------------------------------------------------------------------------------------------------
@@ -144,8 +136,9 @@ public sealed class Factory {
 			var lr = new LiteRepository(conString, _bsonMapper);
 			lr.Database.CheckpointSize = _option.CheckpointSize;
 
-			// Do *NOT* set `UtcDate` on the database as it causes unpredictable/alteration of values behavior -- see the tests in this solution for more information
+			// Do *NOT* set `UtcDate` on the Database as it causes unpredictable/alteration of values behavior -- see the tests in this solution for more information
 			//lr.Database.UtcDate = utc;
+			// As a matter of fact.. store them as strings as done by _RegisterCustomDateTimeDateTimeOffsetMapping 
 
 			return lr;
 		}
