@@ -2,7 +2,6 @@ namespace Praxis.LiteDb;
 
 using System.Globalization;
 using LiteDB;
-using LiteDB.Engine;
 
 /// <summary>
 /// Options for configuring and using LiteDb.
@@ -26,12 +25,13 @@ public sealed class FactoryOption {
 
 
 	/// <summary>
-	/// Gets or inits a delegate that performs extra bson mapping for objects that require additional configuration for storage and retrieval
+	/// Gets or inits a delegate that performs final configuration of BsonMapper before being stored / reused by a Factory.
 	/// </summary>
 	/// <remarks>
-	/// Default performs no action
+	/// This can be used to create a whole new BsonMapper to replace the one created by <see cref="CreateBsonMapperWithSensibleDefaults"/>
+	/// when creating a <see cref="Factory"/>.
 	/// </remarks>
-	public Action<BsonMapper> BsonMapping { get; init; } = (b) => { };
+	public Func<BsonMapper, BsonMapper> ConfigureBsonMapper { get; init; } = (b) => b;
 
 	/// <summary>
 	/// Gets or inits the checkpoint size to use on the database (when creating new)
@@ -58,14 +58,6 @@ public sealed class FactoryOption {
 	public Action<LiteRepository> EnsureIndexes { get; init; } = (l) => { };
 
 	/// <summary>
-	/// Gets or inits a value indicating whether or not enums will be stored as integers in data
-	/// </summary>
-	/// <remarks>
-	/// Default is <see langword="true"/>
-	/// </remarks>
-	public bool EnumAsInteger { get; init; } = true;
-
-	/// <summary>
 	/// Gets or inits the full file path used as the storage location for LiteDb instances
 	/// </summary>
 	public required string FileFullName { get; init; }
@@ -76,28 +68,31 @@ public sealed class FactoryOption {
 	/// <remarks>
 	/// This should run once per lifetime of an application context.
 	/// </remarks>
-	public Action<LiteRepository, Factory>? OnInitialized { get; init; }
+	public Action<LiteRepository, Factory> OnInitialized { get; init; } = (l, f) => { };
+
+
 
 	/// <summary>
-	/// Used for mapping objects to collection names that are different than their type name.
+	/// Create a BsonMapper with some default values set differently than the original class defaults.
 	/// </summary>
 	/// <remarks>
-	/// The default behavior is simply to return a Type's <c>Name</c>.
+	/// Changes / differences are as follows:
+	/// <list type="bullet">
+	/// <item><see cref="BsonMapper.EnumAsInteger"/> = true (must be true to support LINQ expressions)</item>
+	/// <item><see cref="BsonMapper.EmptyStringToNull"/> = false (store what is there and do not alter it before storage)</item>
+	/// <item><see cref="BsonMapper.SerializeNullValues"/> = true (store what is there and do not leave off properties because of null values) </item>
+	/// <item><see cref="BsonMapper.TrimWhitespace"/> = false (store what is there and do not alter is before storage)</item>
+	/// </list>
 	/// </remarks>
-	/// <returns></returns>
-	public Func<Type, string> ResolveCollectionName { get; init; } = (t) => t.Name;
-
-	/// <summary>
-	/// Gets or inits a value indicating whether strings will have whitespace auto trimmed during storage
-	/// </summary>
-	/// <remarks>
-	/// Default is <see langword="false"/>
-	/// <para>Beware of changing this to <see langword="true"/>: while it may save some space, this can
-	/// cause values with intentional spaces and their sizes not to match depending on your code</para>
-	/// </remarks>
-	public bool TrimWhitespace { get; init; } = false;
-
-
+	/// <returns><see cref="BsonMapper"/></returns>
+	public static BsonMapper CreateBsonMapperWithSensibleDefaults() {
+		return new() {
+			EnumAsInteger = true,
+			EmptyStringToNull = false,
+			SerializeNullValues = true,
+			TrimWhitespace = false
+		};
+	}
 
 	/// <summary>
 	/// Adds registration for <see cref="DateTime"/> and <see cref="DateTimeOffset"/> types
