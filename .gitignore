@@ -360,5 +360,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-/PraxisReleaseLibraries
-/Praxis.Web/Properties/launchSettings.json
+
+# Custom added
+/.github
