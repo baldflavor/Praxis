@@ -10,6 +10,9 @@ Use it how you want, copy it how you want.
 
 He makes no responsibility or claim for how you use it, and doesn't even want any credit: consider it a gift to you.
 
+## Version
+
+This targets .NET 8.
 
 # License
 
